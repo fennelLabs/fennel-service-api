@@ -20,3 +20,19 @@ class WhiteflagSignalView(views.APIView):
 
     def post(self, request, format=None):
         return Response({'signal': 'ok'})
+
+
+class OffChainMessageView(views.APIView):
+    def get(self, request, format=None):
+        return Response({'signal': 'ok'})
+
+    def post(self, request, format=None):
+        return Response({'signal': 'ok'})
+    
+
+class FennelProtocolView(views.APIView):
+    def get(self, request, format=None):
+        return Response({'signal': 'ok'})
+
+    def post(self, request, format=None):
+        return Response({'signal': 'ok'})
