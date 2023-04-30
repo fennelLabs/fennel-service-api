@@ -50,7 +50,7 @@ function static() {
 }
 
 function run() {
-  python3 manage.py runserver 0.0.0.0:1234
+  python3 manage.py runserver 0.0.0.0:8080
 }
 
 function reset_migrations() {
@@ -62,7 +62,7 @@ function reset_migrations() {
 }
 
 function setup() {
-  python3 manage.py setup
+  python3 manage.py createadmin
 }
 
 function shell() {
