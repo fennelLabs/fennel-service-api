@@ -1,0 +1,196 @@
+@hostname = localhost
+@port = 1234
+
+###
+# @name Register
+# @no-cookie-jar
+POST /v1/auth/register/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+
+{
+  "username": "testinguser",
+  "email": "testinguser@test.com",
+  "password": "testinguser"
+}
+
+###
+# @name Login
+# @no-cookie-jar
+POST /v1/auth/login/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+
+{
+  "username": "testinguser",
+  "password": "testinguser"
+}
+
+###
+# @name Logout
+# @no-cookie-jar
+POST /v1/auth/logout/
+Host: {{hostname}}:{{port}}
+Authorization: Token <token>
+
+###
+# @name Whiteflag - Authenticate
+# @no-cookie-jar
+POST /v1/whiteflag/authenticate/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+
+{
+    "verificationMethod": "1",
+    "verificationData": "https://organisation.int/whiteflag"
+}
+
+
+###
+# @name Whiteflag - Discontinue Authentication
+# @no-cookie-jar
+POST /v1/whiteflag/discontinue_authentication/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+
+{
+    "referencedMessage": "0000000000000000000000000000000000000000000000000000000000000000",
+    "verificationMethod": "1",
+    "verificationData": "https://organisation.int/whiteflag"
+}
+
+###
+# @name Whiteflag - Encode
+# @no-cookie-jar
+POST /v1/whiteflag/encode/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+
+{
+    "encryptionIndicator": "1",
+    "duressIndicator": "0",
+    "messageCode": "0",
+    "referenceIndicator": "0",
+    "referencedMessage": "0000000000000000000000000000000000000000000000000000000000000000",
+    "verificationMethod": "1",
+    "verificationData": "https://organisation.int/whiteflag",
+    "cryptoDataType": "0",
+    "cryptoData": "",
+    "text": "",
+    "resourceMethod": "",
+    "resourceData": "",
+    "pseudoMessageCode": "",
+    "subjectCode": "",
+    "dateTime": "",
+    "duration": "",
+    "objectType": "",
+    "objectLatitude": "",
+    "objectLongitude": "",
+    "objectSizeDim1": "",
+    "objectSizeDim2": "",
+    "objectOrientation": "",
+    "objectTypeQuant": ""
+}
+
+###
+# @name Whiteflag - Decode
+# @no-cookie-jar
+POST /v1/whiteflag/decode/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+
+{
+    "message": "5746313020a00000000000000000000000000000000000000000000000000000000000000000b43a3a38399d1797b7b933b0b734b9b0ba34b7b71734b73a17bbb434ba32b33630b380"
+}
+
+###
+# @name Fennel - Create Account
+# @no-cookie-jar
+POST /v1/fennel/create_account/
+Host: {{hostname}}:{{port}}
+Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
+
+###
+# @name Fennel - Get Account Balance
+# @no-cookie-jar
+POST /v1/fennel/get_account_balance/
+Host: {{hostname}}:{{port}}
+Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
+
+###
+# @name Fennel - Get Address
+# @no-cookie-jar
+POST /v1/fennel/get_address/
+Host: {{hostname}}:{{port}}
+Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
+
+###
+# @name Get Fee For Transfer Token
+# @no-cookie-jar
+POST /v1/fennel/get_fee_for_transfer_token/
+Host: {{hostname}}:{{port}}
+Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
+Content-Type: application/json
+
+{
+    "to": "5CwBjJ48HW7c36dT7pAf9TkGQjj88jxw624xHaL6wtXJTWCt",
+    "amount": 100000
+}
+
+###
+# @name Get Fee For Transfer Token
+# @no-cookie-jar
+POST /v1/fennel/transfer_token/
+Host: {{hostname}}:{{port}}
+Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
+Content-Type: application/json
+
+{
+    "to": "5CwBjJ48HW7c36dT7pAf9TkGQjj88jxw624xHaL6wtXJTWCt",
+    "amount": 100000
+}
+
+###
+# @name Fennel - Get Fee for New Signal
+# @no-cookie-jar
+POST /v1/fennel/get_fee_for_new_signal/
+Host: {{hostname}}:{{port}}
+Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
+Content-Type: application/json
+
+{
+    "content": "This is a test message"
+}
+
+###
+# @name Fennel - Send New Signal
+# @no-cookie-jar
+POST /v1/fennel/send_new_signal/
+Host: {{hostname}}:{{port}}
+Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
+Content-Type: application/json
+
+{
+    "content": "This is a test message"
+}
+
+###
+# @name Fennel - Get Signals
+# @no-cookie-jar
+GET /v1/fennel/get_signals/
+Host: {{hostname}}:{{port}}
+Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
+
+###
+# @name Fennel - Get Latest 5 Signals
+# @no-cookie-jar
+GET /v1/fennel/get_signals/5/
+Host: {{hostname}}:{{port}}
+Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
+
+###
+# @name Fennel - Get Signal History
+# @no-cookie-jar
+GET /v1/fennel/get_signal_history/
+Host: {{hostname}}:{{port}}
+Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
