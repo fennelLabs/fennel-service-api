@@ -45,6 +45,8 @@ def whiteflag_discontinue_authentication(request):
 @api_view(["POST"])
 def whiteflag_encode(request):
     payload = json.dumps({
+        "prefix": "WF",
+        "version": "1",
         "encryptionIndicator": request.data["encryptionIndicator"],
         "duressIndicator": request.data["duressIndicator"],
         "messageCode": request.data["messageCode"],
@@ -59,7 +61,7 @@ def whiteflag_encode(request):
         "resourceData": request.data["resourceData"],
         "pseudoMessageCode": request.data["pseudoMessageCode"],
         "subjectCode": request.data["subjectCode"],
-        "dateTime": request.data["dateTime"],
+        "datetime": request.data["datetime"],
         "duration": request.data["duration"],
         "objectType": request.data["objectType"],
         "objectLatitude": request.data["objectLatitude"],
@@ -70,7 +72,10 @@ def whiteflag_encode(request):
         "objectTypeQuant": request.data["objectTypeQuant"],
     })
     r = requests.post("http://localhost:9031/v1/whiteflag_encode", data=payload)
-    return Response(r.json())
+    try:
+        return Response(r.json())
+    except:
+        return Response(r.text)
 
 
 @api_view(["POST"])

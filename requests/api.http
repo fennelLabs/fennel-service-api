@@ -71,7 +71,7 @@ Content-Type: application/json
 {
     "encryptionIndicator": "1",
     "duressIndicator": "0",
-    "messageCode": "0",
+    "messageCode": "A",
     "referenceIndicator": "0",
     "referencedMessage": "0000000000000000000000000000000000000000000000000000000000000000",
     "verificationMethod": "1",
@@ -83,7 +83,7 @@ Content-Type: application/json
     "resourceData": "",
     "pseudoMessageCode": "",
     "subjectCode": "",
-    "dateTime": "",
+    "datetime": "",
     "duration": "",
     "objectType": "",
     "objectLatitude": "",
