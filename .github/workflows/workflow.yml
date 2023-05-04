@@ -28,7 +28,7 @@ jobs:
      
       - name: Build Docker Image
         env:
-          IMAGE_NAME: fennel-api #create env called IMAGE_NAME consisted of actual name of Docker Image after we build
+          IMAGE_NAME: fennel-service-api #create env called IMAGE_NAME consisted of actual name of Docker Image after we build
           PROJECT_ID: whiteflag-0
         run: docker build -t $IMAGE_NAME:latest . #build the docker image
 
@@ -49,6 +49,6 @@ jobs:
         with:
           push: true
           tags: |
-             us-east1-docker.pkg.dev/whiteflag-0/fennel-docker-registry/fennel-api:latest
+             us-east1-docker.pkg.dev/whiteflag-0/fennel-docker-registry/fennel-service-api:latest
             #us-east1-docker.pkg.dev/whiteflag-0/<your-gar-repo-name>/fennel-cli:${{ steps.get-tag.outputs.short_ref }}
           

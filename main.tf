@@ -1,47 +1,54 @@
 module "gce-container" {
   source = "terraform-google-modules/container-vm/google"
-  version = "~> 2.0"  # Upgrade the version if necessary.
+  version = "~> 2.0" 
 
   container = {
-    image = "us-east1-docker.pkg.dev/whiteflag-0/fennel-docker-registry/fennel-api:latest"
+    image = "ubuntu-os-cloud/ubuntu-2004-lts"
   }
 }
 
-resource "google_compute_instance" "fennel-api" {
-  name         = "fennel-api-instance"
+resource "google_compute_address" "fennel-service-api-ip" {
+  name = "fennel-service-api-ip"
+}
+
+resource "google_compute_instance" "fennel-service-api" {
+  name         = "fennel-service-api-instance"
   machine_type = "e2-small"
   zone         = "us-east1-b"
+
+  can_ip_forward = true
+  tags = ["public-server"]
   
   boot_disk {
     initialize_params {
-      image = module.gce-container.source_image
+      image = "debian-cloud/debian-11"
     }
   }
 
-  #metadata_startup_script = "echo Hello, World!"
-  
   network_interface {
-    network = "default"
-    access_config {}
+    network    = "whiteflag-sandbox-vpc"
+    subnetwork = "public-subnet"
+     access_config {
+      nat_ip = google_compute_address.fennel-service-api-ip.address
+    }
   }
 
- 
+  metadata_startup_script = <<EOF
+    #!/bin/bash
+    apt-get update
+    apt-get install -y docker.io
+    gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin us-east1-docker.pkg.dev
+    docker pull us-east1-docker.pkg.dev/whiteflag-0/fennel-docker-registry/fennel-service-api:latest
+    docker run -dit -p 1234:1234 --name fennel-service-api us-east1-docker.pkg.dev/whiteflag-0/fennel-docker-registry/fennel-service-api:latest
+  EOF  
+
  metadata = {
     # Required metadata key.
     gce-container-declaration = module.gce-container.metadata_value
     google-logging-enabled    = "true"
     google-monitoring-enabled = "true"
   }
-
-  # Setting the startup script to start the Docker image
-  metadata_startup_script = <<EOF
-#!/bin/bash
-sudo docker run \
-  -p 8080:8080 \
-  --env ENV_VAR_NAME=ENV_VAR_VALUE \
-  "us-east1-docker.pkg.dev/whiteflag-0/fennel-docker-registry/fennel-api:latest"
-EOF
-
+ 
   service_account {
     scopes = ["cloud-platform"]
   }
