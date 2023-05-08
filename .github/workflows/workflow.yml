@@ -6,8 +6,7 @@ jobs:
   docker-release:
     name: Tagged Docker release to Google Artifact Registry
     runs-on: ubuntu-latest
-    #if: github.event_name == 'push' # && startsWith(github.ref, 'refs/tags')  # <-- Notice that I'm filtering here to only run when a tagged commit is pushed
-
+    
     permissions:
       contents: 'read'
       id-token: 'write'
@@ -50,5 +49,3 @@ jobs:
           push: true
           tags: |
              us-east1-docker.pkg.dev/whiteflag-0/fennel-docker-registry/fennel-service-api:latest
-            #us-east1-docker.pkg.dev/whiteflag-0/<your-gar-repo-name>/fennel-cli:${{ steps.get-tag.outputs.short_ref }}
-          
