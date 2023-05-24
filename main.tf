@@ -27,7 +27,6 @@ resource "google_compute_instance" "fennel-service-api" {
   can_ip_forward = true
   tags = ["public-server"]
   
-  
   boot_disk {
     initialize_params {
       image = "debian-cloud/debian-11"
@@ -48,10 +47,6 @@ resource "google_compute_instance" "fennel-service-api" {
     gce-container-declaration = module.gce-container.metadata_value
     google-logging-enabled    = "true"
     google-monitoring-enabled = "true"
-    user-data = <<-EOF
-      #!/bin/bash
-      echo "cli_ip=${data.google_compute_instance.fennel-cli-instance.network_interface.0.access_config.0.nat_ip}" >> /etc/profile.d/fennel-cli-ip.sh
-      EOF
   }
  
   service_account {
