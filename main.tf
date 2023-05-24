@@ -50,7 +50,7 @@ resource "google_compute_instance" "fennel-service-api" {
     google-monitoring-enabled = "true"
     user-data = <<-EOF
       #!/bin/bash
-      echo "docker_variable=${google_compute_instance.fennel-cli.network_interface.0.access_config.0.nat_ip}" >> /etc/profile.d/fennel-cli-ip.sh
+      echo "docker_variable=${google_compute_address.fennel-cli-ip.address}" >> /etc/profile.d/fennel-cli-ip.sh
       EOF
   }
  
