@@ -1,6 +1,6 @@
 # Tokens are **examples only**.
 
-@hostname = localhost
+@hostname = 34.148.9.195
 @port = 1234
 
 ###
