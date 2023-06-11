@@ -1,4 +1,5 @@
 # Tokens are **examples only**.
+# Use the REST Client extension for VSCode to test these endpoints.
 
 @hostname = 34.148.9.195
 @port = 1234
@@ -103,6 +104,25 @@ Content-Type: application/json
 
 {
     "message": "5746313020a00000000000000000000000000000000000000000000000000000000000000000b43a3a38399d1797b7b933b0b734b9b0ba34b7b71734b73a17bbb434ba32b33630b380"
+}
+
+###
+# @name Whiteflag Generate Shared Token
+# @no-cookie-jar
+GET /v1/whiteflag/generate_shared_token/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+
+###
+# @name Whiteflag - Generate Public Token
+# @no-cookie-jar
+POST /v1/whiteflag/generate_public_token/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+
+{
+    "sharedToken": "b35f89b6-df83-44c9-a59e-5647f248a058",
+    "address": "5CwBjJ48HW7c36dT7pAf9TkGQjj88jxw624xHaL6wtXJTWCt"
 }
 
 ###

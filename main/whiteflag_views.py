@@ -2,6 +2,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import requests
 import json
+import uuid
+import hashlib
 
 
 @api_view(["POST"])
@@ -83,3 +85,25 @@ def whiteflag_decode(request):
     payload = json.dumps(request.data["message"])
     r = requests.post("http://localhost:9031/v1/whiteflag_decode", data=payload)
     return Response(r.json())
+
+
+@api_view(["GET"])
+def whiteflag_generate_shared_token(request):
+    r = {
+            "sharedToken": str(uuid.uuid4()),
+    }
+    return Response(json.dumps(r))
+
+
+@api_view(["POST"])
+def whiteflag_generate_public_token(request):
+    payload = json.dumps(
+        {
+            "sharedToken": request.data["sharedToken"],
+            "address": request.data["address"],
+        }
+    )
+    h = hashlib.sha3_512()
+    h.update(payload.encode("utf-8"))
+    r = h.hexdigest()
+    return Response(r)

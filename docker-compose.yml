@@ -39,6 +39,9 @@ services:
       - SERVER_EMAIL=""
       - ENVIRONMENT="LOCAL"
       - SECRET_KEY=2HY>fXi!dQ&(9Vf.XghCa;L6G=Ul4r-Bwqh>ae0RG3vIh1ZJ%T
+      - SUBSERVICE_HOST=localhost
+      - KEYSERVER_HOST=localhost
+      - FENNEL_RPC=localhost
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASS=postgres
