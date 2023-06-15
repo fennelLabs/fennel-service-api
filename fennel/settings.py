@@ -85,10 +85,10 @@ if "POSTGRES_USER" in os.environ:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql_psycopg2",
-            "NAME": os.environ["POSTGRES_DB"],
+            "NAME": os.environ["POSTGRES_NAME"],
             "USER": os.environ["POSTGRES_USER"],
             "PASSWORD": os.environ["POSTGRES_PASS"],
-            "HOST": os.environ["POSTGRES_NAME"],
+            "HOST": os.environ["POSTGRES_DB"],
             "PORT": 5432,
         }
     }
