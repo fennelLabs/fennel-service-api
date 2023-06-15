@@ -11,6 +11,8 @@ urlpatterns = [
     ),
     path('whiteflag/encode/', whiteflag_views.whiteflag_encode),
     path('whiteflag/decode/', whiteflag_views.whiteflag_decode),
+    path('whiteflag/generate_shared_token/', whiteflag_views.whiteflag_generate_shared_token),
+    path('whiteflag/generate_public_token/', whiteflag_views.whiteflag_generate_public_token),
     path('fennel/create_account/', views.create_account),
     path('fennel/get_account_balance/', views.get_account_balance),
     path('fennel/get_address/', views.get_address),
