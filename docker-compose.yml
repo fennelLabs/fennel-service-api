@@ -21,6 +21,8 @@ services:
       - db:/var/lib/postgresql/data
 
   apidev:
+    entrypoint:
+      - /opt/app/build.sh
     build:
       context: .
       dockerfile: Dockerfile

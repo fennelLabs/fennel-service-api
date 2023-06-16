@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from .models import Signal
+from .models import Signal, UserKeys
 from rest_framework.decorators import (
     api_view,
     authentication_classes,
@@ -18,23 +18,15 @@ import os
 def create_account(request):
     r = requests.get(f"http://{os.environ.get('FENNEL_SUBSERVICE_IP', None)}:6060/create_account")
     mnemonic = r.json()["mnemonic"]
-    r = requests.post(
-        f"http://{os.environ.get('FENNEL_KEYSERVER_IP', None)}:6060/api/keys/",
-        data={"user": request.user.username, "mnemonic": mnemonic},
-    )
-    if r.status_code != 200:
-        return Response(r.json(), status=r.status_code)
-    return Response(r.json()["mnemonic"] == mnemonic)
+    user_keys = UserKeys.objects.get_or_create(user=request.user, mnemonic=mnemonic)
+    return Response(mnemonic == user_keys.mnemonic)
 
 
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def get_account_balance(request):
-    r = requests.get(
-        f"http://{os.environ.get('FENNEL_KEYSERVER_IP', None)}:6060/api/keys?user={request.user.username}"
-    )
-    payload = {"mnemonic": r.json()[0]["mnemonic"]}
+    payload = UserKeys.objects.filter(user=request.user).first().mnemonic
     r = requests.post(f"http://{os.environ.get('FENNEL_SUBSERVICE_IP', None)}:6060/get_account_balance", data=payload)
     return Response(r.json())
 
@@ -43,10 +35,7 @@ def get_account_balance(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def get_address(request):
-    r = requests.get(
-        f"http://{os.environ.get('FENNEL_KEYSERVER_IP', None)}:6060/api/keys?user={request.user.username}"
-    )
-    payload = {"mnemonic": r.json()[0]["mnemonic"]}
+    payload = UserKeys.objects.filter(user=request.user).first().mnemonic
     r = requests.post(f"http://{os.environ.get('FENNEL_SUBSERVICE_IP', None)}:6060/get_address", data=payload)
     return Response(r.json())
 
@@ -55,11 +44,8 @@ def get_address(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def get_fee_for_transfer_token(request):
-    r = requests.get(
-        f"http://{os.environ.get('FENNEL_KEYSERVER_IP', None)}:6060/api/keys?user={request.user.username}"
-    )
     payload = {
-        "mnemonic": r.json()[0]["mnemonic"],
+        "mnemonic": UserKeys.objects.filter(user=request.user).first().mnemonic,
         "to": request.data["to"],
         "amount": request.data["amount"],
     }
@@ -71,11 +57,8 @@ def get_fee_for_transfer_token(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def transfer_token(request):
-    r = requests.get(
-        f"http://{os.environ.get('FENNEL_KEYSERVER_IP', None)}:6060/api/keys?user={request.user.username}"
-    )
     payload = {
-        "mnemonic": r.json()[0]["mnemonic"],
+        "mnemonic": UserKeys.objects.filter(user=request.user).first().mnemonic,
         "to": request.data["to"],
         "amount": request.data["amount"],
     }
@@ -87,10 +70,7 @@ def transfer_token(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def get_fee_for_new_signal(request):
-    r = requests.get(
-        f"http://{os.environ.get('FENNEL_KEYSERVER_IP', None)}:6060/api/keys?user={request.user.username}"
-    )
-    mnemonic_from_database = r.json()[0]["mnemonic"]
+    mnemonic_from_database = UserKeys.objects.filter(user=request.user).first().mnemonic
     payload = {
             "mnemonic": mnemonic_from_database,
             "content": request.data["content"]
@@ -105,12 +85,8 @@ def get_fee_for_new_signal(request):
 def send_new_signal(request):
     signal = Signal.objects.create(signal_text=request.data["content"], sender=request.user)
     try:
-        r = requests.get(
-            f"http://{os.environ.get('FENNEL_KEYSERVER_IP', None)}:6060/api/keys?user={request.user.username}"
-        )
-        mnemonic_from_database = r.json()[0]["mnemonic"]
         payload = {
-            "mnemonic": mnemonic_from_database, 
+            "mnemonic": UserKeys.objects.filter(user=request.user).first().mnemonic,
             "content": request.data["content"]
         }
         r = requests.post(f"http://{os.environ.get('FENNEL_SUBSERVICE_IP', None)}:6060/send_new_signal", data=payload)
@@ -127,12 +103,8 @@ def send_new_signal(request):
 def get_fee_for_sync_signal(request):
     id = request.data["id"]
     signal = get_object_or_404(Signal, id=id)
-    r = requests.get(
-        f"http://{os.environ.get('FENNEL_KEYSERVER_IP', None)}:6060/api/keys?user={request.user.username}"
-    )
-    mnemonic_from_database = r.json()[0]["mnemonic"]
     payload = {
-            "mnemonic": mnemonic_from_database,
+            "mnemonic": UserKeys.objects.filter(user=request.user).first().mnemonic,
             "content": signal.signal_text
     }
     r = requests.post(f"http://{os.environ.get('FENNEL_SUBSERVICE_IP', None)}:6060/get_fee_for_new_signal", data=payload)
@@ -151,9 +123,8 @@ def sync_signal(request):
         r = requests.get(
             f"http://{os.environ.get('FENNEL_KEYSERVER_IP', None)}:6060/api/keys?user={request.user.username}"
         )
-        mnemonic_from_database = r.json()[0]["mnemonic"]
         payload = {
-            "mnemonic": mnemonic_from_database, 
+            "mnemonic": UserKeys.objects.filter(user=request.user).first().mnemonic, 
             "content": signal.signal_text
         }
         r = requests.post(f"http://{os.environ.get('FENNEL_SUBSERVICE_IP', None)}:6060/send_new_signal", data=payload)

@@ -8,3 +8,11 @@ class Signal(models.Model):
 
     def __str__(self):
         return self.signal_text
+
+
+class UserKeys(models.Model):
+    user = models.ForeignKey('auth.User', related_name='keys', on_delete=models.CASCADE)
+    mnemonic = models.CharField(max_length=256)
+
+    def __str__(self):
+        return self.user
