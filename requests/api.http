@@ -197,6 +197,32 @@ Content-Type: application/json
 }
 
 ###
+# @name Fennel - Get Fee for Sync Signal
+# @description Get the fee for sending a given signal which previously failed to sync to Fennel Network.
+# @no-cookie-jar
+POST /v1/fennel/get_fee_for_sync_signal/
+Host: {{hostname}}:{{port}}
+Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
+Content-Type: application/json
+
+{
+    "id": 0
+}
+
+###
+# @name Fennel - Sync Signal
+# @description Send a previously failed signal to Fennel Network.
+# @no-cookie-jar
+POST /v1/fennel/sync_signal/
+Host: {{hostname}}:{{port}}
+Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
+Content-Type: application/json
+
+{
+    "id": 0
+}
+
+###
 # @name Fennel - Get Signals
 # @no-cookie-jar
 GET /v1/fennel/get_signals/
@@ -214,5 +240,13 @@ Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1
 # @name Fennel - Get Signal History
 # @no-cookie-jar
 GET /v1/fennel/get_signal_history/
+Host: {{hostname}}:{{port}}
+Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
+
+###
+# @name Fennel - Get Unsynced Signals
+# @description Get all signals which failed to sync to Fennel Network.
+# @no-cookie-jar
+GET /v1/fennel/get_unsynced_signals/
 Host: {{hostname}}:{{port}}
 Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6

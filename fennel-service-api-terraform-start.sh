@@ -20,5 +20,5 @@ export FENNEL_API_IP=$(gsutil cat gs://whiteflag-0-admin/fennel-api-ip.sh)
 export FENNEL_KEYSERVER_IP=$(gsutil cat gs://whiteflag-0-admin/fennel-keyserver-ip.sh)
 export FENNEL_SUBSERVICE_IP=$(gsutil cat gs://whiteflag-0-admin/fennel-subservice-ip.sh)
 gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin us-east1-docker.pkg.dev
-docker run -dit -e DEBUG -e ADMIN_NAME -e ADMIN_EMAIL -e EMAIL_HOST -e EMAIL_PORT -e EMAIL_USERNAME -e EMAIL_PASSWORD -e DEFAULT_FROM_EMAIL -e SERVER_EMAIL -e SECRET_KEY -e POSTGRES_DB -e POSTGRES_USER -e POSTGRES_PASS -e POSTGRES_NAME -e FENNEL_CLI_IP -e FENNEL_API_IP -e FENNEL_KEYSERVER_IP -e FENNEL_SUBSERVICE_IP -p 1234:1234 --name fennel-service-api us-east1-docker.pkg.dev/whiteflag-0/fennel-docker-registry/fennel-service-api:latest
-docker exec -it fennel-service-api /opt/app/build.sh
+docker run -dt -e DEBUG -e ADMIN_NAME -e ADMIN_EMAIL -e EMAIL_HOST -e EMAIL_PORT -e EMAIL_USERNAME -e EMAIL_PASSWORD -e DEFAULT_FROM_EMAIL -e SERVER_EMAIL -e SECRET_KEY -e POSTGRES_DB -e POSTGRES_USER -e POSTGRES_PASS -e POSTGRES_NAME -e FENNEL_CLI_IP -e FENNEL_API_IP -e FENNEL_KEYSERVER_IP -e FENNEL_SUBSERVICE_IP -p 1234:1234 --name fennel-service-api us-east1-docker.pkg.dev/whiteflag-0/fennel-docker-registry/fennel-service-api:latest
+docker exec fennel-service-api /opt/app/build.sh
