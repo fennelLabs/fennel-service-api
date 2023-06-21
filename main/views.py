@@ -12,6 +12,11 @@ import requests
 import os
 
 
+@api_view(["GET"])
+def healthcheck(request):
+    return Response({"status": "ok"})
+
+
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])

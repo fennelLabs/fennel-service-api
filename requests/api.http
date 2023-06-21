@@ -5,6 +5,12 @@
 @port = 1234
 
 ###
+# @name Health Check
+# @no-cookie-jar
+GET /v1/healthcheck/
+Host: {{hostname}}:{{port}}
+
+###
 # @name Register
 # @no-cookie-jar
 POST /v1/auth/register/
