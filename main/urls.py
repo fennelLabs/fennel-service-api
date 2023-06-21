@@ -26,7 +26,7 @@ urlpatterns = [
     path('fennel/get_signals/', views.get_signals),
     path('fennel/get_signals/<int:count>/', views.get_signals),
     path('fennel/get_signal_history/', views.get_signal_history),
-    path('fenne/get_unsynced_signals/', views.get_unsynced_signals),
+    path('fennel/get_unsynced_signals/', views.get_unsynced_signals),
     path('auth/register/', auth_views.UserRegisterView.as_view()),
     path('auth/login/', auth_views.LoginAPIView.as_view()),
     path('auth/user/', auth_views.UserAPI.as_view()),
