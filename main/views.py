@@ -14,7 +14,7 @@ import os
 
 @api_view(["GET"])
 def healthcheck(request):
-    return Response({"status": "ok"})
+    return Response()
 
 
 @api_view(["POST"])
