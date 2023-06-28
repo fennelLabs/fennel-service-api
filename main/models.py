@@ -13,6 +13,8 @@ class Signal(models.Model):
 class UserKeys(models.Model):
     user = models.ForeignKey('auth.User', related_name='keys', on_delete=models.CASCADE)
     mnemonic = models.CharField(max_length=256)
+    address = models.CharField(max_length=256, null=True, blank=True)
+    balance = models.IntegerField(default=0)
 
     def __str__(self):
         return self.user

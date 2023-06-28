@@ -21,6 +21,8 @@ def healthcheck(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def create_account(request):
+    if UserKeys.objects.filter(user=request.user).exists():
+        return Response({"error": "user already has an account"})
     r = requests.get(f"http://{os.environ.get('FENNEL_SUBSERVICE_IP', None)}:6060/create_account")
     mnemonic = r.json()["mnemonic"]
     user_keys = UserKeys.objects.get_or_create(user=request.user, mnemonic=mnemonic)
@@ -31,17 +33,30 @@ def create_account(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def get_account_balance(request):
-    payload = UserKeys.objects.filter(user=request.user).first().mnemonic
-    r = requests.post(f"http://{os.environ.get('FENNEL_SUBSERVICE_IP', None)}:6060/get_account_balance", data=payload)
-    return Response(r.json())
+    if not UserKeys.objects.filter(user=request.user).exists():
+        return Response({"error": "user does not have an account"})
+    key = UserKeys.objects.filter(user=request.user).first()
+    try:
+        payload = key.mnemonic
+        r = requests.post(f"http://{os.environ.get('FENNEL_SUBSERVICE_IP', None)}:6060/get_account_balance", data=payload)
+        key.balance = r.json()["balance"]
+        key.save()
+        return Response(r.json())
+    except Exception:
+        return Response({"balance": key.balance})
 
 
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def get_address(request):
-    payload = UserKeys.objects.filter(user=request.user).first().mnemonic
+    key = UserKeys.objects.filter(user=request.user).first()
+    if key.address:
+        return Response({"address": key.address})
+    payload = key.mnemonic
     r = requests.post(f"http://{os.environ.get('FENNEL_SUBSERVICE_IP', None)}:6060/get_address", data=payload)
+    key.address = r.json()["address"]
+    key.save()
     return Response(r.json())
 
 
@@ -139,6 +154,7 @@ def sync_signal(request):
         signal.save()
         return Response({"signal": "saved as unsynced", "error": str(e)})
 
+
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -147,7 +163,7 @@ def get_signals(request, count=None):
         queryset = Signal.objects.all().order_by("-timestamp")[:count]
     else:
         queryset = Signal.objects.all().order_by("-timestamp")
-    return Response([{"content": signal.signal_text} for signal in queryset])
+    return Response(queryset)
 
 
 @api_view(["GET"])
