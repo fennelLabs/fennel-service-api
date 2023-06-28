@@ -184,6 +184,11 @@ EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
 SERVER_EMAIL = os.environ.get("SERVER_EMAIL")
 
+ADMINS = [
+    (os.environ.get("ADMIN_NAME"),
+     os.environ.get("ADMIN_EMAIL")),
+]
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
