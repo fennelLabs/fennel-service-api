@@ -10,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from knox.auth import TokenAuthentication
 import requests
 import os
+import datetime
 
 
 @api_view(["GET"])
@@ -117,9 +118,10 @@ def send_new_signal(request):
         }
         r = requests.post(f"http://{os.environ.get('FENNEL_SUBSERVICE_IP', None)}:6060/send_new_signal", data=payload)
         signal.synced = True
+        signal.mempool_timestamp = datetime.datetime.now()
+        signal.save()
         return Response(r.json())
     except Exception as e:
-        signal.save()
         return Response({"signal": "saved as unsynced", "error": str(e)})
 
 
@@ -155,9 +157,10 @@ def sync_signal(request):
         }
         r = requests.post(f"http://{os.environ.get('FENNEL_SUBSERVICE_IP', None)}:6060/send_new_signal", data=payload)
         signal.synced = True
+        signal.mempool_timestamp = datetime.datetime.now()
+        signal.save()
         return Response(r.json())
     except Exception as e:
-        signal.save()
         return Response({"signal": "saved as unsynced", "error": str(e)})
 
 
