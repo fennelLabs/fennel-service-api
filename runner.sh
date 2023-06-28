@@ -5,6 +5,7 @@ function all() {
   pip3 install -r requirements.txt
   python3 -m safety check -r requirements.txt
   python3 manage.py check
+  run_tests
   static
   setup
 }

@@ -22,7 +22,10 @@ def healthcheck(request):
 @permission_classes([IsAuthenticated])
 def create_account(request):
     if UserKeys.objects.filter(user=request.user).exists():
-        return Response({"error": "user already has an account"})
+        return Response({
+            "error": "user already has an account",
+            "fix": "you can make other calls to /v1/fennel to get the address and balance"
+        })
     r = requests.get(f"http://{os.environ.get('FENNEL_SUBSERVICE_IP', None)}:6060/create_account")
     mnemonic = r.json()["mnemonic"]
     user_keys = UserKeys.objects.get_or_create(user=request.user, mnemonic=mnemonic)
@@ -34,7 +37,10 @@ def create_account(request):
 @permission_classes([IsAuthenticated])
 def get_account_balance(request):
     if not UserKeys.objects.filter(user=request.user).exists():
-        return Response({"error": "user does not have an account"})
+        return Response({
+            "error": "user does not have an account",
+            "fix": "call /v1/fennel/create_account first"
+        })
     key = UserKeys.objects.filter(user=request.user).first()
     try:
         payload = key.mnemonic
