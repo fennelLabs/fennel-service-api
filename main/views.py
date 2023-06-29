@@ -27,7 +27,7 @@ def create_account(request):
             "error": "user already has an account",
             "fix": "you can make other calls to /v1/fennel to get the address and balance"
         })
-    r = requests.get(f"http://{os.environ.get('FENNEL_SUBSERVICE_IP', None)}:6060/create_account")
+    r = requests.get(f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/create_account")
     mnemonic = r.json()["mnemonic"]
     user_keys = UserKeys.objects.get_or_create(user=request.user, mnemonic=mnemonic)
     return Response(mnemonic == user_keys.mnemonic)
@@ -45,7 +45,7 @@ def get_account_balance(request):
     key = UserKeys.objects.filter(user=request.user).first()
     try:
         payload = key.mnemonic
-        r = requests.post(f"http://{os.environ.get('FENNEL_SUBSERVICE_IP', None)}:6060/get_account_balance", data=payload)
+        r = requests.post(f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_account_balance", data=payload)
         key.balance = r.json()["balance"]
         key.save()
         return Response(r.json())
@@ -61,7 +61,7 @@ def get_address(request):
     if key.address:
         return Response({"address": key.address})
     payload = key.mnemonic
-    r = requests.post(f"http://{os.environ.get('FENNEL_SUBSERVICE_IP', None)}:6060/get_address", data=payload)
+    r = requests.post(f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_address", data=payload)
     key.address = r.json()["address"]
     key.save()
     return Response(r.json())
@@ -76,7 +76,7 @@ def get_fee_for_transfer_token(request):
         "to": request.data["to"],
         "amount": request.data["amount"],
     }
-    r = requests.post(f"http://{os.environ.get('FENNEL_SUBSERVICE_IP', None)}:6060/get_fee_for_transfer_token", data=payload)
+    r = requests.post(f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_transfer_token", data=payload)
     return Response(r.json())
 
 
@@ -89,7 +89,7 @@ def transfer_token(request):
         "to": request.data["to"],
         "amount": request.data["amount"],
     }
-    r = requests.post(f"http://{os.environ.get('FENNEL_SUBSERVICE_IP', None)}:6060/transfer_token", data=payload)
+    r = requests.post(f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/transfer_token", data=payload)
     return Response(r.json())
 
 
@@ -102,7 +102,7 @@ def get_fee_for_new_signal(request):
             "mnemonic": mnemonic_from_database,
             "content": request.data["content"]
     }
-    r = requests.post(f"http://{os.environ.get('FENNEL_SUBSERVICE_IP', None)}:6060/get_fee_for_new_signal", data=payload)
+    r = requests.post(f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_new_signal", data=payload)
     return Response(r.json())
 
 
@@ -116,7 +116,7 @@ def send_new_signal(request):
             "mnemonic": UserKeys.objects.filter(user=request.user).first().mnemonic,
             "content": request.data["content"]
         }
-        r = requests.post(f"http://{os.environ.get('FENNEL_SUBSERVICE_IP', None)}:6060/send_new_signal", data=payload)
+        r = requests.post(f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/send_new_signal", data=payload)
         signal.synced = True
         signal.mempool_timestamp = datetime.datetime.now()
         signal.save()
@@ -135,7 +135,7 @@ def get_fee_for_sync_signal(request):
             "mnemonic": UserKeys.objects.filter(user=request.user).first().mnemonic,
             "content": signal.signal_text
     }
-    r = requests.post(f"http://{os.environ.get('FENNEL_SUBSERVICE_IP', None)}:6060/get_fee_for_new_signal", data=payload)
+    r = requests.post(f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_new_signal", data=payload)
     return Response(r.json())
 
 
@@ -149,13 +149,13 @@ def sync_signal(request):
         return Response({"error": "sender is not current user"})
     try:
         r = requests.get(
-            f"http://{os.environ.get('FENNEL_KEYSERVER_IP', None)}:6060/api/keys?user={request.user.username}"
+            f"{os.environ.get('FENNEL_KEYSERVER_IP', None)}/api/keys?user={request.user.username}"
         )
         payload = {
             "mnemonic": UserKeys.objects.filter(user=request.user).first().mnemonic, 
             "content": signal.signal_text
         }
-        r = requests.post(f"http://{os.environ.get('FENNEL_SUBSERVICE_IP', None)}:6060/send_new_signal", data=payload)
+        r = requests.post(f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/send_new_signal", data=payload)
         signal.synced = True
         signal.mempool_timestamp = datetime.datetime.now()
         signal.save()

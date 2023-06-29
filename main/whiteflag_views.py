@@ -22,7 +22,7 @@ def whiteflag_authenticate(request):
             "verificationData": request.data["verificationData"],
         }
     )
-    r = requests.post("http://{0}:9031/v1/whiteflag_encode".format(os.environ.get("FENNEL_CLI_IP", None)), data=payload)
+    r = requests.post("{0}/v1/whiteflag_encode".format(os.environ.get("FENNEL_CLI_IP", None)), data=payload)
     return Response(r.text)
 
 
@@ -41,7 +41,7 @@ def whiteflag_discontinue_authentication(request):
             "verificationData": request.data["verificationData"],
         }
     )
-    r = requests.post("http://{0}:9031/v1/whiteflag_encode".format(os.environ.get("FENNEL_CLI_IP", None)), data=payload)
+    r = requests.post("{0}/v1/whiteflag_encode".format(os.environ.get("FENNEL_CLI_IP", None)), data=payload)
     return Response(r.text)
 
 
@@ -74,7 +74,7 @@ def whiteflag_encode(request):
         "objectOrientation": request.data["objectOrientation"],
         "objectTypeQuant": request.data["objectTypeQuant"],
     })
-    r = requests.post("http://{0}:9031/v1/whiteflag_encode".format(os.environ.get("FENNEL_CLI_IP", None)), data=payload)
+    r = requests.post("{0}/v1/whiteflag_encode".format(os.environ.get("FENNEL_CLI_IP", None)), data=payload)
     try:
         return Response(r.json())
     except:
@@ -84,7 +84,7 @@ def whiteflag_encode(request):
 @api_view(["POST"])
 def whiteflag_decode(request):
     payload = json.dumps(request.data["message"])
-    r = requests.post("http://{0}:9031/v1/whiteflag_decode".format(os.environ.get("FENNEL_CLI_IP", None)), data=payload)
+    r = requests.post("{0}/v1/whiteflag_decode".format(os.environ.get("FENNEL_CLI_IP", None)), data=payload)
     return Response(r.json())
 
 

@@ -1,8 +1,8 @@
 # Tokens are **examples only**.
 # Use the REST Client extension for VSCode to test these endpoints.
 
-@hostname = 34.148.9.195
-@port = 1234
+@hostname = api.fennellabs.com
+@port = 443
 
 ###
 # @name Health Check
