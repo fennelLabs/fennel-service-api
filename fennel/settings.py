@@ -25,7 +25,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY", None)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True if os.environ.get("DEBUG") == "True" else False
 
-ALLOWED_HOSTS = ["localhost", "192.168.1.186", "34.148.9.195"]
+ALLOWED_HOSTS = ["localhost", "192.168.1.186", "34.148.9.195", "api.fennellabs.com"]
 
 CORS_ORIGIN_WHITELIST = ["http://localhost:3000", "http://127.0.0.1:3000"]
 
