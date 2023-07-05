@@ -44,7 +44,9 @@ def get_account_balance(request):
         })
     key = UserKeys.objects.filter(user=request.user).first()
     try:
-        payload = key.mnemonic
+        payload = {
+            'mnemonic': key.mnemonic
+        }
         r = requests.post(f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_account_balance", data=payload)
         key.balance = r.json()["balance"]
         key.save()
@@ -60,7 +62,9 @@ def get_address(request):
     key = UserKeys.objects.filter(user=request.user).first()
     if key.address:
         return Response({"address": key.address})
-    payload = key.mnemonic
+    payload = {
+        'mnemonic': key.mnemonic
+    }
     r = requests.post(f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_address", data=payload)
     key.address = r.json()["address"]
     key.save()
