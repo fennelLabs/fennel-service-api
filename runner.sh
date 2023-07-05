@@ -68,7 +68,7 @@ function check() {
 }
 
 function gunicorn_run() {
-  gunicorn fennel.wsgi:application --bind 0.0.0.0:1234
+  gunicorn --workers=8 --threads=8 --max-requests=8 fennel.wsgi:application --bind 0.0.0.0:1234
 }
 
 case "$1" in
