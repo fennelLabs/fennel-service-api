@@ -33,7 +33,10 @@ def whiteflag_authenticate(request):
         }
     )
     r = requests.post("{0}/v1/whiteflag_encode".format(os.environ.get("FENNEL_CLI_IP", None)), data=payload)
-    return Response(r.text)
+    try:
+        return Response(r.json())
+    except:
+        return Response(r.text)
 
 
 @api_view(["POST"])
@@ -52,7 +55,10 @@ def whiteflag_discontinue_authentication(request):
         }
     )
     r = requests.post("{0}/v1/whiteflag_encode".format(os.environ.get("FENNEL_CLI_IP", None)), data=payload)
-    return Response(r.text)
+    try:
+        return Response(r.json())
+    except:
+        return Response(r.text)
 
 
 @api_view(["POST"])

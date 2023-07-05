@@ -23,7 +23,7 @@ export POSTGRES_DB=$(gsutil cat gs://whiteflag-0-admin/postgres_db.sh)
 export POSTGRES_USER=postgres
 export POSTGRES_PASS=$(gsutil cat gs://whiteflag-0-admin/postgres_pass.sh)
 export POSTGRES_NAME=fennel_service_api
-export FENNEL_CLI_IP=https://cli.fennellabs.com
+export FENNEL_CLI_IP=https://bitwise.fennellabs.com
 export FENNEL_SUBSERVICE_IP=https://subservice.fennellabs.com
 gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin us-east1-docker.pkg.dev
 docker run -dt -e DEBUG -e ADMIN_NAME -e ADMIN_EMAIL -e EMAIL_HOST -e EMAIL_PORT -e EMAIL_USERNAME -e EMAIL_PASSWORD -e DEFAULT_FROM_EMAIL -e SERVER_EMAIL -e SECRET_KEY -e POSTGRES_DB -e POSTGRES_USER -e POSTGRES_PASS -e POSTGRES_NAME -e FENNEL_CLI_IP -e FENNEL_SUBSERVICE_IP -p 1234:1234 --name fennel-service-api us-east1-docker.pkg.dev/whiteflag-0/fennel-docker-registry/fennel-service-api:latest
