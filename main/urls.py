@@ -5,6 +5,8 @@ from main import views, auth_views, whiteflag_views
 
 urlpatterns = [
     path("healthcheck/", views.healthcheck),
+    path("whiteflag/healthcheck/", whiteflag_views.fennel_cli_healthcheck),
+    path("fennel/healthcheck/", views.subservice_healthcheck),
     path('whiteflag/authenticate/', whiteflag_views.whiteflag_authenticate),
     path(
         'whiteflag/discontinue_authentication/',

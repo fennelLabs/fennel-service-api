@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from django.http import Http404
 from .models import Signal, UserKeys
 from rest_framework.decorators import (
     api_view,
@@ -16,6 +17,15 @@ import datetime
 @api_view(["GET"])
 def healthcheck(request):
     return Response()
+
+
+@api_view(["GET"])
+def subservice_healthcheck(request):
+    r = requests.get(f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/healthcheck")
+    if r.status_code == 200:
+        return Response("Ok")
+    else:
+        raise Http404
 
 
 @api_view(["POST"])

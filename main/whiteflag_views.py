@@ -1,10 +1,20 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.http import Http404
 import requests
 import json
 import uuid
 import hashlib
 import os
+
+
+@api_view(["GET"])
+def fennel_cli_healthcheck(request):
+    r = requests.get("{0}/v1/hello_there/".format(os.environ.get("FENNEL_CLI_IP", None)))
+    if r.status_code == 200:
+        return Response("Ok")
+    else:
+        raise Http404
 
 
 @api_view(["POST"])

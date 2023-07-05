@@ -11,6 +11,18 @@ GET /v1/healthcheck/
 Host: {{hostname}}:{{port}}
 
 ###
+# @name Whiteflag Healthcheck
+# @no-cookie-jar
+GET /v1/whiteflag/healthcheck/
+Host: {{hostname}}:{{port}}
+
+###
+# @name Fennel Healthcheck
+# @no-cookie-jar
+GET /v1/fennel/healthcheck/
+Host: {{hostname}}:{{port}}
+
+###
 # @name Register
 # @no-cookie-jar
 POST /v1/auth/register/
