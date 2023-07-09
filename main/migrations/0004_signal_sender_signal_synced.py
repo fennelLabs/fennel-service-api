@@ -9,18 +9,24 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('main', '0003_initial'),
+        ("main", "0003_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='signal',
-            name='sender',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='signals', to=settings.AUTH_USER_MODEL),
+            model_name="signal",
+            name="sender",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="signals",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='signal',
-            name='synced',
+            model_name="signal",
+            name="synced",
             field=models.BooleanField(default=False),
         ),
     ]

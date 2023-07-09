@@ -10,7 +10,9 @@ import os
 
 @api_view(["GET"])
 def fennel_cli_healthcheck(request):
-    r = requests.get("{0}/v1/hello_there/".format(os.environ.get("FENNEL_CLI_IP", None)))
+    r = requests.get(
+        "{0}/v1/hello_there/".format(os.environ.get("FENNEL_CLI_IP", None))
+    )
     if r.status_code == 200:
         return Response("Ok")
     else:
@@ -32,7 +34,10 @@ def whiteflag_authenticate(request):
             "verificationData": request.data["verificationData"],
         }
     )
-    r = requests.post("{0}/v1/whiteflag_encode".format(os.environ.get("FENNEL_CLI_IP", None)), data=payload)
+    r = requests.post(
+        "{0}/v1/whiteflag_encode".format(os.environ.get("FENNEL_CLI_IP", None)),
+        data=payload,
+    )
     try:
         return Response(r.json())
     except:
@@ -54,7 +59,10 @@ def whiteflag_discontinue_authentication(request):
             "verificationData": request.data["verificationData"],
         }
     )
-    r = requests.post("{0}/v1/whiteflag_encode".format(os.environ.get("FENNEL_CLI_IP", None)), data=payload)
+    r = requests.post(
+        "{0}/v1/whiteflag_encode".format(os.environ.get("FENNEL_CLI_IP", None)),
+        data=payload,
+    )
     try:
         return Response(r.json())
     except:
@@ -63,34 +71,39 @@ def whiteflag_discontinue_authentication(request):
 
 @api_view(["POST"])
 def whiteflag_encode(request):
-    payload = json.dumps({
-        "prefix": "WF",
-        "version": "1",
-        "encryptionIndicator": request.data["encryptionIndicator"],
-        "duressIndicator": request.data["duressIndicator"],
-        "messageCode": request.data["messageCode"],
-        "referenceIndicator": request.data["referenceIndicator"],
-        "referencedMessage": request.data["referencedMessage"],
-        "verificationMethod": request.data["verificationMethod"],
-        "verificationData": request.data["verificationData"],
-        "cryptoDataType": request.data["cryptoDataType"],
-        "cryptoData": request.data["cryptoData"],
-        "text": request.data["text"],
-        "resourceMethod": request.data["resourceMethod"],
-        "resourceData": request.data["resourceData"],
-        "pseudoMessageCode": request.data["pseudoMessageCode"],
-        "subjectCode": request.data["subjectCode"],
-        "datetime": request.data["datetime"],
-        "duration": request.data["duration"],
-        "objectType": request.data["objectType"],
-        "objectLatitude": request.data["objectLatitude"],
-        "objectLongitude": request.data["objectLongitude"],
-        "objectSizeDim1": request.data["objectSizeDim1"],
-        "objectSizeDim2": request.data["objectSizeDim2"],
-        "objectOrientation": request.data["objectOrientation"],
-        "objectTypeQuant": request.data["objectTypeQuant"],
-    })
-    r = requests.post("{0}/v1/whiteflag_encode".format(os.environ.get("FENNEL_CLI_IP", None)), data=payload)
+    payload = json.dumps(
+        {
+            "prefix": "WF",
+            "version": "1",
+            "encryptionIndicator": request.data["encryptionIndicator"],
+            "duressIndicator": request.data["duressIndicator"],
+            "messageCode": request.data["messageCode"],
+            "referenceIndicator": request.data["referenceIndicator"],
+            "referencedMessage": request.data["referencedMessage"],
+            "verificationMethod": request.data["verificationMethod"],
+            "verificationData": request.data["verificationData"],
+            "cryptoDataType": request.data["cryptoDataType"],
+            "cryptoData": request.data["cryptoData"],
+            "text": request.data["text"],
+            "resourceMethod": request.data["resourceMethod"],
+            "resourceData": request.data["resourceData"],
+            "pseudoMessageCode": request.data["pseudoMessageCode"],
+            "subjectCode": request.data["subjectCode"],
+            "datetime": request.data["datetime"],
+            "duration": request.data["duration"],
+            "objectType": request.data["objectType"],
+            "objectLatitude": request.data["objectLatitude"],
+            "objectLongitude": request.data["objectLongitude"],
+            "objectSizeDim1": request.data["objectSizeDim1"],
+            "objectSizeDim2": request.data["objectSizeDim2"],
+            "objectOrientation": request.data["objectOrientation"],
+            "objectTypeQuant": request.data["objectTypeQuant"],
+        }
+    )
+    r = requests.post(
+        "{0}/v1/whiteflag_encode".format(os.environ.get("FENNEL_CLI_IP", None)),
+        data=payload,
+    )
     try:
         return Response(r.json())
     except:
@@ -100,14 +113,17 @@ def whiteflag_encode(request):
 @api_view(["POST"])
 def whiteflag_decode(request):
     payload = json.dumps(request.data["message"])
-    r = requests.post("{0}/v1/whiteflag_decode".format(os.environ.get("FENNEL_CLI_IP", None)), data=payload)
+    r = requests.post(
+        "{0}/v1/whiteflag_decode".format(os.environ.get("FENNEL_CLI_IP", None)),
+        data=payload,
+    )
     return Response(r.json())
 
 
 @api_view(["GET"])
 def whiteflag_generate_shared_token(request):
     r = {
-            "sharedToken": str(uuid.uuid4()),
+        "sharedToken": str(uuid.uuid4()),
     }
     return Response(json.dumps(r))
 

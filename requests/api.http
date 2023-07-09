@@ -268,3 +268,19 @@ Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1
 GET /v1/fennel/get_unsynced_signals/
 Host: {{hostname}}:{{port}}
 Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
+
+###
+# @name Fennel - Get Fee History
+# @description Retrieves historical fees from the chain.
+# @no-cookie-jar
+GET /v1/fennel/get_fee_history/
+Host: {{hostname}}:{{port}}
+Authorization: Token <token>
+
+###
+# @name Fennel - Get Fee History with Count
+# @description Retrieves historical fees from the chain for a certain number of transactions.
+# @no-cookie-jar
+GET /v1/fennel/get_fee_history/5/
+Host: {{hostname}}:{{port}}
+Authorization: Token <token>

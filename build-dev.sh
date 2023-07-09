@@ -18,4 +18,5 @@ export FENNEL_PROTOCOL_BOOT_IP="localhost"
 export FENNEL_PROTOCOL_VALIDATOR_IP="localhost"
 export FENNEL_PROTOCOL_COLLATOR_1_IP="localhost"
 export FENNEL_PROTOCOL_COLLATOR_2_IP="localhost"
+python -m black .
 ./runner.sh init-all-run

@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0007_userkeys_balance'),
+        ("main", "0007_userkeys_balance"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='signal',
-            name='mempool_timestamp',
+            model_name="signal",
+            name="mempool_timestamp",
             field=models.DateTimeField(blank=True, null=True),
         ),
     ]

@@ -88,7 +88,7 @@ if "POSTGRES_USER" in os.environ:
             "NAME": os.environ["POSTGRES_NAME"],
             "USER": os.environ["POSTGRES_USER"],
             "PASSWORD": os.environ["POSTGRES_PASS"],
-            "HOST": os.environ["POSTGRES_DB"]
+            "HOST": os.environ["POSTGRES_DB"],
         }
     }
 else:
@@ -100,8 +100,8 @@ else:
     }
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'knox.auth.TokenAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "knox.auth.TokenAuthentication",
     ]
 }
 
@@ -185,8 +185,7 @@ DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
 SERVER_EMAIL = os.environ.get("SERVER_EMAIL")
 
 ADMINS = [
-    (os.environ.get("ADMIN_NAME"),
-     os.environ.get("ADMIN_EMAIL")),
+    (os.environ.get("ADMIN_NAME"), os.environ.get("ADMIN_EMAIL")),
 ]
 
 LOGGING = {
