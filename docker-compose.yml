@@ -41,13 +41,12 @@ services:
       - SERVER_EMAIL=""
       - ENVIRONMENT="LOCAL"
       - SECRET_KEY=2HY>fXi!dQ&(9Vf.XghCa;L6G=Ul4r-Bwqh>ae0RG3vIh1ZJ%T
-      - SUBSERVICE_HOST=localhost
-      - KEYSERVER_HOST=localhost
-      - FENNEL_RPC=localhost
-      - POSTGRES_DB=postgres
+      - FENNEL_SUBSERVICE_IP=https://subservice.fennellabs.com
+      - FENNEL_CLI_IP=https://bitwise.fennellabs.com
+      - POSTGRES_DB=database
       - POSTGRES_USER=postgres
       - POSTGRES_PASS=postgres
-      - POSTGRES_NAME=database
+      - POSTGRES_NAME=postgres
       - ENVIRONMENT=LOCAL
     depends_on:
       - 'database'
