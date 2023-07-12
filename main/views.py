@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 from django.http import Http404
-from .models import Signal, Transaction, UserKeys
+from .models import Signal, Transaction, UserKeys, ConfirmationRecord
 from rest_framework.decorators import (
     api_view,
     authentication_classes,
@@ -156,6 +156,7 @@ def send_new_signal(request):
             f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/send_new_signal",
             data=payload,
         )
+        signal.tx_hash = r.json()["hash"]
         signal.synced = True
         signal.mempool_timestamp = datetime.datetime.now()
         signal.save()
@@ -207,11 +208,21 @@ def sync_signal(request):
             data=payload,
         )
         signal.synced = True
+        signal.tx_hash = r.json()["hash"]
         signal.mempool_timestamp = datetime.datetime.now()
         signal.save()
         return Response(r.json())
     except Exception as e:
         return Response({"signal": "saved as unsynced", "error": str(e)})
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def confirm_signal(request):
+    signal = get_object_or_404(Signal, id=request.data["id"])
+    ConfirmationRecord.objects.update_or_create(signal=signal, confirmer=request.user)
+    return Response({"status": "ok"})
 
 
 @api_view(["GET"])
@@ -226,32 +237,25 @@ def get_signals(request, count=None):
         [
             {
                 "id": signal.id,
+                "tx_hash": signal.tx_hash,
                 "timestamp": signal.timestamp,
                 "mempool_timestamp": signal.mempool_timestamp,
                 "signal_text": signal.signal_text,
                 "sender": {"id": signal.sender.id, "username": signal.sender.username},
                 "synced": signal.synced,
+                "confirmations": [
+                    {
+                        "id": confirmation.id,
+                        "timestamp": confirmation.timestamp,
+                        "confirming_user": {
+                            "id": confirmation.confirmer.id,
+                            "username": confirmation.confirmer.username,
+                        },
+                    }
+                    for confirmation in ConfirmationRecord.objects.filter(signal=signal)
+                ],
             }
             for signal in queryset
-        ]
-    )
-
-
-@api_view(["GET"])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-def get_signal_history(request):
-    return Response(
-        [
-            {
-                "id": signal.id,
-                "timestamp": signal.timestamp,
-                "mempool_timestamp": signal.mempool_timestamp,
-                "signal_text": signal.signal_text,
-                "sender": {"id": signal.sender.id, "username": signal.sender.username},
-                "synced": signal.synced,
-            }
-            for signal in Signal.objects.all().order_by("-timestamp")
         ]
     )
 

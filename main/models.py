@@ -12,6 +12,7 @@ class Transaction(models.Model):
 
 
 class Signal(models.Model):
+    tx_hash = models.CharField(max_length=256, unique=True, null=True, blank=True)
     signal_text = models.CharField(max_length=256)
     timestamp = models.DateTimeField(auto_now_add=True)
     mempool_timestamp = models.DateTimeField(auto_now_add=False, null=True, blank=True)
@@ -26,6 +27,23 @@ class Signal(models.Model):
 
     def __str__(self):
         return self.signal_text
+
+
+class ConfirmationRecord(models.Model):
+    signal = models.ForeignKey(
+        "Signal", related_name="confirmations", on_delete=models.CASCADE
+    )
+    timestamp = models.DateTimeField(auto_now_add=True)
+    confirmer = models.ForeignKey(
+        "auth.User",
+        related_name="confirmations",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        unique_together = ("signal", "confirmer")
 
 
 class UserKeys(models.Model):

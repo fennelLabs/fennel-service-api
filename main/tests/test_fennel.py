@@ -1,6 +1,6 @@
 from django.test.client import Client
 from django.contrib.auth import get_user_model
-from main.models import Transaction, Signal
+from main.models import Transaction, Signal, ConfirmationRecord
 from model_bakery import baker
 
 
@@ -78,6 +78,112 @@ def test_get_signals():
     assert len(response.json()) == 100
     Signal.objects.all().delete()
     User.objects.all().delete()
+
+
+def test_confirm_signal():
+    client = Client()
+    User = get_user_model()
+    response = client.post(
+        "/v1/auth/register/",
+        {
+            "username": "confirm_signal_test",
+            "password": "confirm_signal_test",
+            "email": "confirm_signal_test@test.com",
+        },
+    )
+    assert response.status_code == 200
+    assert response.json()["token"] is not None
+    user = User.objects.get(username="confirm_signal_test")
+    signal = baker.make("main.Signal", sender=user)
+    response = client.post(
+        "/v1/fennel/confirm_signal/",
+        {"id": signal.id},
+        HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
+    )
+    assert response.status_code == 200
+    assert response.json()["status"] == "ok"
+    confirmation = ConfirmationRecord.objects.get(signal=signal)
+    assert confirmation is not None
+    assert confirmation.confirmer == user
+    Signal.objects.all().delete()
+    User.objects.all().delete()
+    ConfirmationRecord.objects.all().delete()
+
+
+def test_confirm_signal_updates():
+    client = Client()
+    User = get_user_model()
+    auth_response = client.post(
+        "/v1/auth/register/",
+        {
+            "username": "confirm_signal_test",
+            "password": "confirm_signal_test",
+            "email": "confirm_signal_test@test.com",
+        },
+    )
+    assert auth_response.status_code == 200
+    assert auth_response.json()["token"] is not None
+    user = User.objects.get(username="confirm_signal_test")
+    signal = baker.make("main.Signal", sender=user)
+    response = client.post(
+        "/v1/fennel/confirm_signal/",
+        {"id": signal.id},
+        HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+    )
+    assert response.status_code == 200
+    assert response.json()["status"] == "ok"
+    confirmation = ConfirmationRecord.objects.get(signal=signal)
+    assert confirmation is not None
+    assert confirmation.confirmer == user
+    response = client.post(
+        "/v1/fennel/confirm_signal/",
+        {"id": signal.id},
+        HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+    )
+    assert response.status_code == 200
+    assert response.json()["status"] == "ok"
+    assert len(ConfirmationRecord.objects.filter(signal=signal)) == 1
+    Signal.objects.all().delete()
+    User.objects.all().delete()
+    ConfirmationRecord.objects.all().delete()
+
+
+def test_signal_confirmation_list():
+    client = Client()
+    User = get_user_model()
+    auth_response = client.post(
+        "/v1/auth/register/",
+        {
+            "username": "confirm_signal_list_test",
+            "password": "confirm_signal_list_test",
+            "email": "confirm_signal_list_test@test.com",
+        },
+    )
+    assert auth_response.status_code == 200
+    assert auth_response.json()["token"] is not None
+    user = User.objects.get(username="confirm_signal_list_test")
+    signal = baker.make("main.Signal", sender=user)
+    response = client.post(
+        "/v1/fennel/confirm_signal/",
+        {"id": signal.id},
+        HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+    )
+    assert response.status_code == 200
+    assert response.json()["status"] == "ok"
+    confirmation = ConfirmationRecord.objects.get(signal=signal)
+    assert confirmation is not None
+    assert confirmation.confirmer == user
+    response = client.get(
+        "/v1/fennel/get_signals/",
+        HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+    )
+    assert response.status_code == 200
+    assert len(response.json()) == 1
+    print(response.json())
+    assert len(response.json()[0]["confirmations"]) == 1
+    Signal.objects.all().delete()
+    User.objects.all().delete()
+    ConfirmationRecord.objects.all().delete()
 
 
 def test_get_signals_count():

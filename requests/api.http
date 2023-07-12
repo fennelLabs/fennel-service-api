@@ -241,6 +241,19 @@ Content-Type: application/json
 }
 
 ###
+# @name Fennel - Confirm Signal
+# @description Confirm a signal has been seen by a user.
+# @no-cookie-jar
+POST /v1/fennel/confirm_signal/
+Host: {{hostname}}:{{port}}
+Authorization: Token <token>
+Content-Type: application/json
+
+{
+    "id": 0
+}
+
+###
 # @name Fennel - Get Signals
 # @no-cookie-jar
 GET /v1/fennel/get_signals/
@@ -251,13 +264,6 @@ Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1
 # @name Fennel - Get Latest 5 Signals
 # @no-cookie-jar
 GET /v1/fennel/get_signals/5/
-Host: {{hostname}}:{{port}}
-Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
-
-###
-# @name Fennel - Get Signal History
-# @no-cookie-jar
-GET /v1/fennel/get_signal_history/
 Host: {{hostname}}:{{port}}
 Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
 
