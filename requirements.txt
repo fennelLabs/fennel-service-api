@@ -28,7 +28,7 @@ psycopg2-binary==2.9.2
 pycparser==2.21
 pyhcl==0.4.4
 pytz==2022.1
-requests==2.29.0
+requests==2.31.0
 Rx==1.6.1
 safety==1.10.3
 shortuuid==1.0.11
