@@ -32,3 +32,29 @@ def generate_keypair(request):
         )
     except Exception as e:
         return Response({"error": "keypair not created", "detail": str(e)})
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_public_key_by_username(request):
+    if UserKeys.objects.filter(user__username=request.data["username"]).exists():
+        public_key = UserKeys.objects.get(
+            user__username=request.data["username"]
+        ).public_diffie_hellman_key
+        return Response({"public_key": public_key})
+    else:
+        return Response({"error": "no key exists for username"})
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_public_key_by_address(request):
+    if UserKeys.objects.filter(address=request.data["address"]).exists():
+        public_key = UserKeys.objects.get(
+            address=request.data["address"]
+        ).public_diffie_hellman_key
+        return Response({"public_key": public_key})
+    else:
+        return Response({"error": "no key exists for address"})
