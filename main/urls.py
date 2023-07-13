@@ -26,6 +26,14 @@ urlpatterns = [
         "crypto/generate_keypair/",
         crypto_views.generate_keypair,
     ),
+    path(
+        "crypto/get_public_key_by_username/",
+        crypto_views.get_public_key_by_username,
+    ),
+    path(
+        "crypto/get_public_key_by_address/",
+        crypto_views.get_public_key_by_address,
+    ),
     path("fennel/create_account/", views.create_account),
     path("fennel/get_account_balance/", views.get_account_balance),
     path("fennel/get_address/", views.get_address),

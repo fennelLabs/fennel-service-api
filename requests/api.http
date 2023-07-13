@@ -155,6 +155,30 @@ Content-Type: application/json
 Authorization: Token 9512982d2a0d9030b8be56c6f80a4b1d48b3d332766b759bde305573828a829e
 
 ###
+# @name Whiteflag - Get Public Key by Username
+# @no-cookie-jar
+POST /v1/crypto/get_public_key_by_username/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+Authorization: Token <token>
+
+{
+    "username": "testinguser"
+}
+
+###
+# @name Whiteflag - Get Public Key by Address
+# @no-cookie-jar
+POST /v1/crypto/get_public_key_by_address/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+Authorization: Token <token>
+
+{
+    "address": "5CwBjJ48HW7c36dT7pAf9TkGQjj88jxw624xHaL6wtXJTWCt"
+}
+
+###
 # @name Fennel - Create Account
 # @no-cookie-jar
 POST /v1/fennel/create_account/

@@ -51,7 +51,7 @@ class UserKeys(models.Model):
         "auth.User", related_name="keys", on_delete=models.CASCADE
     )
     mnemonic = models.CharField(max_length=256)
-    address = models.CharField(max_length=256, null=True, blank=True)
+    address = models.CharField(max_length=256, null=True, blank=True, unique=True)
     balance = models.IntegerField(default=0)
     public_diffie_hellman_key = models.CharField(max_length=256, null=True, blank=True)
     private_diffie_hellman_key = models.CharField(max_length=256, null=True, blank=True)
