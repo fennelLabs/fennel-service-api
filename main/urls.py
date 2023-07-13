@@ -35,6 +35,10 @@ urlpatterns = [
         crypto_views.dh_encrypt_whiteflag_message,
     ),
     path(
+        "crypto/dh_decrypt_whiteflag_message/",
+        crypto_views.dh_decrypt_whiteflag_message,
+    ),
+    path(
         "crypto/get_dh_public_key_by_username/",
         crypto_views.get_dh_public_key_by_username,
     ),
