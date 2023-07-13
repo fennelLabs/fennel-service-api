@@ -4,6 +4,7 @@ from knox import views as knox_views
 from main import views, auth_views, whiteflag_views, crypto_views
 
 urlpatterns = [
+    path("get_version/", views.get_version),
     path("healthcheck/", views.healthcheck),
     path("whiteflag/healthcheck/", whiteflag_views.fennel_cli_healthcheck),
     path("fennel/healthcheck/", views.subservice_healthcheck),
