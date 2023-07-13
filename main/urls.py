@@ -1,7 +1,7 @@
 from django.urls import path
 from knox import views as knox_views
 
-from main import views, auth_views, whiteflag_views
+from main import views, auth_views, whiteflag_views, crypto_views
 
 urlpatterns = [
     path("healthcheck/", views.healthcheck),
@@ -21,6 +21,10 @@ urlpatterns = [
     path(
         "whiteflag/generate_public_token/",
         whiteflag_views.whiteflag_generate_public_token,
+    ),
+    path(
+        "crypto/generate_keypair/",
+        crypto_views.generate_keypair,
     ),
     path("fennel/create_account/", views.create_account),
     path("fennel/get_account_balance/", views.get_account_balance),
