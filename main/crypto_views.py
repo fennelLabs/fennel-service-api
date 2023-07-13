@@ -63,7 +63,7 @@ def dh_encrypt_whiteflag_message(request):
         r = requests.post(
             "{0}/v1/dh_encrypt".format(os.environ.get("FENNEL_CLI_IP", None)),
             json={
-                "plaintext": request.data["message"][9],
+                "plaintext": request.data["message"][9:],
                 "shared_secret": request.data["shared_secret"],
             },
         )
