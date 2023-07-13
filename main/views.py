@@ -15,6 +15,11 @@ import datetime
 
 
 @api_view(["GET"])
+def get_version(request):
+    return Response({"version": "v1.0.0-alpha.3"})
+
+
+@api_view(["GET"])
 def healthcheck(request):
     return Response()
 
