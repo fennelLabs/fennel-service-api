@@ -15,6 +15,16 @@ from main.models import UserKeys
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
+def wf_is_this_encrypted(request):
+    if request.data["message"][7] == "1":
+        return Response({"encrypted": True})
+    else:
+        return Response({"encrypted": False})
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def generate_diffie_hellman_keypair(request):
     try:
         r = requests.post(

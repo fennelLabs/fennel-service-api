@@ -146,7 +146,7 @@ Content-Type: application/json
 ###
 # @name Crypto - Generate Diffie-Hellman Keypair
 # @no-cookie-jar
-POST /v1/crypto/generate_diffie_hellman_keypair/
+POST /v1/crypto/dh/generate_keypair/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token 9512982d2a0d9030b8be56c6f80a4b1d48b3d332766b759bde305573828a829e
@@ -154,7 +154,7 @@ Authorization: Token 9512982d2a0d9030b8be56c6f80a4b1d48b3d332766b759bde305573828
 ###
 # @name Crypto - Get Diffie-Hellman Shared Secret
 # @no-cookie-jar
-POST /v1/crypto/get_diffie_hellman_shared_secret/
+POST /v1/crypto/dh/get_shared_secret/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token ac1224a5a82d588ad1ea79d81c58cae3ac9c2f5acf116b30374fe9728602e73f
@@ -167,7 +167,7 @@ Authorization: Token ac1224a5a82d588ad1ea79d81c58cae3ac9c2f5acf116b30374fe972860
 ###
 # @name Crypto - DH Encrypt Whiteflag Message
 # @no-cookie-jar
-POST /v1/crypto/dh_encrypt_whiteflag_message/
+POST /v1/crypto/dh/whiteflag/encrypt_message/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token ac1224a5a82d588ad1ea79d81c58cae3ac9c2f5acf116b30374fe9728602e73f
@@ -180,7 +180,7 @@ Authorization: Token ac1224a5a82d588ad1ea79d81c58cae3ac9c2f5acf116b30374fe972860
 ###
 # @name Crypto - DH Decrypt Whiteflag Message
 # @no-cookie-jar
-POST /v1/crypto/dh_decrypt_whiteflag_message/
+POST /v1/crypto/dh/whiteflag/decrypt_message/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token ac1224a5a82d588ad1ea79d81c58cae3ac9c2f5acf116b30374fe9728602e73f
@@ -193,7 +193,7 @@ Authorization: Token ac1224a5a82d588ad1ea79d81c58cae3ac9c2f5acf116b30374fe972860
 ###
 # @name Crypto - Get DH Public Key by Username
 # @no-cookie-jar
-POST /v1/crypto/get_dh_public_key_by_username/
+POST /v1/crypto/dh/get_public_key_by_username/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token <token>
@@ -205,13 +205,25 @@ Authorization: Token <token>
 ###
 # @name Crypto - Get Public Key by Address
 # @no-cookie-jar
-POST /v1/crypto/get_dh_public_key_by_address/
+POST /v1/crypto/dh/get_public_key_by_address/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token <token>
 
 {
     "address": "5CwBjJ48HW7c36dT7pAf9TkGQjj88jxw624xHaL6wtXJTWCt"
+}
+
+###
+# @name Crypto - Check if Encrypted
+# @no-cookie-jar
+POST /v1/crypto/dh/whiteflag/is_this_encrypted/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+Authorization: <token>
+
+{
+    "message": "5746313020a00000000000000000000000000000000000000000000000000000000000000000b43a3a38399d1797b7b933b0b734b9b0ba34b7b71734b73a17bbb434ba32b33630b380",
 }
 
 ###

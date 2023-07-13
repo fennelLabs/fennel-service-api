@@ -23,27 +23,31 @@ urlpatterns = [
         whiteflag_views.whiteflag_generate_public_token,
     ),
     path(
-        "crypto/generate_diffie_hellman_keypair/",
+        "crypto/dh/whiteflag/is_this_encrypted/",
+        crypto_views.wf_is_this_encrypted,
+    ),
+    path(
+        "crypto/dh/generate_keypair/",
         crypto_views.generate_diffie_hellman_keypair,
     ),
     path(
-        "crypto/get_diffie_hellman_shared_secret/",
+        "crypto/dh/get_shared_secret/",
         crypto_views.get_diffie_hellman_shared_secret,
     ),
     path(
-        "crypto/dh_encrypt_whiteflag_message/",
+        "crypto/dh/whiteflag/encrypt_message/",
         crypto_views.dh_encrypt_whiteflag_message,
     ),
     path(
-        "crypto/dh_decrypt_whiteflag_message/",
+        "crypto/dh/whiteflag/decrypt_message/",
         crypto_views.dh_decrypt_whiteflag_message,
     ),
     path(
-        "crypto/get_dh_public_key_by_username/",
+        "crypto/dh/get_public_key_by_username/",
         crypto_views.get_dh_public_key_by_username,
     ),
     path(
-        "crypto/get_dh_public_key_by_address/",
+        "crypto/dh/get_public_key_by_address/",
         crypto_views.get_dh_public_key_by_address,
     ),
     path("fennel/create_account/", views.create_account),
