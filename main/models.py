@@ -47,10 +47,14 @@ class ConfirmationRecord(models.Model):
 
 
 class UserKeys(models.Model):
-    user = models.ForeignKey("auth.User", related_name="keys", on_delete=models.CASCADE)
+    user = models.OneToOneField(
+        "auth.User", related_name="keys", on_delete=models.CASCADE
+    )
     mnemonic = models.CharField(max_length=256)
     address = models.CharField(max_length=256, null=True, blank=True)
     balance = models.IntegerField(default=0)
+    public_diffie_hellman_key = models.CharField(max_length=256, null=True, blank=True)
+    private_diffie_hellman_key = models.CharField(max_length=256, null=True, blank=True)
 
     def __str__(self):
         return self.user

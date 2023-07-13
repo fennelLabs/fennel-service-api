@@ -1,8 +1,11 @@
 # Tokens are **examples only**.
 # Use the REST Client extension for VSCode to test these endpoints.
 
-@hostname = api.fennellabs.com
-@port = 443
+#@hostname = api.fennellabs.com
+#@port = 443
+
+@hostname = localhost
+@port = 1234
 
 ###
 # @name Health Check
@@ -142,6 +145,14 @@ Content-Type: application/json
     "sharedToken": "b35f89b6-df83-44c9-a59e-5647f248a058",
     "address": "5CwBjJ48HW7c36dT7pAf9TkGQjj88jxw624xHaL6wtXJTWCt"
 }
+
+###
+# @name Whiteflag - Generate Keypair
+# @no-cookie-jar
+POST /v1/crypto/generate_keypair/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+Authorization: Token 9512982d2a0d9030b8be56c6f80a4b1d48b3d332766b759bde305573828a829e
 
 ###
 # @name Fennel - Create Account
