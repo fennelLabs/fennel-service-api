@@ -147,17 +147,30 @@ Content-Type: application/json
 }
 
 ###
-# @name Whiteflag - Generate Keypair
+# @name Crypto - Generate Diffie-Hellman Keypair
 # @no-cookie-jar
-POST /v1/crypto/generate_keypair/
+POST /v1/crypto/generate_diffie_hellman_keypair/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token 9512982d2a0d9030b8be56c6f80a4b1d48b3d332766b759bde305573828a829e
 
 ###
-# @name Whiteflag - Get Public Key by Username
+# @name Crypto - Get Diffie-Hellman Shared Secret
 # @no-cookie-jar
-POST /v1/crypto/get_public_key_by_username/
+POST /v1/crypto/get_diffie_hellman_shared_secret/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+Authorization: Token ac1224a5a82d588ad1ea79d81c58cae3ac9c2f5acf116b30374fe9728602e73f
+
+{
+    "secret": "d8eb4daf0686892944e95b8b63e09f58ea4fdaeef0fe86e20d98e8b2a19c0072",
+    "public": "0402ae7ca1142a2c64d979cf6cd039af9bc78241e893ef5bfec9f323e3b9ae4b"
+}
+
+###
+# @name Crypto - Get DH Public Key by Username
+# @no-cookie-jar
+POST /v1/crypto/get_dh_public_key_by_username/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token <token>
@@ -167,9 +180,9 @@ Authorization: Token <token>
 }
 
 ###
-# @name Whiteflag - Get Public Key by Address
+# @name Crypto - Get Public Key by Address
 # @no-cookie-jar
-POST /v1/crypto/get_public_key_by_address/
+POST /v1/crypto/get_dh_public_key_by_address/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token <token>
