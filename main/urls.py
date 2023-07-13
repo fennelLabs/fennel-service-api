@@ -23,16 +23,20 @@ urlpatterns = [
         whiteflag_views.whiteflag_generate_public_token,
     ),
     path(
-        "crypto/generate_keypair/",
-        crypto_views.generate_keypair,
+        "crypto/generate_diffie_hellman_keypair/",
+        crypto_views.generate_diffie_hellman_keypair,
     ),
     path(
-        "crypto/get_public_key_by_username/",
-        crypto_views.get_public_key_by_username,
+        "crypto/get_diffie_hellman_shared_secret/",
+        crypto_views.get_diffie_hellman_shared_secret,
     ),
     path(
-        "crypto/get_public_key_by_address/",
-        crypto_views.get_public_key_by_address,
+        "crypto/get_dh_public_key_by_username/",
+        crypto_views.get_dh_public_key_by_username,
+    ),
+    path(
+        "crypto/get_dh_public_key_by_address/",
+        crypto_views.get_dh_public_key_by_address,
     ),
     path("fennel/create_account/", views.create_account),
     path("fennel/get_account_balance/", views.get_account_balance),
