@@ -45,7 +45,12 @@ def get_diffie_hellman_shared_secret(request):
             ),
             json={"secret": request.data["secret"], "public": request.data["public"]},
         )
-        return Response({"success": "shared secret created", "shared_secret": r.json()['shared_secret']})
+        return Response(
+            {
+                "success": "shared secret created",
+                "shared_secret": r.json()["shared_secret"],
+            }
+        )
     except Exception as e:
         return Response({"error": "shared secret not created", "detail": str(e)})
 
