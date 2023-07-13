@@ -63,11 +63,21 @@ def dh_encrypt_whiteflag_message(request):
         r = requests.post(
             "{0}/v1/dh_encrypt".format(os.environ.get("FENNEL_CLI_IP", None)),
             json={
-                "plaintext": request.data["message"],
+                "plaintext": request.data["message"][9],
                 "shared_secret": request.data["shared_secret"],
             },
         )
-        return Response({"success": "message encrypted", "encrypted": r.text})
+        return Response(
+            {
+                "success": "message encrypted",
+                "encrypted": (
+                    request.data["message"][0:7]
+                    + "1"
+                    + request.data["message"][8:9]
+                    + r.text
+                ),
+            }
+        )
     except Exception as e:
         return Response({"error": "message not encrypted", "detail": str(e)})
 
