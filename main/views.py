@@ -241,7 +241,11 @@ def get_signals(request, count=None):
                 "timestamp": signal.timestamp,
                 "mempool_timestamp": signal.mempool_timestamp,
                 "signal_text": signal.signal_text,
-                "sender": {"id": signal.sender.id, "username": signal.sender.username},
+                "sender": {
+                    "id": signal.sender.id,
+                    "username": signal.sender.username,
+                    "address": UserKeys.objects.get(user=signal.sender).address,
+                },
                 "synced": signal.synced,
                 "confirmations": [
                     {
