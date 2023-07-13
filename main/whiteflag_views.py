@@ -117,7 +117,7 @@ def whiteflag_decode(request):
         "{0}/v1/whiteflag_decode".format(os.environ.get("FENNEL_CLI_IP", None)),
         data=payload,
     )
-    return Response(r.json())
+    return Response(json.loads(r.json()))
 
 
 @api_view(["GET"])
@@ -125,7 +125,7 @@ def whiteflag_generate_shared_token(request):
     r = {
         "sharedToken": str(uuid.uuid4()),
     }
-    return Response(json.dumps(r))
+    return Response(r)
 
 
 @api_view(["POST"])
