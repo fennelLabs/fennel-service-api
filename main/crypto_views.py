@@ -58,6 +58,23 @@ def get_diffie_hellman_shared_secret(request):
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
+def dh_encrypt_whiteflag_message(request):
+    try:
+        r = requests.post(
+            "{0}/v1/dh_encrypt".format(os.environ.get("FENNEL_CLI_IP", None)),
+            json={
+                "plaintext": request.data["message"],
+                "shared_secret": request.data["shared_secret"],
+            },
+        )
+        return Response({"success": "message encrypted", "encrypted": r.text})
+    except Exception as e:
+        return Response({"error": "message not encrypted", "detail": str(e)})
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def get_dh_public_key_by_username(request):
     if UserKeys.objects.filter(user__username=request.data["username"]).exists():
         public_key = UserKeys.objects.get(

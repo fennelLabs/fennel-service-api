@@ -168,6 +168,19 @@ Authorization: Token ac1224a5a82d588ad1ea79d81c58cae3ac9c2f5acf116b30374fe972860
 }
 
 ###
+# @name Crypto - DH Encrypt Whiteflag Message
+# @no-cookie-jar
+POST /v1/crypto/dh_encrypt_whiteflag_message/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+Authorization: Token ac1224a5a82d588ad1ea79d81c58cae3ac9c2f5acf116b30374fe9728602e73f
+
+{
+    "message": "This is a test.",
+    "shared_secret": "bc9fc6e2629eddd82ec1bdfae268288de8db724e12ebd3eb6f99d9a686cc457e"
+}
+
+###
 # @name Crypto - Get DH Public Key by Username
 # @no-cookie-jar
 POST /v1/crypto/get_dh_public_key_by_username/
