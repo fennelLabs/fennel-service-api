@@ -5,6 +5,12 @@
 @port = 443
 
 ###
+# @name Get Version
+# @no-cookie-jar
+GET /v1/get_version/
+Host: {{hostname}}:{{port}}
+
+###
 # @name Health Check
 # @no-cookie-jar
 GET /v1/healthcheck/

@@ -7,7 +7,6 @@ function all() {
   python3 manage.py check
   run_tests
   static
-  setup
 }
 
 function run_tests() {
@@ -48,10 +47,6 @@ function reset_migrations() {
   rm -rf main/migrations
   python3 manage.py migrate --fake-initial
   python3 manage.py showmigrations
-}
-
-function setup() {
-  python3 manage.py createadmin
 }
 
 function shell() {
@@ -95,10 +90,6 @@ test)
 
 run)
   run
-  ;;
-
-setup)
-  setup
   ;;
 
 init-all-run)
