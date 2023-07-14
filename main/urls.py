@@ -1,7 +1,7 @@
 from django.urls import path
 from knox import views as knox_views
 
-from main import views, auth_views, whiteflag_views, crypto_views
+from main import views, auth_views, whiteflag_views, crypto_views, fennel_views
 
 urlpatterns = [
     path("healthcheck/", views.healthcheck),
@@ -50,21 +50,21 @@ urlpatterns = [
         "crypto/dh/get_public_key_by_address/",
         crypto_views.get_dh_public_key_by_address,
     ),
-    path("fennel/create_account/", views.create_account),
-    path("fennel/get_account_balance/", views.get_account_balance),
-    path("fennel/get_address/", views.get_address),
-    path("fennel/get_fee_for_transfer_token/", views.get_fee_for_transfer_token),
-    path("fennel/transfer_token/", views.transfer_token),
-    path("fennel/get_fee_for_new_signal/", views.get_fee_for_new_signal),
-    path("fennel/send_new_signal/", views.send_new_signal),
-    path("fennel/get_fee_for_sync_signal/", views.get_fee_for_sync_signal),
-    path("fennel/sync_signal/", views.sync_signal),
-    path("fennel/confirm_signal/", views.confirm_signal),
-    path("fennel/get_signals/", views.get_signals),
-    path("fennel/get_signals/<int:count>/", views.get_signals),
-    path("fennel/get_unsynced_signals/", views.get_unsynced_signals),
-    path("fennel/get_fee_history/", views.get_fee_history),
-    path("fennel/get_fee_history/<int:count>/", views.get_fee_history),
+    path("fennel/create_account/", fennel_views.create_account),
+    path("fennel/get_account_balance/", fennel_views.get_account_balance),
+    path("fennel/get_address/", fennel_views.get_address),
+    path("fennel/get_fee_for_transfer_token/", fennel_views.get_fee_for_transfer_token),
+    path("fennel/transfer_token/", fennel_views.transfer_token),
+    path("fennel/get_fee_for_new_signal/", fennel_views.get_fee_for_new_signal),
+    path("fennel/send_new_signal/", fennel_views.send_new_signal),
+    path("fennel/get_fee_for_sync_signal/", fennel_views.get_fee_for_sync_signal),
+    path("fennel/sync_signal/", fennel_views.sync_signal),
+    path("fennel/confirm_signal/", fennel_views.confirm_signal),
+    path("fennel/get_signals/", fennel_views.get_signals),
+    path("fennel/get_signals/<int:count>/", fennel_views.get_signals),
+    path("fennel/get_unsynced_signals/", fennel_views.get_unsynced_signals),
+    path("fennel/get_fee_history/", fennel_views.get_fee_history),
+    path("fennel/get_fee_history/<int:count>/", fennel_views.get_fee_history),
     path("auth/register/", auth_views.UserRegisterView.as_view()),
     path("auth/login/", auth_views.LoginAPIView.as_view()),
     path("auth/user/", auth_views.UserAPI.as_view()),
