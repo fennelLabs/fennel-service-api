@@ -381,3 +381,14 @@ Authorization: Token <token>
 GET /v1/fennel/get_fee_history/5/
 Host: {{hostname}}:{{port}}
 Authorization: Token <token>
+
+###
+# @name Whiteflag - Decode List
+# @no-cookie-jar
+POST /v1/whiteflag/decode_list/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+
+{
+    "signals": [0]
+}
