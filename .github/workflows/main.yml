@@ -17,6 +17,8 @@ jobs:
       DEBUG: True
       ENVIRONMENT: CI-CD
       TESTING: Github Actions
+      FENNEL_CLI_IP: https://bitwise.fennellabs.com
+      FENNEL_SUBSERVICE_IP: https://subservice.fennellabs.com
 
     steps:
       - name: Checkout with Submodules

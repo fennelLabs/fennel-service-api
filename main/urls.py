@@ -1,7 +1,7 @@
 from django.urls import path
 from knox import views as knox_views
 
-from main import views, auth_views, whiteflag_views, crypto_views, fennel_views
+from main import views, auth_views, whiteflag_views, crypto_views, fennel_views, compound_views
 
 urlpatterns = [
     path("get_version/", views.get_version),
@@ -22,6 +22,10 @@ urlpatterns = [
     path(
         "whiteflag/generate_public_token/",
         whiteflag_views.whiteflag_generate_public_token,
+    ),
+    path(
+        "whiteflag/decode_list",
+        compound_views.decode_list,
     ),
     path(
         "crypto/dh/whiteflag/is_this_encrypted/",
