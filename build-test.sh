@@ -9,14 +9,7 @@ export EMAIL_USERNAME=""
 export EMAIL_PASSWORD=""
 export DEFAULT_FROM_EMAIL=""
 export SERVER_EMAIL=""
-export ENVIRONMENT="LOCAL"
-export FENNEL_CLI_IP="localhost:9031"
-export FENNEL_API_IP="localhost:1234"
-export FENNEL_KEYSERVER_IP="localhost"
-export FENNEL_SUBSERVICE_IP="localhost:6060"
-export FENNEL_PROTOCOL_BOOT_IP="localhost"
-export FENNEL_PROTOCOL_VALIDATOR_IP="localhost"
-export FENNEL_PROTOCOL_COLLATOR_1_IP="localhost"
-export FENNEL_PROTOCOL_COLLATOR_2_IP="localhost"
+export FENNEL_CLI_IP=https://bitwise.fennellabs.com
+export FENNEL_SUBSERVICE_IP=https://subservice.fennellabs.com
 python -m black .
 ./runner.sh all
