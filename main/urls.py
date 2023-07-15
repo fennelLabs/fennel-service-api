@@ -1,7 +1,14 @@
 from django.urls import path
 from knox import views as knox_views
 
-from main import views, auth_views, whiteflag_views, crypto_views, fennel_views, compound_views
+from main import (
+    views,
+    auth_views,
+    whiteflag_views,
+    crypto_views,
+    fennel_views,
+    compound_views,
+)
 
 urlpatterns = [
     path("get_version/", views.get_version),
@@ -74,4 +81,5 @@ urlpatterns = [
     path("auth/login/", auth_views.LoginAPIView.as_view()),
     path("auth/user/", auth_views.UserAPI.as_view()),
     path("auth/logout/", knox_views.LogoutView.as_view(), name="knox_logout"),
+    path("auth/change_password/", auth_views.ChangePasswordView.as_view()),
 ]
