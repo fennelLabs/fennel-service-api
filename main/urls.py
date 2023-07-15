@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import include, path
 from knox import views as knox_views
 
 from main import (
@@ -82,4 +82,12 @@ urlpatterns = [
     path("auth/user/", auth_views.UserAPI.as_view()),
     path("auth/logout/", knox_views.LogoutView.as_view(), name="knox_logout"),
     path("auth/change_password/", auth_views.ChangePasswordView.as_view()),
+    path(
+        "auth/reset_password/verify_token/",
+        auth_views.CustomPasswordTokenVerificationView.as_view(),
+    ),
+    path(
+        "auth/reset_password/",
+        include("django_rest_passwordreset.urls", namespace="password_reset"),
+    ),
 ]

@@ -63,6 +63,41 @@ Host: {{hostname}}:{{port}}
 Authorization: Token <token>
 
 ###
+# @name Change Password
+# @no-cookie-jar
+POST /v1/auth/change_password/
+Host: {{hostname}}:{{port}}
+Authorization: Token <token>
+
+{
+    "old_password": "testinguser",
+    "new_password": "testinguser2"
+}
+
+###
+# @name Reset Password
+# @no-cookie-jar
+POST /v1/auth/reset_password/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+
+{
+    "email": "testinguser@test.com"
+}
+
+###
+# @name Reset Password Confirm
+# @no-cookie-jar
+POST /v1/auth/reset_password_confirm/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+
+{
+    "token": "MjA:1jYXJkZW4uZmVubmVsbGFicw:1jYXJkZW4uZmVubmVsbGFicw",
+    "new_password": "testinguser"
+}
+
+###
 # @name Whiteflag - Authenticate
 # @no-cookie-jar
 POST /v1/whiteflag/authenticate/
@@ -73,7 +108,6 @@ Content-Type: application/json
     "verificationMethod": "1",
     "verificationData": "https://organisation.int/whiteflag"
 }
-
 
 ###
 # @name Whiteflag - Discontinue Authentication

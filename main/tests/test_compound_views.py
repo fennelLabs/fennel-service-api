@@ -115,7 +115,8 @@ def test_decode_long_signal_list():
             Signal,
             sender=user,
             signal_text="574631312af34c38e3af3ab687ac276965c11b369274da9ddf514bcc0eebf037a268f087f3bda708026b5f7a5b83e49072a2d32f83bc283c249601066c488a0a1e40bb4f27dcb409c14aa7c7b7f0f656c9bc184a8df6fbe7928a25d3e5b74a81ab16df93efcc30b1105c7ba56878afed34f318d337532a293b41c7b54d1af2c6b92414a79e68077655f7e3629bf93b2f43e553ebd518198c2cc1a782bcc3d37e1304f431c9997c803368f54ef2f2774f42543c32d",
-        ) for _ in range(100)
+        )
+        for _ in range(100)
     ]
     signals_list = [signal.id for signal in signals]
     response = client.post(
