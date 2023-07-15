@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "main",
     "django_filters",
     "rest_framework",
+    "django_rest_passwordreset",
     "knox",
     "django_nose",
 ]
