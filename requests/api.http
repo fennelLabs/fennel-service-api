@@ -420,7 +420,8 @@ Authorization: Token <token>
 POST /v1/whiteflag/decode_list/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
+Authorization: Token 8254a8d30b94abf2cbb170c8d67d4aa3e41f941b36a5edafe97a9a74f42acf6c
 
 {
-    "signals": [0]
+    "signals": [3]
 }
