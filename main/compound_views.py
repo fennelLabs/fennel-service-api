@@ -33,7 +33,10 @@ def __decode(signal: str) -> dict:
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def decode_list(request):
-    signals = request.data.getlist("signals")
+    try:
+        signals = request.data.getlist("signals")
+    except:
+        signals = request.data.get("signals")
     return Response(
         [
             {

@@ -31,7 +31,7 @@ urlpatterns = [
         whiteflag_views.whiteflag_generate_public_token,
     ),
     path(
-        "whiteflag/decode_list",
+        "whiteflag/decode_list/",
         compound_views.decode_list,
     ),
     path(
