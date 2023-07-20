@@ -113,7 +113,7 @@ def transfer_token(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def get_fee_for_new_signal(request):
-    form = SignalForm(request.POST)
+    form = SignalForm(request.data)
     if not form.is_valid():
         return Response({"error": dict(form.errors.items())})
     mnemonic_from_database = UserKeys.objects.filter(user=request.user).first().mnemonic
@@ -121,23 +121,26 @@ def get_fee_for_new_signal(request):
         "mnemonic": mnemonic_from_database,
         "content": form.cleaned_data["signal"],
     }
-    r = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_new_signal",
-        data=payload,
-    )
-    Transaction.objects.create(
-        function="send_new_signal",
-        payload_size=len(form.cleaned_data["signal"]),
-        fee=r.json()["fee"],
-    )
-    return Response(r.json())
+    try:
+        r = requests.post(
+            f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_new_signal",
+            data=payload,
+        )
+        Transaction.objects.create(
+            function="send_new_signal",
+            payload_size=len(form.cleaned_data["signal"]),
+            fee=r.json()["fee"],
+        )
+        return Response(r.json())
+    except Exception:
+        return Response({"error": "could not get fee"})
 
 
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def send_new_signal(request):
-    form = SignalForm(request.POST)
+    form = SignalForm(request.data)
     if not form.is_valid():
         return Response({"error": dict(form.errors.items())})
     signal = Signal.objects.create(
@@ -157,7 +160,7 @@ def send_new_signal(request):
         signal.mempool_timestamp = datetime.datetime.now()
         signal.save()
         return Response(r.json())
-    except Exception as e:
+    except Exception:
         return Response({"signal": "saved as unsynced"})
 
 
@@ -208,7 +211,7 @@ def sync_signal(request):
         signal.mempool_timestamp = datetime.datetime.now()
         signal.save()
         return Response(r.json())
-    except Exception as e:
+    except Exception:
         return Response({"signal": "saved as unsynced"})
 
 

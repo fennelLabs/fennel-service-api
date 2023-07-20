@@ -41,7 +41,7 @@ def generate_diffie_hellman_keypair(request):
         return Response(
             {"success": "keypair created", "public_key": r.json()["public"]}
         )
-    except Exception as e:
+    except Exception:
         return Response({"error": "keypair not created"})
 
 
@@ -62,7 +62,7 @@ def get_diffie_hellman_shared_secret(request):
                 "shared_secret": r.json()["shared_secret"],
             }
         )
-    except Exception as e:
+    except Exception:
         return Response({"error": "shared secret not created"})
 
 
@@ -70,7 +70,7 @@ def get_diffie_hellman_shared_secret(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def dh_encrypt_whiteflag_message(request):
-    form = DhDecryptWhiteflagMessageForm(request.POST)
+    form = DhDecryptWhiteflagMessageForm(request.data)
     if not form.is_valid():
         return Response({"error": dict(form.errors.items())})
     try:
@@ -92,7 +92,7 @@ def dh_encrypt_whiteflag_message(request):
                 ),
             }
         )
-    except Exception as e:
+    except Exception:
         return Response({"error": "message not encrypted"})
 
 
@@ -100,7 +100,7 @@ def dh_encrypt_whiteflag_message(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def dh_decrypt_whiteflag_message(request):
-    form = DhDecryptWhiteflagMessageForm(request.POST)
+    form = DhDecryptWhiteflagMessageForm(request.data)
     if not form.is_valid():
         return Response({"error": dict(form.errors.items())})
     try:
@@ -117,7 +117,7 @@ def dh_decrypt_whiteflag_message(request):
                 "decrypted": (form.cleaned_data["message"][0:9] + r.text),
             }
         )
-    except Exception as e:
+    except Exception:
         return Response({"error": "message not decrypted"})
 
 

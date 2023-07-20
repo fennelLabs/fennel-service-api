@@ -315,7 +315,7 @@ Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1
 Content-Type: application/json
 
 {
-    "content": "This is a test message"
+    "signal": "This is a test message"
 }
 
 ###
@@ -327,7 +327,7 @@ Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1
 Content-Type: application/json
 
 {
-    "content": "This is a test message"
+    "signal": "This is a test message"
 }
 
 ###
