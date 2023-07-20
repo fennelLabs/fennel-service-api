@@ -117,3 +117,55 @@ def test_check_if_encrypted_true():
     assert response.json()["encrypted"] is not None
     assert response.json()["encrypted"] == True
     User.objects.all().delete()
+
+
+def test_encrypt_message():
+    client = Client()
+    User = get_user_model()
+    response = client.post(
+        "/v1/auth/register/",
+        {
+            "username": "encrypt_message_test",
+            "password": "test",
+            "email": "encrypt_message_test@test.com",
+        },
+    )
+    assert response.status_code == 200
+    assert response.json()["token"] is not None
+    response = client.post(
+        "/v1/crypto/dh/whiteflag/encrypt_message/",
+        {
+            "message": "574631312af34c38e3af3ab687ac276965c11b369274da9ddf514bcc0eebf037a268f087f3bda708026b5f7a5b83e49072a2d32f83bc283c249601066c488a0a1e40bb4f27dcb409c14aa7c7b7f0f656c9bc184a8df6fbe7928a25d3e5b74a81ab16df93efcc30b1105c7ba56878afed34f318d337532a293b41c7b54d1af2c6b92414a79e68077655f7e3629bf93b2f43e553ebd518198c2cc1a782bcc3d37e1304f431c9997c803368f54ef2f2774f42543c32d",
+            "shared_secret": "bc9fc6e2629eddd82ec1bdfae268288de8db724e12ebd3eb6f99d9a686cc457e",
+        },
+        HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
+    )
+    assert response.status_code == 200
+    assert response.json()["encrypted"] is not None
+    User.objects.all().delete()
+
+
+def test_decrypt_message():
+    client = Client()
+    User = get_user_model()
+    response = client.post(
+        "/v1/auth/register/",
+        {
+            "username": "decrypt_message_test",
+            "password": "test",
+            "email": "decrypt_message_test@test.com",
+        },
+    )
+    assert response.status_code == 200
+    assert response.json()["token"] is not None
+    response = client.post(
+        "/v1/crypto/dh/whiteflag/decrypt_message/",
+        {
+            "message": "574631312af34c38e3af3ab687ac276965c11b369274da9ddf514bcc0eebf037a268f087f3bda708026b5f7a5b83e49072a2d32f83bc283c249601066c488a0a1e40bb4f27dcb409c14aa7c7b7f0f656c9bc184a8df6fbe7928a25d3e5b74a81ab16df93efcc30b1105c7ba56878afed34f318d337532a293b41c7b54d1af2c6b92414a79e68077655f7e3629bf93b2f43e553ebd518198c2cc1a782bcc3d37e1304f431c9997c803368f54ef2f2774f42543c32d",
+            "shared_secret": "bc9fc6e2629eddd82ec1bdfae268288de8db724e12ebd3eb6f99d9a686cc457e",
+        },
+        HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
+    )
+    assert response.status_code == 200
+    assert response.json()["decrypted"] is not None
+    User.objects.all().delete()

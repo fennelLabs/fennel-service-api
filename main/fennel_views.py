@@ -114,15 +114,20 @@ def transfer_token(request):
 @permission_classes([IsAuthenticated])
 def get_fee_for_new_signal(request):
     form = SignalForm(request.POST)
+    if not form.is_valid():
+        return Response({"error": dict(form.errors.items())})
     mnemonic_from_database = UserKeys.objects.filter(user=request.user).first().mnemonic
-    payload = {"mnemonic": mnemonic_from_database, "content": form.signal}
+    payload = {
+        "mnemonic": mnemonic_from_database,
+        "content": form.cleaned_data["signal"],
+    }
     r = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_new_signal",
         data=payload,
     )
     Transaction.objects.create(
         function="send_new_signal",
-        payload_size=len(form.signal),
+        payload_size=len(form.cleaned_data["signal"]),
         fee=r.json()["fee"],
     )
     return Response(r.json())
@@ -133,11 +138,15 @@ def get_fee_for_new_signal(request):
 @permission_classes([IsAuthenticated])
 def send_new_signal(request):
     form = SignalForm(request.POST)
-    signal = Signal.objects.create(signal_text=form.signal, sender=request.user)
+    if not form.is_valid():
+        return Response({"error": dict(form.errors.items())})
+    signal = Signal.objects.create(
+        signal_text=form.cleaned_data["signal"], sender=request.user
+    )
     try:
         payload = {
             "mnemonic": UserKeys.objects.filter(user=request.user).first().mnemonic,
-            "content": form.signal,
+            "content": form.cleaned_data["signal"],
         }
         r = requests.post(
             f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/send_new_signal",
@@ -149,7 +158,7 @@ def send_new_signal(request):
         signal.save()
         return Response(r.json())
     except Exception as e:
-        return Response({"signal": "saved as unsynced", "error": e.message})
+        return Response({"signal": "saved as unsynced"})
 
 
 @api_view(["POST"])
@@ -200,7 +209,7 @@ def sync_signal(request):
         signal.save()
         return Response(r.json())
     except Exception as e:
-        return Response({"signal": "saved as unsynced", "error": e.message})
+        return Response({"signal": "saved as unsynced"})
 
 
 @api_view(["POST"])
