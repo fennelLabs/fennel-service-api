@@ -1,7 +1,35 @@
 from django.test.client import Client
 from django.contrib.auth import get_user_model
 from main.models import Transaction, Signal, ConfirmationRecord, UserKeys
+from main.fennel_views import __record_signal_fee
 from model_bakery import baker
+
+
+def test_create_account():
+    client = Client()
+    User = get_user_model()
+    auth_response = client.post(
+        "/v1/auth/register/",
+        {
+            "username": "create_account_test",
+            "password": "test",
+            "email": "create_account_test@test.com",
+        },
+    )
+    assert auth_response.status_code == 200
+    assert auth_response.json()["token"] is not None
+    response = client.post(
+        "/v1/fennel/create_account/",
+        HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+    )
+    assert response.status_code == 200
+    response = client.post(
+        "/v1/fennel/get_address/",
+        HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+    )
+    assert response.status_code == 200
+    assert response.json()["address"] is not None
+    User.objects.all().delete()
 
 
 def test_get_fee_history_count():
@@ -187,7 +215,6 @@ def test_signal_confirmation_list():
     )
     assert response.status_code == 200
     assert len(response.json()) == 1
-    print(response.json())
     assert len(response.json()[0]["confirmations"]) == 1
     Signal.objects.all().delete()
     User.objects.all().delete()
@@ -279,3 +306,70 @@ def test_get_unsynced_signals():
     assert len(response.json()) == 100
     Signal.objects.all().delete()
     User.objects.all().delete()
+
+
+def test_record_signal_fee():
+    client = Client()
+    User = get_user_model()
+    auth_response = client.post(
+        "/v1/auth/register/",
+        {
+            "username": "record_signal_fee_test",
+            "password": "record_signal_fee_test",
+            "email": "record_signal_fee_test@test.com",
+        },
+    )
+    assert auth_response.status_code == 200
+    assert auth_response.json()["token"] is not None
+    user = User.objects.get(username="record_signal_fee_test")
+    response = client.post(
+        "/v1/fennel/create_account/",
+        HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+    )
+    assert response.status_code == 200
+    mnemonic_from_database = UserKeys.objects.filter(user=user).first().mnemonic
+    payload = {
+        "mnemonic": mnemonic_from_database,
+        "content": "This is a test.",
+    }
+    response = __record_signal_fee(payload)
+    assert response["fee"] is not None
+    assert response["fee"] > 0
+    User.objects.all().delete()
+    UserKeys.objects.all().delete()
+
+
+def test_get_fee_for_new_signal():
+    client = Client()
+    User = get_user_model()
+    auth_response = client.post(
+        "/v1/auth/register/",
+        {
+            "username": "get_fee_for_new_signal_test",
+            "password": "get_fee_for_new_signal_test",
+            "email": "get_fee_for_new_signal_test@test.com",
+        },
+    )
+    assert auth_response.status_code == 200
+    assert auth_response.json()["token"] is not None
+    user = User.objects.get(username="get_fee_for_new_signal_test")
+    response = client.post(
+        "/v1/fennel/create_account/",
+        HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+    )
+    assert response.status_code == 200
+    assert UserKeys.objects.filter(user=user).first().mnemonic is not None
+    assert UserKeys.objects.filter(user=user).first().mnemonic != ""
+    payload = {
+        "signal": "This is a test.",
+    }
+    response = client.post(
+        "/v1/fennel/get_fee_for_new_signal/",
+        payload,
+        HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+    )
+    assert response.status_code == 200
+    assert response.json()["fee"] is not None
+    assert response.json()["fee"] > 0
+    User.objects.all().delete()
+    UserKeys.objects.all().delete()
