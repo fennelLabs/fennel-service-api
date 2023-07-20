@@ -70,23 +70,19 @@ def get_diffie_hellman_shared_secret(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def dh_encrypt_whiteflag_message(request):
+    form = DhDecryptWhiteflagMessageForm(request.POST)
     try:
         r = requests.post(
             "{0}/v1/dh_encrypt".format(os.environ.get("FENNEL_CLI_IP", None)),
             json={
-                "plaintext": request.data["message"][9:],
-                "shared_secret": request.data["shared_secret"],
+                "plaintext": form.message[9:],
+                "shared_secret": form.shared_secret,
             },
         )
         return Response(
             {
                 "success": "message encrypted",
-                "encrypted": (
-                    request.data["message"][0:7]
-                    + "1"
-                    + request.data["message"][8:9]
-                    + r.text
-                ),
+                "encrypted": (form.message[0:7] + "1" + form.message[8:9] + r.text),
             }
         )
     except Exception as e:
