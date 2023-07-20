@@ -42,7 +42,7 @@ def generate_diffie_hellman_keypair(request):
             {"success": "keypair created", "public_key": r.json()["public"]}
         )
     except Exception as e:
-        return Response({"error": "keypair not created", "detail": str(e)})
+        return Response({"error": "keypair not created", "detail": e.message})
 
 
 @api_view(["POST"])
@@ -63,7 +63,7 @@ def get_diffie_hellman_shared_secret(request):
             }
         )
     except Exception as e:
-        return Response({"error": "shared secret not created", "detail": str(e)})
+        return Response({"error": "shared secret not created", "detail": e.message})
 
 
 @api_view(["POST"])
@@ -86,7 +86,7 @@ def dh_encrypt_whiteflag_message(request):
             }
         )
     except Exception as e:
-        return Response({"error": "message not encrypted", "detail": str(e)})
+        return Response({"error": "message not encrypted", "detail": e.message})
 
 
 @api_view(["POST"])
@@ -109,7 +109,7 @@ def dh_decrypt_whiteflag_message(request):
             }
         )
     except Exception as e:
-        return Response({"error": "message not decrypted", "detail": str(e)})
+        return Response({"error": "message not decrypted", "detail": e.message})
 
 
 @api_view(["POST"])

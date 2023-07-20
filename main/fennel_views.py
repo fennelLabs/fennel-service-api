@@ -149,7 +149,7 @@ def send_new_signal(request):
         signal.save()
         return Response(r.json())
     except Exception as e:
-        return Response({"signal": "saved as unsynced", "error": str(e)})
+        return Response({"signal": "saved as unsynced", "error": e.message})
 
 
 @api_view(["POST"])
@@ -200,7 +200,7 @@ def sync_signal(request):
         signal.save()
         return Response(r.json())
     except Exception as e:
-        return Response({"signal": "saved as unsynced", "error": str(e)})
+        return Response({"signal": "saved as unsynced", "error": e.message})
 
 
 @api_view(["POST"])
