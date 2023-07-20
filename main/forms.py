@@ -2,7 +2,7 @@ from django import forms
 
 
 class SignalForm(forms.Form):
-    signal = forms.CharField(label="Signal", max_length=256)
+    signal = forms.CharField(label="Signal", max_length=1024)
 
     def __init__(self, *args, **kwargs):
         super(SignalForm, self).__init__(*args, **kwargs)
@@ -10,8 +10,8 @@ class SignalForm(forms.Form):
 
 
 class DhEncryptWhiteflagMessageForm(forms.Form):
-    message = forms.CharField(label="Message", max_length=256)
-    shared_secret = forms.CharField(label="Shared Secret", max_length=256)
+    message = forms.CharField(label="Message", max_length=1024)
+    shared_secret = forms.CharField(label="Shared Secret", max_length=1024)
 
     def __init__(self, *args, **kwargs):
         super(DhEncryptWhiteflagMessageForm, self).__init__(*args, **kwargs)
@@ -20,8 +20,8 @@ class DhEncryptWhiteflagMessageForm(forms.Form):
 
 
 class DhDecryptWhiteflagMessageForm(forms.Form):
-    message = forms.CharField(label="Message", max_length=256)
-    shared_secret = forms.CharField(label="Shared Secret", max_length=256)
+    message = forms.CharField(label="Message", max_length=1024)
+    shared_secret = forms.CharField(label="Shared Secret", max_length=1024)
 
     def __init__(self, *args, **kwargs):
         super(DhDecryptWhiteflagMessageForm, self).__init__(*args, **kwargs)
