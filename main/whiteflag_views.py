@@ -71,35 +71,31 @@ def whiteflag_discontinue_authentication(request):
 
 @api_view(["POST"])
 def whiteflag_encode(request):
-    payload = json.dumps(
-        {
-            "prefix": "WF",
-            "version": "1",
-            "encryptionIndicator": request.data["encryptionIndicator"],
-            "duressIndicator": request.data["duressIndicator"],
-            "messageCode": request.data["messageCode"],
-            "referenceIndicator": request.data["referenceIndicator"],
-            "referencedMessage": request.data["referencedMessage"],
-            "verificationMethod": request.data["verificationMethod"],
-            "verificationData": request.data["verificationData"],
-            "cryptoDataType": request.data["cryptoDataType"],
-            "cryptoData": request.data["cryptoData"],
-            "text": request.data["text"],
-            "resourceMethod": request.data["resourceMethod"],
-            "resourceData": request.data["resourceData"],
-            "pseudoMessageCode": request.data["pseudoMessageCode"],
-            "subjectCode": request.data["subjectCode"],
-            "datetime": request.data["datetime"],
-            "duration": request.data["duration"],
-            "objectType": request.data["objectType"],
-            "objectLatitude": request.data["objectLatitude"],
-            "objectLongitude": request.data["objectLongitude"],
-            "objectSizeDim1": request.data["objectSizeDim1"],
-            "objectSizeDim2": request.data["objectSizeDim2"],
-            "objectOrientation": request.data["objectOrientation"],
-            "objectTypeQuant": request.data["objectTypeQuant"],
-        }
-    )
+    json_packet = {"prefix": "WF", "version": "1"}
+    json_packet["encryptionIndicator"] = request.data.get("encryptionIndicator", None)
+    json_packet["duressIndicator"] = request.data.get("duressIndicator", None)
+    json_packet["messageCode"] = request.data.get("messageCode", None)
+    json_packet["referenceIndicator"] = request.data.get("referenceIndicator", None)
+    json_packet["referencedMessage"] = request.data.get("referencedMessage", None)
+    json_packet["verificationMethod"] = request.data.get("verificationMethod", None)
+    json_packet["verificationData"] = request.data.get("verificationData", None)
+    json_packet["cryptoDataType"] = request.data.get("cryptoDataType", None)
+    json_packet["cryptoData"] = request.data.get("cryptoData", None)
+    json_packet["text"] = request.data.get("text", None)
+    json_packet["resourceMethod"] = request.data.get("resourceMethod", None)
+    json_packet["resourceData"] = request.data.get("resourceData", None)
+    json_packet["pseudoMessageCode"] = request.data.get("pseudoMessageCode", None)
+    json_packet["subjectCode"] = request.data.get("subjectCode", None)
+    json_packet["datetime"] = request.data.get("datetime", None)
+    json_packet["duration"] = request.data.get("duration", None)
+    json_packet["objectType"] = request.data.get("objectType", None)
+    json_packet["objectLatitude"] = request.data.get("objectLatitude", None)
+    json_packet["objectLongitude"] = request.data.get("objectLongitude", None)
+    json_packet["objectSizeDim1"] = request.data.get("objectSizeDim1", None)
+    json_packet["objectSizeDim2"] = request.data.get("objectSizeDim2", None)
+    json_packet["objectOrientation"] = request.data.get("objectOrientation", None)
+    json_packet["objectTypeQuant"] = request.data.get("objectTypeQuant", None)
+    payload = json.dumps({k: v for k, v in json_packet.items() if v})
     r = requests.post(
         "{0}/v1/whiteflag_encode".format(os.environ.get("FENNEL_CLI_IP", None)),
         data=payload,
