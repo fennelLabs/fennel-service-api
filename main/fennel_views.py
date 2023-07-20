@@ -15,21 +15,40 @@ import os
 import datetime
 
 
+def __record_signal_fee(payload: dict) -> dict:
+    r = requests.post(
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_new_signal",
+        data=payload,
+    )
+    Transaction.objects.create(
+        function="send_new_signal",
+        payload_size=len(payload["content"]),
+        fee=r.json()["fee"],
+    )
+    return r.json()
+
+
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def create_account(request):
     if UserKeys.objects.filter(user=request.user).exists():
-        return Response(
-            {
-                "error": "user already has an account",
-                "fix": "you can make other calls to /v1/fennel to get the address and balance",
-            }
-        )
+        if UserKeys.objects.get(user=request.user).mnemonic:
+            return Response(
+                {
+                    "error": "user already has an account",
+                    "fix": "you can make other calls to /v1/fennel to get the address and balance",
+                }
+            )
+        else:
+            keys = UserKeys.objects.get(user=request.user)
+    else:
+        keys = UserKeys.objects.create(user=request.user)
     r = requests.get(f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/create_account")
     mnemonic = r.json()["mnemonic"]
-    user_keys = UserKeys.objects.get_or_create(user=request.user, mnemonic=mnemonic)
-    return Response(mnemonic == user_keys.mnemonic)
+    keys.mnemonic = mnemonic
+    keys.save()
+    return Response(mnemonic == keys.mnemonic)
 
 
 @api_view(["POST"])
@@ -82,6 +101,8 @@ def get_fee_for_transfer_token(request):
         "to": request.data["to"],
         "amount": request.data["amount"],
     }
+    if not payload["mnemonic"]:
+        return Response({"error": "user does not have a blockchain account"})
     r = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_transfer_token",
         data=payload,
@@ -103,6 +124,8 @@ def transfer_token(request):
         "to": request.data["to"],
         "amount": request.data["amount"],
     }
+    if not payload["mnemonic"]:
+        return Response({"error": "user does not have a blockchain account"})
     r = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/transfer_token", data=payload
     )
@@ -117,21 +140,15 @@ def get_fee_for_new_signal(request):
     if not form.is_valid():
         return Response({"error": dict(form.errors.items())})
     mnemonic_from_database = UserKeys.objects.filter(user=request.user).first().mnemonic
+    if not mnemonic_from_database:
+        return Response({"error": "user does not have a blockchain account"})
     payload = {
         "mnemonic": mnemonic_from_database,
         "content": form.cleaned_data["signal"],
     }
     try:
-        r = requests.post(
-            f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_new_signal",
-            data=payload,
-        )
-        Transaction.objects.create(
-            function="send_new_signal",
-            payload_size=len(form.cleaned_data["signal"]),
-            fee=r.json()["fee"],
-        )
-        return Response(r.json())
+        response = __record_signal_fee(payload)
+        return Response(response)
     except Exception:
         return Response({"error": "could not get fee"})
 
@@ -151,6 +168,9 @@ def send_new_signal(request):
             "mnemonic": UserKeys.objects.filter(user=request.user).first().mnemonic,
             "content": form.cleaned_data["signal"],
         }
+        if not payload["mnemonic"]:
+            return Response({"error": "user does not have a blockchain account"})
+        __record_signal_fee(payload)
         r = requests.post(
             f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/send_new_signal",
             data=payload,
@@ -174,16 +194,10 @@ def get_fee_for_sync_signal(request):
         "mnemonic": UserKeys.objects.filter(user=request.user).first().mnemonic,
         "content": signal.signal_text,
     }
-    r = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_new_signal",
-        data=payload,
-    )
-    Transaction.objects.create(
-        function="sync_signal",
-        payload_size=len(signal.signal_text),
-        fee=r.json()["fee"],
-    )
-    return Response(r.json())
+    if not payload["mnemonic"]:
+        return Response({"error": "user does not have a blockchain account"})
+    response = __record_signal_fee(payload)
+    return Response(response)
 
 
 @api_view(["POST"])
@@ -202,6 +216,9 @@ def sync_signal(request):
             "mnemonic": UserKeys.objects.filter(user=request.user).first().mnemonic,
             "content": signal.signal_text,
         }
+        if not payload["mnemonic"]:
+            return Response({"error": "user does not have a blockchain account"})
+        __record_signal_fee(payload)
         r = requests.post(
             f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/send_new_signal",
             data=payload,

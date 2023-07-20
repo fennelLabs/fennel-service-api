@@ -52,7 +52,6 @@ def test_change_password_view():
         {"old_password": "testpassword", "new_password": "newtestpassword"},
         HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
     )
-    print(response.json())
     assert response.status_code == 200
     response = client.post(
         "/v1/auth/login/",

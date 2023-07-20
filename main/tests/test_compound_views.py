@@ -125,7 +125,6 @@ def test_decode_long_signal_list():
         HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
     )
     assert response.status_code == 200
-    print(len(response.json()))
     assert len(response.json()) == 100
     User.objects.all().delete()
     Signal.objects.all().delete()
