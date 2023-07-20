@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from knox.auth import TokenAuthentication
 import requests
 import os
+from main.forms import DhDecryptWhiteflagMessageForm
 
 from main.models import UserKeys
 
@@ -96,18 +97,19 @@ def dh_encrypt_whiteflag_message(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def dh_decrypt_whiteflag_message(request):
+    form = DhDecryptWhiteflagMessageForm(request.POST)
     try:
         r = requests.post(
             "{0}/v1/dh_decrypt".format(os.environ.get("FENNEL_CLI_IP", None)),
             json={
-                "ciphertext": request.data["message"][9:],
-                "shared_secret": request.data["shared_secret"],
+                "ciphertext": form.message[9:],
+                "shared_secret": form.shared_secret,
             },
         )
         return Response(
             {
                 "success": "message decrypted",
-                "decrypted": (request.data["message"][0:9] + r.text),
+                "decrypted": (form.message[0:9] + r.text),
             }
         )
     except Exception as e:
