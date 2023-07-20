@@ -1,4 +1,6 @@
 from django.shortcuts import get_object_or_404
+
+from main.forms import SignalForm
 from .models import Signal, Transaction, UserKeys, ConfirmationRecord
 from rest_framework.decorators import (
     api_view,
@@ -111,15 +113,16 @@ def transfer_token(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def get_fee_for_new_signal(request):
+    form = SignalForm(request.POST)
     mnemonic_from_database = UserKeys.objects.filter(user=request.user).first().mnemonic
-    payload = {"mnemonic": mnemonic_from_database, "content": request.data["content"]}
+    payload = {"mnemonic": mnemonic_from_database, "content": form.signal}
     r = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_new_signal",
         data=payload,
     )
     Transaction.objects.create(
         function="send_new_signal",
-        payload_size=len(request.data["content"]),
+        payload_size=len(form.signal),
         fee=r.json()["fee"],
     )
     return Response(r.json())
@@ -129,13 +132,12 @@ def get_fee_for_new_signal(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def send_new_signal(request):
-    signal = Signal.objects.create(
-        signal_text=request.data["content"], sender=request.user
-    )
+    form = SignalForm(request.POST)
+    signal = Signal.objects.create(signal_text=form.signal, sender=request.user)
     try:
         payload = {
             "mnemonic": UserKeys.objects.filter(user=request.user).first().mnemonic,
-            "content": request.data["content"],
+            "content": form.signal,
         }
         r = requests.post(
             f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/send_new_signal",
