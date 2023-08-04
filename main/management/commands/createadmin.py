@@ -21,7 +21,7 @@ class Command(BaseCommand):
         if not User.objects.filter(username="admin").exists():
             # CHANGE THE PASSWORD IN PRODUCTION!!!
             superuser = User.objects.create_superuser(
-                "admin", "admin@admin.com", "Fennel-Admin"
+                "admin", "info@fennellabs.com", "Fennel-Admin"
             )
             superuser.first_name = "Admin"
             superuser.last_name = "User"

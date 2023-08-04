@@ -7,6 +7,7 @@ function all() {
   python3 manage.py check
   run_tests
   static
+  setup
 }
 
 function run_tests() {
@@ -14,7 +15,6 @@ function run_tests() {
 }
 
 function clean() {
-  rm -rf main/migrations/*
   files=$(find . -name "__pycache__")
   files2=$(find . -iregex ".*\.\(pyc\)")
   rm -rf "${files2}"
@@ -64,6 +64,10 @@ function check() {
 
 function gunicorn_run() {
   gunicorn --workers=8 --threads=8 --max-requests=8 fennel.wsgi:application --bind 0.0.0.0:1234
+}
+
+function setup() {
+  python manage.py createadmin
 }
 
 case "$1" in

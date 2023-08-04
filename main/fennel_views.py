@@ -54,6 +54,29 @@ def create_account(request):
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
+def download_account_as_json(request):
+    if not UserKeys.objects.filter(user=request.user).exists():
+        return Response(
+            {
+                "error": "user does not have an account",
+                "fix": "call /v1/fennel/create_account first",
+            }
+        )
+    key = UserKeys.objects.filter(user=request.user).first()
+    try:
+        payload = {"mnemonic": key.mnemonic}
+        r = requests.post(
+            f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/download_account_as_json",
+            data=payload,
+        )
+        return Response(r.json())
+    except Exception:
+        return Response({"error": "could not get account json"})
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def get_account_balance(request):
     if not UserKeys.objects.filter(user=request.user).exists():
         return Response(
