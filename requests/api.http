@@ -95,6 +95,83 @@ Content-Type: application/json
     "new_password": "testinguser"
 }
 
+
+###
+# @name Create API Group
+# @no-cookie-jar
+POST /v1/group/create/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+
+{
+    "api_group_name": "test"
+}
+
+
+###
+# @name Add User to API Group
+# @no-cookie-jar
+POST /v1/group/add_user/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+Authorization: Token <token>
+
+{
+    "username": "testinguser",
+    "api_group_name": "test"
+}
+
+###
+# @name Remove User from API Group
+# @no-cookie-jar
+POST /v1/group/remove_user/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+Authorization: Token <token>
+
+{
+    "username": "testinguser",
+    "api_group_name": "test"
+}
+
+###
+# @name Add Admin to API Group
+# @no-cookie-jar
+POST /v1/group/add_admin/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+Authorization: Token <token>
+
+{
+    "username": "testinguser",
+    "api_group_name": "test"
+}
+
+###
+# @name Remove Admin from API Group
+# @no-cookie-jar
+POST /v1/group/remove_admin/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+Authorization: Token <token>
+
+{
+    "username": "testinguser",
+    "api_group_name": "test"
+}
+
+###
+# @name Get Accounts Billable Count
+# @no-cookie-jar
+POST /v1/group/get_accounts_billable_count/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+Authorization: Token <token>
+
+{
+    "api_group_name": "test"
+}
+
 ###
 # @name Whiteflag - Authenticate
 # @no-cookie-jar
@@ -265,6 +342,13 @@ Authorization: <token>
 POST /v1/fennel/create_account/
 Host: {{hostname}}:{{port}}
 Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
+
+###
+# @name Fennel - Download Account As JSON
+# @no-cookie-jar
+POST /v1/fennel/download_account_as_json/
+Host: {{hostname}}:{{port}}
+Authorization: Token <token>
 
 ###
 # @name Fennel - Get Account Balance

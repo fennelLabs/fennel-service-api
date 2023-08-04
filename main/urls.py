@@ -8,11 +8,21 @@ from main import (
     crypto_views,
     fennel_views,
     compound_views,
+    api_admin_views,
 )
 
 urlpatterns = [
     path("get_version/", views.get_version),
     path("healthcheck/", views.healthcheck),
+    path("group/create/", api_admin_views.create_new_api_group),
+    path("group/add_user/", api_admin_views.add_user_to_api_group),
+    path("group/remove_user/", api_admin_views.remove_user_from_api_group),
+    path("group/add_admin/", api_admin_views.add_admin_to_api_group),
+    path("group/remove_admin/", api_admin_views.remove_admin_from_api_group),
+    path(
+        "group/get_accounts_billable_count/",
+        api_admin_views.get_accounts_billable_count,
+    ),
     path("whiteflag/healthcheck/", whiteflag_views.fennel_cli_healthcheck),
     path("fennel/healthcheck/", views.subservice_healthcheck),
     path("whiteflag/authenticate/", whiteflag_views.whiteflag_authenticate),
@@ -63,6 +73,7 @@ urlpatterns = [
         crypto_views.get_dh_public_key_by_address,
     ),
     path("fennel/create_account/", fennel_views.create_account),
+    path("fennel/download_account_as_json/", fennel_views.download_account_as_json),
     path("fennel/get_account_balance/", fennel_views.get_account_balance),
     path("fennel/get_address/", fennel_views.get_address),
     path("fennel/get_fee_for_transfer_token/", fennel_views.get_fee_for_transfer_token),

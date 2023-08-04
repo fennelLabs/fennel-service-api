@@ -1,6 +1,16 @@
 from django.db import models
 
 
+class APIGroup(models.Model):
+    name = models.CharField(max_length=1024, unique=True)
+    user_list = models.ManyToManyField("auth.User", related_name="api_group_users")
+    admin_list = models.ManyToManyField("auth.User", related_name="api_group_admins")
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Transaction(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     function = models.CharField(max_length=1024)
