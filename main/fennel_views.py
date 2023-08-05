@@ -1,6 +1,9 @@
+import ast
+import json
 from django.shortcuts import get_object_or_404
 
 from main.forms import SignalForm
+from main.secret_key_utils import reconstruct_mnemonic, split_mnemonic
 from .models import Signal, Transaction, UserKeys, ConfirmationRecord
 from rest_framework.decorators import (
     api_view,
@@ -49,6 +52,72 @@ def create_account(request):
     keys.mnemonic = mnemonic
     keys.save()
     return Response(mnemonic == keys.mnemonic)
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def create_self_custodial_account(request):
+    if UserKeys.objects.filter(user=request.user).exists():
+        if UserKeys.objects.get(user=request.user).mnemonic:
+            return Response(
+                {
+                    "error": "user already has an account",
+                }
+            )
+        else:
+            keys = UserKeys.objects.get(user=request.user)
+    else:
+        keys = UserKeys.objects.create(user=request.user)
+    r = requests.get(f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/create_account")
+    mnemonic = r.json()["mnemonic"]
+    key_shards = split_mnemonic(mnemonic)
+    keys.key_shard = str(key_shards[1])
+    keys.save()
+    return Response(
+        {
+            "user_shard": str(key_shards[0]),
+            "recovery_shard": str(key_shards[2]),
+        }
+    )
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def reconstruct_self_custodial_account(request):
+    keys = get_object_or_404(UserKeys, user=request.user)
+    key_shards = [
+        ast.literal_eval(keys.key_shard),
+        ast.literal_eval(request.data["user_shard"]),
+    ]
+    mnemonic = reconstruct_mnemonic(key_shards)
+    return Response(
+        {
+            "mnemonic": mnemonic,
+        }
+    )
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def download_self_custodial_account_as_json(request):
+    keys = get_object_or_404(UserKeys, user=request.user)
+    key_shards = [
+        ast.literal_eval(keys.key_shard),
+        ast.literal_eval(request.data["user_shard"]),
+    ]
+    mnemonic = reconstruct_mnemonic(key_shards)
+    try:
+        payload = {"mnemonic": mnemonic}
+        r = requests.post(
+            f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/download_account_as_json",
+            data=payload,
+        )
+        return Response(r.json())
+    except Exception:
+        return Response({"error": "could not get account json"})
 
 
 @api_view(["POST"])

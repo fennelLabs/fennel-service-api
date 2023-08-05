@@ -73,6 +73,18 @@ urlpatterns = [
         crypto_views.get_dh_public_key_by_address,
     ),
     path("fennel/create_account/", fennel_views.create_account),
+    path(
+        "fennel/create_self_custodial_account/",
+        fennel_views.create_self_custodial_account,
+    ),
+    path(
+        "fennel/reconstruct_self_custodial_account/",
+        fennel_views.reconstruct_self_custodial_account,
+    ),
+    path(
+        "fennel/download_self_custodial_account_as_json/",
+        fennel_views.download_self_custodial_account_as_json,
+    ),
     path("fennel/download_account_as_json/", fennel_views.download_account_as_json),
     path("fennel/get_account_balance/", fennel_views.get_account_balance),
     path("fennel/get_address/", fennel_views.get_address),

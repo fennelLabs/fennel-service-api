@@ -29,6 +29,8 @@ ALLOWED_HOSTS = ["localhost", "192.168.1.186", "34.148.9.195", "api.fennellabs.c
 
 CORS_ORIGIN_WHITELIST = ["http://localhost:3000", "http://127.0.0.1:3000"]
 
+CSRF_TRUSTED_ORIGINS = ["http://localhost:3000", "https://api.fennellabs.com"]
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -45,6 +47,7 @@ INSTALLED_APPS = [
     "django_rest_passwordreset",
     "knox",
     "django_nose",
+    "silk",
 ]
 
 MIDDLEWARE = [
@@ -56,6 +59,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "silk.middleware.SilkyMiddleware",
 ]
 
 ROOT_URLCONF = "fennel.urls"
@@ -240,3 +244,14 @@ LOGGING = {
         },
     },
 }
+
+SILKY_PYTHON_PROFILER = True
+SILKY_PYTHON_PROFILER_BINARY = True
+SILKY_AUTHENTICATION = True
+# noinspection PyPep8
+SILKY_PERMISSIONS = lambda user: user.is_superuser
+SILKY_MAX_RESPONSE_BODY_SIZE = 1024
+SILKY_META = True
+SILKY_INTERCEPT_PERCENT = 50
+SILKY_MAX_RECORDED_REQUESTS = 10**3
+SILKY_MAX_RECORDED_REQUESTS_CHECK_PERCENT = 10

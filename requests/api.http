@@ -1,8 +1,10 @@
 # Tokens are **examples only**.
 # Use the REST Client extension for VSCode to test these endpoints.
 
-@hostname = api.fennellabs.com
-@port = 443
+# @hostname = api.fennellabs.com
+# @port = 443
+@hostname = localhost
+@port = 1234
 
 ###
 # @name Get Version
@@ -349,6 +351,37 @@ Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1
 POST /v1/fennel/download_account_as_json/
 Host: {{hostname}}:{{port}}
 Authorization: Token <token>
+
+###
+# @name Fennel - Create Self Custodial Account
+# @no-cookie-jar
+POST /v1/fennel/create_self_custodial_account/
+Host: {{hostname}}:{{port}}
+Authorization: Token c1fdf33d948a726102a447de1d9bcd09970337308263d6bf2fe6b26281d8bab2
+
+###
+# @name Fennel - Reconstruct Self Custodial Account
+# @no-cookie-jar
+POST /v1/fennel/reconstruct_self_custodial_account/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+Authorization: Token c1fdf33d948a726102a447de1d9bcd09970337308263d6bf2fe6b26281d8bab2
+
+{
+    "user_shard": "<user_share>" 
+}
+
+###
+# @name Fennel - Download Self Custodial Account As JSON
+# @no-cookie-jar
+POST /v1/fennel/download_self_custodial_account_as_json/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+Authorization: Token c1fdf33d948a726102a447de1d9bcd09970337308263d6bf2fe6b26281d8bab2
+
+{
+    "user_shard": "<user_share>" 
+}
 
 ###
 # @name Fennel - Get Account Balance
