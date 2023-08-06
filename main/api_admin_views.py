@@ -87,6 +87,16 @@ def get_accounts_billable_count(request):
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
+def get_api_group_requests_count(request):
+    api_group = get_object_or_404(APIGroup, name=request.data["api_group_name"])
+    if not api_group.admin_list.filter(id=request.user.id).exists():
+        return Response({"message": "You are not admin of this api group"})
+    return Response({"count": api_group.request_counter})
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def add_admin_to_api_group(request):
     User = get_user_model()
     user = get_object_or_404(User, username=request.data["username"])

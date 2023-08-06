@@ -173,6 +173,18 @@ Authorization: Token <token>
 }
 
 ###
+# @name Get API Group Request Count
+# @no-cookie-jar
+POST /v1/group/get_api_group_request_count/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+Authorization: Token <token>
+
+{
+    "api_group_name": "test"
+}
+
+###
 # @name Whiteflag - Authenticate
 # @no-cookie-jar
 POST /v1/whiteflag/authenticate/
