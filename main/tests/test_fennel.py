@@ -1,6 +1,6 @@
 from django.test.client import Client
 from django.contrib.auth import get_user_model
-from main.models import Transaction, Signal, ConfirmationRecord, UserKeys
+from main.models import APIGroup, Transaction, Signal, ConfirmationRecord, UserKeys
 from main.fennel_views import (
     __record_signal_fee,
 )
@@ -392,7 +392,16 @@ def test_create_self_custodial_account():
     assert auth_response.json()["token"] is not None
     user = User.objects.get(username="create_self_custodial_account_test")
     response = client.post(
+        "/v1/group/create/",
+        {"api_group_name": "test"},
+        HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+    )
+    response = client.post(
         "/v1/fennel/create_self_custodial_account/",
+        {
+            "api_key": response.json()["api_key"],
+            "api_secret": response.json()["api_secret"],
+        },
         HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
     )
     assert response.status_code == 200
@@ -402,6 +411,7 @@ def test_create_self_custodial_account():
     assert response.json()["recovery_shard"] is not None
     User.objects.all().delete()
     UserKeys.objects.all().delete()
+    APIGroup.objects.all().delete()
 
 
 def test_reconstruct_self_custodial_account():
@@ -419,7 +429,21 @@ def test_reconstruct_self_custodial_account():
     assert auth_response.json()["token"] is not None
     user = User.objects.get(username="reconstruct_self_custodial_account_test")
     response = client.post(
+        "/v1/group/create/",
+        {"api_group_name": "test"},
+        HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+    )
+    assert response.status_code == 200
+    assert response.json()["api_key"] is not None
+    assert response.json()["api_secret"] is not None
+    api_key = response.json()["api_key"]
+    api_secret = response.json()["api_secret"]
+    response = client.post(
         "/v1/fennel/create_self_custodial_account/",
+        {
+            "api_key": api_key,
+            "api_secret": api_secret,
+        },
         HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
     )
     assert response.status_code == 200
@@ -429,6 +453,8 @@ def test_reconstruct_self_custodial_account():
     assert response.json()["recovery_shard"] is not None
     payload = {
         "user_shard": response.json()["user_shard"],
+        "api_key": api_key,
+        "api_secret": api_secret,
     }
     response = client.post(
         "/v1/fennel/reconstruct_self_custodial_account/",
@@ -440,3 +466,4 @@ def test_reconstruct_self_custodial_account():
     assert response.json()["mnemonic"] != ""
     User.objects.all().delete()
     UserKeys.objects.all().delete()
+    APIGroup.objects.all().delete()

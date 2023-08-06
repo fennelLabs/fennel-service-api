@@ -359,6 +359,11 @@ POST /v1/fennel/create_self_custodial_account/
 Host: {{hostname}}:{{port}}
 Authorization: Token c1fdf33d948a726102a447de1d9bcd09970337308263d6bf2fe6b26281d8bab2
 
+{
+    "api_key": "<api_key>",
+    "api_secret": "<api_secret>"
+}
+
 ###
 # @name Fennel - Reconstruct Self Custodial Account
 # @no-cookie-jar
@@ -368,7 +373,9 @@ Content-Type: application/json
 Authorization: Token c1fdf33d948a726102a447de1d9bcd09970337308263d6bf2fe6b26281d8bab2
 
 {
-    "user_shard": "<user_share>" 
+    "user_shard": "<user_share>",
+    "api_key": "<api_key>",
+    "api_secret": "<api_secret>" 
 }
 
 ###
@@ -380,7 +387,9 @@ Content-Type: application/json
 Authorization: Token c1fdf33d948a726102a447de1d9bcd09970337308263d6bf2fe6b26281d8bab2
 
 {
-    "user_shard": "<user_share>" 
+    "user_shard": "<user_share>",
+    "api_key": "<api_key>",
+    "api_secret": "<api_secret>"
 }
 
 ###
