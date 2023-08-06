@@ -84,6 +84,8 @@ def test_add_user_to_api_group():
         {
             "api_group_name": "test_add_user_to_api_group",
             "username": "test_add_user_to_api_group_two",
+            "api_key": group.api_key,
+            "api_secret": group.api_secret,
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -153,10 +155,12 @@ def test_add_user_to_api_group_as_non_admin():
         {
             "api_group_name": "test_add_user_to_api_group_as_non_admin",
             "username": "test_add_user_to_api_group_as_non_admin_two",
+            "api_key": group.api_key,
+            "api_secret": group.api_secret,
         },
         HTTP_AUTHORIZATION=f"Token {token_two}",
     )
-    assert response.status_code == 200
+    assert response.status_code == 400
     assert not group.user_list.filter(
         username="test_add_user_to_api_group_as_non_admin_two"
     ).exists()
@@ -209,6 +213,8 @@ def test_remove_user_from_api_group():
         {
             "api_group_name": "test_remove_user_from_api_group",
             "username": "test_remove_user_from_api_group_two",
+            "api_key": group.api_key,
+            "api_secret": group.api_secret,
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -221,6 +227,8 @@ def test_remove_user_from_api_group():
         {
             "api_group_name": "test_remove_user_from_api_group",
             "username": "test_remove_user_from_api_group_two",
+            "api_key": group.api_key,
+            "api_secret": group.api_secret,
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -278,6 +286,8 @@ def test_remove_user_from_api_group_as_non_admin():
         {
             "api_group_name": "test_remove_user_from_api_group",
             "username": "test_remove_user_from_api_group_two",
+            "api_key": group.api_key,
+            "api_secret": group.api_secret,
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -346,6 +356,8 @@ def test_remove_user_from_api_group_not_in_group():
         {
             "api_group_name": "test_remove_user_from_api_group",
             "username": "test_remove_user_from_api_group_two",
+            "api_key": group.api_key,
+            "api_secret": group.api_secret,
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -402,6 +414,8 @@ def test_add_admin_to_api_group():
         {
             "api_group_name": "test_add_admin_to_api_group",
             "username": "test_add_admin_to_api_group_two",
+            "api_key": group.api_key,
+            "api_secret": group.api_secret,
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -412,6 +426,8 @@ def test_add_admin_to_api_group():
         {
             "api_group_name": "test_add_admin_to_api_group",
             "username": "test_add_admin_to_api_group_two",
+            "api_key": group.api_key,
+            "api_secret": group.api_secret,
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -481,6 +497,8 @@ def test_add_admin_to_api_group_as_non_admin():
         {
             "api_group_name": "test_add_admin_to_api_group_as_non_admin",
             "username": "test_add_admin_to_api_group_as_non_admin_two",
+            "api_key": group.api_key,
+            "api_secret": group.api_secret,
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -493,6 +511,8 @@ def test_add_admin_to_api_group_as_non_admin():
         {
             "api_group_name": "test_add_admin_to_api_group_as_non_admin",
             "username": "test_add_admin_to_api_group_as_non_admin_two",
+            "api_key": group.api_key,
+            "api_secret": group.api_secret,
         },
         HTTP_AUTHORIZATION=f"Token {token_two}",
     )
@@ -554,6 +574,8 @@ def test_add_admin_to_api_group_already_in_group():
         {
             "api_group_name": "test_add_admin_to_api_group_already_in_group",
             "username": "test_add_admin_to_api_group_already_in_group_two",
+            "api_key": group.api_key,
+            "api_secret": group.api_secret,
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -566,10 +588,12 @@ def test_add_admin_to_api_group_already_in_group():
         {
             "api_group_name": "test_add_admin_to_api_group_already_in_group",
             "username": "test_add_admin_to_api_group_already_in_group_two",
+            "api_key": group.api_key,
+            "api_secret": group.api_secret,
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
-    assert response.status_code == 200
+    assert response.status_code == 400
     assert group.user_list.filter(
         username="test_add_admin_to_api_group_already_in_group_two"
     ).exists()
@@ -622,6 +646,8 @@ def test_remove_admin_from_api_group():
         {
             "api_group_name": "test_remove_admin_from_api_group",
             "username": "test_remove_admin_from_api_group_two",
+            "api_key": group.api_key,
+            "api_secret": group.api_secret,
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -634,6 +660,8 @@ def test_remove_admin_from_api_group():
         {
             "api_group_name": "test_remove_admin_from_api_group",
             "username": "test_remove_admin_from_api_group_two",
+            "api_key": group.api_key,
+            "api_secret": group.api_secret,
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -646,6 +674,8 @@ def test_remove_admin_from_api_group():
         {
             "api_group_name": "test_remove_admin_from_api_group",
             "username": "test_remove_admin_from_api_group_two",
+            "api_key": group.api_key,
+            "api_secret": group.api_secret,
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -718,6 +748,8 @@ def test_remove_admin_from_api_group_as_non_admin():
         {
             "api_group_name": "test_remove_admin_from_api_group_as_non_admin",
             "username": "test_remove_admin_from_api_group_as_non_admin_two",
+            "api_key": group.api_key,
+            "api_secret": group.api_secret,
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -730,6 +762,8 @@ def test_remove_admin_from_api_group_as_non_admin():
         {
             "api_group_name": "test_remove_admin_from_api_group_as_non_admin",
             "username": "test_remove_admin_from_api_group_as_non_admin_three",
+            "api_key": group.api_key,
+            "api_secret": group.api_secret,
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -742,6 +776,8 @@ def test_remove_admin_from_api_group_as_non_admin():
         {
             "api_group_name": "test_remove_admin_from_api_group_as_non_admin",
             "username": "test_remove_admin_from_api_group_as_non_admin_two",
+            "api_key": group.api_key,
+            "api_secret": group.api_secret,
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -754,6 +790,8 @@ def test_remove_admin_from_api_group_as_non_admin():
         {
             "api_group_name": "test_remove_admin_from_api_group_as_non_admin",
             "username": "test_remove_admin_from_api_group_as_non_admin_two",
+            "api_key": group.api_key,
+            "api_secret": group.api_secret,
         },
         HTTP_AUTHORIZATION=f"Token {token_three}",
     )
@@ -826,6 +864,8 @@ def test_remove_admin_from_api_group_not_in_group():
         {
             "api_group_name": "test_remove_admin_from_api_group_not_in_group",
             "username": "test_remove_admin_from_api_group_not_in_group_two",
+            "api_key": group.api_key,
+            "api_secret": group.api_secret,
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -838,6 +878,8 @@ def test_remove_admin_from_api_group_not_in_group():
         {
             "api_group_name": "test_remove_admin_from_api_group_not_in_group",
             "username": "test_remove_admin_from_api_group_not_in_group_three",
+            "api_key": group.api_key,
+            "api_secret": group.api_secret,
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -850,6 +892,8 @@ def test_remove_admin_from_api_group_not_in_group():
         {
             "api_group_name": "test_remove_admin_from_api_group_not_in_group",
             "username": "test_remove_admin_from_api_group_not_in_group_two",
+            "api_key": group.api_key,
+            "api_secret": group.api_secret,
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -865,6 +909,8 @@ def test_remove_admin_from_api_group_not_in_group():
         {
             "api_group_name": "test_remove_admin_from_api_group_not_in_group",
             "username": "test_remove_admin_from_api_group_not_in_group_three",
+            "api_key": group.api_key,
+            "api_secret": group.api_secret,
         },
         HTTP_AUTHORIZATION=f"Token {token_two}",
     )

@@ -1,6 +1,7 @@
 import ast
 import json
 from django.shortcuts import get_object_or_404
+from main.decorators import subject_to_api_limit
 
 from main.forms import SignalForm
 from main.secret_key_utils import reconstruct_mnemonic, split_mnemonic
@@ -57,6 +58,7 @@ def create_account(request):
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
+@subject_to_api_limit
 def create_self_custodial_account(request):
     if UserKeys.objects.filter(user=request.user).exists():
         if UserKeys.objects.get(user=request.user).mnemonic:
@@ -85,6 +87,7 @@ def create_self_custodial_account(request):
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
+@subject_to_api_limit
 def reconstruct_self_custodial_account(request):
     keys = get_object_or_404(UserKeys, user=request.user)
     key_shards = [
@@ -102,6 +105,7 @@ def reconstruct_self_custodial_account(request):
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
+@subject_to_api_limit
 def download_self_custodial_account_as_json(request):
     keys = get_object_or_404(UserKeys, user=request.user)
     key_shards = [

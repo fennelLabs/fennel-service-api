@@ -10,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from .models import APIGroup
+import secrets
 
 
 @api_view(["POST"])
@@ -17,15 +18,26 @@ from .models import APIGroup
 @permission_classes([IsAuthenticated])
 def create_new_api_group(request):
     if APIGroup.objects.filter(user_list__in=[request.user]).exists():
-        return Response({"message": "You already have an api group"})
+        return Response({"message": "You already have an api group"}, status=400)
     if APIGroup.objects.filter(name=request.data["api_group_name"]).exists():
-        return Response({"message": "Api Group already exists"})
+        return Response({"message": "Api Group already exists"}, status=400)
     api_group = APIGroup.objects.create(name=request.data["api_group_name"])
     if api_group.admin_list.filter(id=request.user.id).exists():
-        return Response({"message": "You are already admin of this api group"})
+        return Response(
+            {"message": "You are already admin of this api group"}, status=400
+        )
     api_group.admin_list.add(request.user)
+    api_group.user_list.add(request.user)
+    api_group.api_key = secrets.token_hex(32)
+    api_group.api_secret = secrets.token_hex(32)
     api_group.save()
-    return Response(status=status.HTTP_200_OK)
+    return Response(
+        {
+            "api_key": api_group.api_key,
+            "api_secret": api_group.api_secret,
+            "api_group_name": api_group.name,
+        }
+    )
 
 
 @api_view(["POST"])
@@ -35,12 +47,12 @@ def add_user_to_api_group(request):
     User = get_user_model()
     user = get_object_or_404(User, username=request.data["username"])
     if APIGroup.objects.filter(user_list__in=[user]).exists():
-        return Response({"message": "User already has an api group"})
+        return Response({"message": "User already has an api group"}, status=400)
     api_group = get_object_or_404(APIGroup, name=request.data["api_group_name"])
     if not api_group.admin_list.filter(id=request.user.id).exists():
-        return Response({"message": "You are not admin of this api group"})
+        return Response({"message": "You are not admin of this api group"}, status=400)
     if api_group.user_list.filter(id=user.id).exists():
-        return Response({"message": "User already in this api group"})
+        return Response({"message": "User already in this api group"}, status=400)
     api_group.user_list.add(user)
     api_group.save()
     return Response(status=status.HTTP_200_OK)

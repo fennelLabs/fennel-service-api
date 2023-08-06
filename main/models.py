@@ -6,6 +6,9 @@ class APIGroup(models.Model):
     user_list = models.ManyToManyField("auth.User", related_name="api_group_users")
     admin_list = models.ManyToManyField("auth.User", related_name="api_group_admins")
     active = models.BooleanField(default=True)
+    api_key = models.CharField(max_length=1024, unique=True, null=True, blank=True)
+    api_secret = models.CharField(max_length=1024, unique=True, null=True, blank=True)
+    request_counter = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name
