@@ -102,6 +102,7 @@ Content-Type: application/json
 POST /v1/group/create/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
+Authorization: Token <token>
 
 {
     "api_group_name": "test"
