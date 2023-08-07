@@ -160,8 +160,8 @@ def test_add_user_to_api_group_as_non_admin():
         },
         HTTP_AUTHORIZATION=f"Token {token_two}",
     )
-    assert response.status_code == 400
-    assert not group.user_list.filter(
+    assert response.status_code == 200
+    assert group.user_list.filter(
         username="test_add_user_to_api_group_as_non_admin_two"
     ).exists()
     User.objects.all().delete()

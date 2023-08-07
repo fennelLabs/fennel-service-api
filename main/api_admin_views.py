@@ -49,8 +49,6 @@ def add_user_to_api_group(request):
     if APIGroup.objects.filter(user_list__in=[user]).exists():
         return Response({"message": "User already has an api group"}, status=400)
     api_group = get_object_or_404(APIGroup, name=request.data["api_group_name"])
-    if not api_group.admin_list.filter(id=request.user.id).exists():
-        return Response({"message": "You are not admin of this api group"}, status=400)
     if api_group.user_list.filter(id=user.id).exists():
         return Response({"message": "User already in this api group"}, status=400)
     api_group.user_list.add(user)
