@@ -1,0 +1,220 @@
+# Tokens are **examples only**.
+# Use the REST Client extension for VSCode to test these endpoints.
+
+@hostname = api.fennellabs.com
+@port = 443
+
+###
+# @name Get Version
+# @no-cookie-jar
+GET /v1/get_version/
+Host: {{hostname}}:{{port}}
+
+###
+# @name Health Check
+# @no-cookie-jar
+GET /v1/healthcheck/
+Host: {{hostname}}:{{port}}
+
+###
+# @name Fennel Healthcheck
+# @no-cookie-jar
+GET /v1/fennel/healthcheck/
+Host: {{hostname}}:{{port}}
+
+###
+# @name Register
+# @no-cookie-jar
+POST /v1/auth/register/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+
+{
+  "username": "testinguser",
+  "email": "testinguser@test.com",
+  "password": "testinguser"
+}
+
+###
+# @name Login
+# @no-cookie-jar
+POST /v1/auth/login/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+
+{
+  "username": "testinguser",
+  "password": "testinguser"
+}
+
+###
+# @name Logout
+# @no-cookie-jar
+POST /v1/auth/logout/
+Host: {{hostname}}:{{port}}
+Authorization: Token <token>
+
+###
+# @name Change Password
+# @no-cookie-jar
+POST /v1/auth/change_password/
+Host: {{hostname}}:{{port}}
+Authorization: Token <token>
+
+{
+    "old_password": "testinguser",
+    "new_password": "testinguser2"
+}
+
+###
+# @name Reset Password
+# @no-cookie-jar
+POST /v1/auth/reset_password/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+
+{
+    "email": "testinguser@test.com"
+}
+
+###
+# @name Reset Password Confirm
+# @no-cookie-jar
+POST /v1/auth/reset_password_confirm/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+
+{
+    "token": "MjA:1jYXJkZW4uZmVubmVsbGFicw:1jYXJkZW4uZmVubmVsbGFicw",
+    "new_password": "testinguser"
+}
+
+
+###
+# @name Create API Group
+# @no-cookie-jar
+POST /v1/group/create/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+Authorization: Token <token>
+
+{
+    "api_group_name": "test"
+}
+
+
+###
+# @name Add User to API Group
+# @no-cookie-jar
+POST /v1/group/add_user/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+Authorization: Token <token>
+
+{
+    "username": "testinguser",
+    "api_group_name": "test"
+}
+
+###
+# @name Remove User from API Group
+# @no-cookie-jar
+POST /v1/group/remove_user/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+Authorization: Token <token>
+
+{
+    "username": "testinguser",
+    "api_group_name": "test"
+}
+
+###
+# @name Add Admin to API Group
+# @no-cookie-jar
+POST /v1/group/add_admin/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+Authorization: Token <token>
+
+{
+    "username": "testinguser",
+    "api_group_name": "test"
+}
+
+###
+# @name Remove Admin from API Group
+# @no-cookie-jar
+POST /v1/group/remove_admin/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+Authorization: Token <token>
+
+{
+    "username": "testinguser",
+    "api_group_name": "test"
+}
+
+###
+# @name Get Accounts Billable Count
+# @no-cookie-jar
+POST /v1/group/get_accounts_billable_count/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+Authorization: Token <token>
+
+{
+    "api_group_name": "test"
+}
+
+###
+# @name Get API Group Request Count
+# @no-cookie-jar
+POST /v1/group/get_api_group_request_count/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+Authorization: Token <token>
+
+{
+    "api_group_name": "test"
+}
+
+###
+# @name Fennel - Create Self Custodial Account
+# @no-cookie-jar
+POST /v1/fennel/create_self_custodial_account/
+Host: {{hostname}}:{{port}}
+Authorization: Token c1fdf33d948a726102a447de1d9bcd09970337308263d6bf2fe6b26281d8bab2
+
+{
+    "api_key": "<api_key>",
+    "api_secret": "<api_secret>"
+}
+
+###
+# @name Fennel - Reconstruct Self Custodial Account
+# @no-cookie-jar
+POST /v1/fennel/reconstruct_self_custodial_account/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+Authorization: Token c1fdf33d948a726102a447de1d9bcd09970337308263d6bf2fe6b26281d8bab2
+
+{
+    "user_shard": "<user_share>",
+    "api_key": "<api_key>",
+    "api_secret": "<api_secret>" 
+}
+
+###
+# @name Fennel - Download Self Custodial Account As JSON
+# @no-cookie-jar
+POST /v1/fennel/download_self_custodial_account_as_json/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+Authorization: Token c1fdf33d948a726102a447de1d9bcd09970337308263d6bf2fe6b26281d8bab2
+
+{
+    "user_shard": "<user_share>",
+    "api_key": "<api_key>",
+    "api_secret": "<api_secret>"
+}
