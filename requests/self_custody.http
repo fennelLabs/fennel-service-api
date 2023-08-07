@@ -1,8 +1,10 @@
 # Tokens are **examples only**.
 # Use the REST Client extension for VSCode to test these endpoints.
 
-@hostname = api.fennellabs.com
-@port = 443
+# @hostname = api.fennellabs.com
+# @port = 443
+@hostname = localhost
+@port = 1234
 
 ###
 # @name Get Version
@@ -203,6 +205,18 @@ Authorization: Token c1fdf33d948a726102a447de1d9bcd09970337308263d6bf2fe6b26281d
     "user_shard": "<user_share>",
     "api_key": "<api_key>",
     "api_secret": "<api_secret>" 
+}
+
+###
+# @name Fennel - Get Self Custodial Account Address
+# @no-cookie-jar
+POST /v1/fennel/get_self_custodial_account_address/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+Authorization: Token <token>
+
+{
+    "mnemonic": "<mnemonic>"
 }
 
 ###

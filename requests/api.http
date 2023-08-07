@@ -390,6 +390,18 @@ Authorization: Token c1fdf33d948a726102a447de1d9bcd09970337308263d6bf2fe6b26281d
 }
 
 ###
+# @name Fennel - Get Self Custodial Account Address
+# @no-cookie-jar
+POST /v1/fennel/get_self_custodial_account_address/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+Authorization: Token <token>
+
+{
+    "mnemonic": "<mnemonic>"
+}
+
+###
 # @name Fennel - Download Self Custodial Account As JSON
 # @no-cookie-jar
 POST /v1/fennel/download_self_custodial_account_as_json/

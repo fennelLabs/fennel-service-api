@@ -89,6 +89,10 @@ urlpatterns = [
         "fennel/download_self_custodial_account_as_json/",
         fennel_views.download_self_custodial_account_as_json,
     ),
+    path(
+        "fennel/get_self_custodial_account_address/",
+        fennel_views.get_self_custodial_account_address,
+    ),
     path("fennel/download_account_as_json/", fennel_views.download_account_as_json),
     path("fennel/get_account_balance/", fennel_views.get_account_balance),
     path("fennel/get_address/", fennel_views.get_address),

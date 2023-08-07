@@ -106,6 +106,18 @@ def reconstruct_self_custodial_account(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 @subject_to_api_limit
+def get_self_custodial_account_address(request):
+    payload = {"mnemonic": request.data["mnemonic"]}
+    r = requests.post(
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_address", data=payload
+    )
+    return Response(r.json())
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+@subject_to_api_limit
 def download_self_custodial_account_as_json(request):
     keys = get_object_or_404(UserKeys, user=request.user)
     key_shards = [
