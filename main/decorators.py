@@ -6,8 +6,8 @@ from main.models import APIGroup
 
 def subject_to_api_limit(view_func):
     def wrap(request, *args, **kwargs):
-        api_key = request.POST.get("api_key", None)
-        api_secret = request.POST.get("api_secret", None)
+        api_key = request.data.get("api_key", None)
+        api_secret = request.data.get("api_secret", None)
         if api_key and api_secret:
             api_group = get_object_or_404(
                 APIGroup, api_key=api_key, api_secret=api_secret
