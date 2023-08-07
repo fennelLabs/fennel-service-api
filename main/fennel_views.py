@@ -78,8 +78,8 @@ def create_self_custodial_account(request):
     keys.save()
     return Response(
         {
-            "user_shard": str(key_shards[0]),
-            "recovery_shard": str(key_shards[2]),
+            "user_shard": str(key_shards[0]).encode("utf-8").hex(),
+            "recovery_shard": str(key_shards[2]).encode("utf-8").hex(),
         }
     )
 
@@ -92,7 +92,7 @@ def reconstruct_self_custodial_account(request):
     keys = get_object_or_404(UserKeys, user=request.user)
     key_shards = [
         ast.literal_eval(keys.key_shard),
-        ast.literal_eval(request.data["user_shard"]),
+        ast.literal_eval(bytes.fromhex(request.data["user_shard"]).decode("utf-8")),
     ]
     mnemonic = reconstruct_mnemonic(key_shards)
     return Response(
