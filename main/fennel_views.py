@@ -122,7 +122,7 @@ def download_self_custodial_account_as_json(request):
     keys = get_object_or_404(UserKeys, user=request.user)
     key_shards = [
         ast.literal_eval(keys.key_shard),
-        ast.literal_eval(request.data["user_shard"]),
+        ast.literal_eval(bytes.fromhex(request.data["user_shard"]).decode("utf-8")),
     ]
     mnemonic = reconstruct_mnemonic(key_shards)
     try:
