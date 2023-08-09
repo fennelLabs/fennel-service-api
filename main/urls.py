@@ -78,6 +78,14 @@ urlpatterns = [
         crypto_views.get_diffie_hellman_shared_secret,
     ),
     path(
+        "crypto/dh/dm/encrypt_message/",
+        crypto_views.dh_encrypt_message,
+    ),
+    path(
+        "crypto/dh/dm/decrypt_message/",
+        crypto_views.dh_decrypt_message,
+    ),
+    path(
         "crypto/dh/whiteflag/encrypt_message/",
         crypto_views.dh_encrypt_whiteflag_message,
     ),

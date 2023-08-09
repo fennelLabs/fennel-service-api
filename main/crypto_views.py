@@ -69,6 +69,40 @@ def get_diffie_hellman_shared_secret(request):
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
+def dh_encrypt_message(request):
+    try:
+        r = requests.post(
+            "{0}/v1/dh_encrypt".format(os.environ.get("FENNEL_CLI_IP", None)),
+            json={
+                "plaintext": request.data["message"],
+                "shared_secret": request.data["shared_secret"],
+            },
+        )
+        return Response({"success": "message encrypted", "encrypted": r.text})
+    except Exception:
+        return Response({"error": "message not encrypted"})
+    
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def dh_decrypt_message(request):
+    try:
+        r = requests.post(
+            "{0}/v1/dh_decrypt".format(os.environ.get("FENNEL_CLI_IP", None)),
+            json={
+                "ciphertext": request.data["message"],
+                "shared_secret": request.data["shared_secret"],
+            },
+        )
+        return Response({"success": "message decrypted", "decrypted": r.text})
+    except Exception:
+        return Response({"error": "message not decrypted"})
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def dh_encrypt_whiteflag_message(request):
     form = DhDecryptWhiteflagMessageForm(request.data)
     if not form.is_valid():
