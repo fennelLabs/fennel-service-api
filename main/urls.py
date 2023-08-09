@@ -9,6 +9,7 @@ from main import (
     fennel_views,
     compound_views,
     api_admin_views,
+    message_views,
 )
 
 urlpatterns = [
@@ -47,6 +48,22 @@ urlpatterns = [
     path(
         "whiteflag/decode_list/",
         compound_views.decode_list,
+    ),
+    path(
+        "messages/get_messages/",
+        message_views.get_messages,
+    ),
+    path(
+        "messages/get_sent_messages/",
+        message_views.get_sent_messages,
+    ),
+    path(
+        "messages/get_message_by_id/<int:message_id>/",
+        message_views.get_message_by_id,
+    ),
+    path(
+        "messages/send_message/",
+        message_views.send_message,
     ),
     path(
         "crypto/dh/whiteflag/is_this_encrypted/",
