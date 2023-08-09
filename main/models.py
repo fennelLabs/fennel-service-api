@@ -74,3 +74,22 @@ class UserKeys(models.Model):
 
     def __str__(self):
         return self.user
+
+
+class PrivateMessage(models.Model):
+    sender = models.ForeignKey(
+        "auth.User",
+        related_name="private_messages_sent",
+        on_delete=models.CASCADE,
+    )
+    receiver = models.ForeignKey(
+        "auth.User",
+        related_name="private_messages_received",
+        on_delete=models.CASCADE,
+    )
+    message = models.CharField(max_length=4096)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.message
