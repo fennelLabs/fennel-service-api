@@ -133,6 +133,8 @@ urlpatterns = [
     path("fennel/get_unsynced_signals/", fennel_views.get_unsynced_signals),
     path("fennel/get_fee_history/", fennel_views.get_fee_history),
     path("fennel/get_fee_history/<int:count>/", fennel_views.get_fee_history),
+    path("fennel/get_fee_for_issue_trust/", fennel_views.get_fee_for_issue_trust),
+    path("fennel/issue_trust/", fennel_views.issue_trust),
     path("auth/register/", auth_views.UserRegisterView.as_view()),
     path("auth/login/", auth_views.LoginAPIView.as_view()),
     path("auth/user/", auth_views.UserAPI.as_view()),

@@ -426,3 +426,41 @@ def get_fee_history(request, count=None):
             for transaction in queryset
         ]
     )
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_fee_for_issue_trust(request):
+    payload = {
+        "mnemonic": UserKeys.objects.filter(user=request.user).first().mnemonic,
+        "amount": request.data["amount"],
+    }
+    if not payload["mnemonic"]:
+        return Response({"error": "user does not have a blockchain account"})
+    r = requests.post(
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_issue_trust",
+        data=payload,
+    )
+    Transaction.objects.create(
+        function="issue_trust",
+        payload_size=0,
+        fee=r.json()["fee"],
+    )
+    return Response(r.json())
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def issue_trust(request):
+    payload = {
+        "mnemonic": UserKeys.objects.filter(user=request.user).first().mnemonic,
+        "amount": request.data["amount"],
+    }
+    if not payload["mnemonic"]:
+        return Response({"error": "user does not have a blockchain account"})
+    r = requests.post(
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/issue_trust", data=payload
+    )
+    return Response(r.json())
