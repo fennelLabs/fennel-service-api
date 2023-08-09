@@ -5,7 +5,14 @@ from main.decorators import subject_to_api_limit
 
 from main.forms import SignalForm
 from main.secret_key_utils import reconstruct_mnemonic, split_mnemonic
-from .models import Signal, Transaction, UserKeys, ConfirmationRecord
+from .models import (
+    Signal,
+    Transaction,
+    TrustConnection,
+    TrustRequest,
+    UserKeys,
+    ConfirmationRecord,
+)
 from rest_framework.decorators import (
     api_view,
     authentication_classes,
@@ -434,7 +441,7 @@ def get_fee_history(request, count=None):
 def get_fee_for_issue_trust(request):
     payload = {
         "mnemonic": UserKeys.objects.filter(user=request.user).first().mnemonic,
-        "amount": request.data["amount"],
+        "address": request.data["address"],
     }
     if not payload["mnemonic"]:
         return Response({"error": "user does not have a blockchain account"})
@@ -456,10 +463,18 @@ def get_fee_for_issue_trust(request):
 def issue_trust(request):
     payload = {
         "mnemonic": UserKeys.objects.filter(user=request.user).first().mnemonic,
-        "amount": request.data["amount"],
+        "address": request.data["address"],
     }
     if not payload["mnemonic"]:
         return Response({"error": "user does not have a blockchain account"})
+    if payload["address"] == UserKeys.objects.filter(user=request.user).first().address:
+        return Response({"error": "user cannot trust themselves"})
+    trust_target = get_object_or_404(UserKeys, address=payload["address"]).user
+    if not trust_target:
+        return Response({"error": "user does not exist"})
+    TrustConnection.objects.update_or_create(
+        user=request.user, trusted_user=trust_target
+    )
     r = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/issue_trust", data=payload
     )
@@ -472,7 +487,7 @@ def issue_trust(request):
 def get_fee_for_remove_trust(request):
     payload = {
         "mnemonic": UserKeys.objects.filter(user=request.user).first().mnemonic,
-        "amount": request.data["amount"],
+        "address": request.data["address"],
     }
     if not payload["mnemonic"]:
         return Response({"error": "user does not have a blockchain account"})
@@ -494,11 +509,162 @@ def get_fee_for_remove_trust(request):
 def remove_trust(request):
     payload = {
         "mnemonic": UserKeys.objects.filter(user=request.user).first().mnemonic,
-        "amount": request.data["amount"],
+        "address": request.data["address"],
     }
     if not payload["mnemonic"]:
         return Response({"error": "user does not have a blockchain account"})
+    if payload["address"] == UserKeys.objects.filter(user=request.user).first().address:
+        return Response({"error": "user cannot trust themselves"})
+    trust_target = get_object_or_404(UserKeys, address=payload["address"]).user
+    if not trust_target:
+        return Response({"error": "user does not exist"})
+    TrustConnection.objects.filter(
+        user=request.user, trusted_user=trust_target
+    ).delete()
     r = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/remove_trust", data=payload
     )
     return Response(r.json())
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_fee_for_request_trust(request):
+    payload = {
+        "mnemonic": UserKeys.objects.filter(user=request.user).first().mnemonic,
+        "address": request.data["address"],
+    }
+    if not payload["mnemonic"]:
+        return Response({"error": "user does not have a blockchain account"})
+    r = requests.post(
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_request_trust",
+        data=payload,
+    )
+    Transaction.objects.create(
+        function="request_trust",
+        payload_size=0,
+        fee=r.json()["fee"],
+    )
+    return Response(r.json())
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def request_trust(request):
+    payload = {
+        "mnemonic": UserKeys.objects.filter(user=request.user).first().mnemonic,
+        "address": request.data["address"],
+    }
+    if not payload["mnemonic"]:
+        return Response({"error": "user does not have a blockchain account"})
+    if payload["address"] == UserKeys.objects.filter(user=request.user).first().address:
+        return Response({"error": "user cannot trust themselves"})
+    trust_target = get_object_or_404(UserKeys, address=payload["address"]).user
+    if not trust_target:
+        return Response({"error": "user does not exist"})
+    TrustRequest.objects.update_or_create(user=request.user, trusted_user=trust_target)
+    r = requests.post(
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/request_trust", data=payload
+    )
+    return Response(r.json())
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_fee_for_cancel_trust_request(request):
+    payload = {
+        "mnemonic": UserKeys.objects.filter(user=request.user).first().mnemonic,
+        "address": request.data["address"],
+    }
+    if not payload["mnemonic"]:
+        return Response({"error": "user does not have a blockchain account"})
+    r = requests.post(
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_cancel_trust_request",
+        data=payload,
+    )
+    Transaction.objects.create(
+        function="cancel_trust_request",
+        payload_size=0,
+        fee=r.json()["fee"],
+    )
+    return Response(r.json())
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def cancel_trust_request(request):
+    payload = {
+        "mnemonic": UserKeys.objects.filter(user=request.user).first().mnemonic,
+        "address": request.data["address"],
+    }
+    if not payload["mnemonic"]:
+        return Response({"error": "user does not have a blockchain account"})
+    if payload["address"] == UserKeys.objects.filter(user=request.user).first().address:
+        return Response({"error": "user cannot trust themselves"})
+    trust_target = get_object_or_404(UserKeys, address=payload["address"]).user
+    if not trust_target:
+        return Response({"error": "user does not exist"})
+    TrustRequest.objects.filter(user=request.user, trusted_user=trust_target).delete()
+    r = requests.post(
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/cancel_trust_request",
+        data=payload,
+    )
+    return Response(r.json())
+
+
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_trust_requests(request):
+    return Response(
+        [
+            {
+                "id": trust_request.id,
+                "timestamp": trust_request.timestamp,
+                "requesting_user": {
+                    "id": trust_request.user.id,
+                    "username": trust_request.user.username,
+                },
+            }
+            for trust_request in TrustRequest.objects.filter(trusted_user=request.user)
+        ]
+    )
+
+
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_trust_connections(request):
+    return Response(
+        [
+            {
+                "id": trust_connection.id,
+                "timestamp": trust_connection.timestamp,
+                "trusted_user": {
+                    "id": trust_connection.trusted_user.id,
+                    "username": trust_connection.trusted_user.username,
+                },
+            }
+            for trust_connection in TrustConnection.objects.filter(user=request.user)
+        ]
+    )
+
+
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def check_if_trust_exists(request):
+    Response(
+        {
+            "trust_exists": TrustConnection.objects.filter(
+                user=get_object_or_404(UserKeys, address=request.data["address"]).user,
+                trusted_user=get_object_or_404(
+                    UserKeys, address=request.data["address"]
+                ).user,
+            ).exists()
+        }
+    )

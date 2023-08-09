@@ -93,3 +93,34 @@ class PrivateMessage(models.Model):
 
     def __str__(self):
         return self.message
+
+
+class TrustConnection(models.Model):
+    user = models.ForeignKey(
+        "auth.User",
+        related_name="trust_connections",
+        on_delete=models.CASCADE,
+    )
+    trusted_user = models.ForeignKey(
+        "auth.User",
+        related_name="trusted_by",
+        on_delete=models.CASCADE,
+    )
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.user + " trusts " + self.trusted_user
+
+
+class TrustRequest(models.Model):
+    user = models.ForeignKey(
+        "auth.User",
+        related_name="trust_requests",
+        on_delete=models.CASCADE,
+    )
+    trusted_user = models.ForeignKey(
+        "auth.User",
+        related_name="trust_requests_received",
+        on_delete=models.CASCADE,
+    )
+    timestamp = models.DateTimeField(auto_now_add=True)

@@ -81,7 +81,7 @@ def dh_encrypt_message(request):
         return Response({"success": "message encrypted", "encrypted": r.text})
     except Exception:
         return Response({"error": "message not encrypted"})
-    
+
 
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
