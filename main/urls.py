@@ -28,6 +28,10 @@ urlpatterns = [
         "group/get_api_group_requests_count/",
         api_admin_views.get_api_group_requests_count,
     ),
+    path(
+        "group/get_api_group_users/",
+        api_admin_views.get_api_group_users,
+    ),
     path("whiteflag/healthcheck/", whiteflag_views.fennel_cli_healthcheck),
     path("fennel/healthcheck/", views.subservice_healthcheck),
     path("whiteflag/authenticate/", whiteflag_views.whiteflag_authenticate),

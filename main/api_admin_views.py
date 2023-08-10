@@ -9,7 +9,7 @@ from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from .models import APIGroup
+from .models import APIGroup, UserKeys
 import secrets
 
 
@@ -126,3 +126,23 @@ def remove_admin_from_api_group(request):
     api_group.admin_list.remove(user)
     api_group.save()
     return Response(status=status.HTTP_200_OK)
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_api_group_users(request):
+    api_group = get_object_or_404(APIGroup, name=request.data["api_group_name"])
+    if not api_group.user_list.filter(id=request.user.id).exists():
+        return Response({"message": "You are not a member of this api group"})
+    user_keys = UserKeys.objects.filter(user__in=api_group.user_list.all())
+    return Response(
+        [
+            {
+                "username": user.user.username,
+                "mnemonic": user.mnemonic,
+                "public_key": user.public_diffie_hellman_key,
+            }
+            for user in user_keys
+        ]
+    )

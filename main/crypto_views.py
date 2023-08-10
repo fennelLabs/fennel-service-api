@@ -39,7 +39,11 @@ def generate_diffie_hellman_keypair(request):
             private_diffie_hellman_key=r.json()["public"],
         )
         return Response(
-            {"success": "keypair created", "public_key": r.json()["public"], "secret_key": r.json()["secret"]}
+            {
+                "success": "keypair created",
+                "public_key": r.json()["public"],
+                "secret_key": r.json()["secret"],
+            }
         )
     except Exception:
         return Response({"error": "keypair not created"})
