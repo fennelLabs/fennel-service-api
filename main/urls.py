@@ -10,6 +10,7 @@ from main import (
     compound_views,
     api_admin_views,
     message_views,
+    onetrust_views,
 )
 
 urlpatterns = [
@@ -107,20 +108,20 @@ urlpatterns = [
     ),
     path("fennel/create_account/", fennel_views.create_account),
     path(
-        "fennel/create_self_custodial_account/",
-        fennel_views.create_self_custodial_account,
+        "onetrust/create_self_custodial_account/",
+        onetrust_views.create_self_custodial_account,
     ),
     path(
-        "fennel/reconstruct_self_custodial_account/",
-        fennel_views.reconstruct_self_custodial_account,
+        "onetrust/reconstruct_self_custodial_account/",
+        onetrust_views.reconstruct_self_custodial_account,
     ),
     path(
-        "fennel/download_self_custodial_account_as_json/",
-        fennel_views.download_self_custodial_account_as_json,
+        "onetrust/download_self_custodial_account_as_json/",
+        onetrust_views.download_self_custodial_account_as_json,
     ),
     path(
-        "fennel/get_self_custodial_account_address/",
-        fennel_views.get_self_custodial_account_address,
+        "onetrust/get_self_custodial_account_address/",
+        onetrust_views.get_self_custodial_account_address,
     ),
     path("fennel/download_account_as_json/", fennel_views.download_account_as_json),
     path("fennel/get_account_balance/", fennel_views.get_account_balance),
