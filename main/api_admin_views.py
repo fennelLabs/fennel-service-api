@@ -1,3 +1,4 @@
+import os
 from rest_framework import status
 from rest_framework.decorators import (
     api_view,
@@ -9,6 +10,7 @@ from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
+from django.core.mail import send_mail
 
 from main.forms import APIGroupForm
 from .models import APIGroup, UserKeys
@@ -40,6 +42,12 @@ def create_new_api_group(request):
     api_group.api_key = secrets.token_hex(32)
     api_group.api_secret = secrets.token_hex(32)
     api_group.save()
+    send_mail(
+        "New API Group",
+        f"A new API Group has been added with the name {api_group.name} and the email {api_group.email}",
+        os.environ.get("SERVER_EMAIL"),
+        [os.environ.get("SERVER_EMAIL")],
+    )
     return Response(
         {
             "api_key": api_group.api_key,
