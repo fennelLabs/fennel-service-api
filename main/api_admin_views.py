@@ -9,6 +9,8 @@ from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
+
+from main.forms import APIGroupForm
 from .models import APIGroup, UserKeys
 import secrets
 from silk.profiling.profiler import silk_profile
@@ -19,12 +21,15 @@ from silk.profiling.profiler import silk_profile
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def create_new_api_group(request):
+    form = APIGroupForm(request.data)
+    if not form.is_valid():
+        return Response({"error": dict(form.errors.items())}, status=400)
     if APIGroup.objects.filter(user_list__in=[request.user]).exists():
         return Response({"message": "You already have an api group"}, status=400)
-    if APIGroup.objects.filter(name=request.data["api_group_name"]).exists():
+    if APIGroup.objects.filter(name=form.cleaned_data["api_group_name"]).exists():
         return Response({"message": "Api Group already exists"}, status=400)
     api_group = APIGroup.objects.create(
-        name=request.data["api_group_name"], email=request.data["email"]
+        name=form.cleaned_data["api_group_name"], email=form.cleaned_data["email"]
     )
     if api_group.admin_list.filter(id=request.user.id).exists():
         return Response(
