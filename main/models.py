@@ -3,6 +3,7 @@ from django.db import models
 
 class APIGroup(models.Model):
     name = models.CharField(max_length=1024, unique=True)
+    email = models.EmailField(max_length=1024)
     user_list = models.ManyToManyField("auth.User", related_name="api_group_users")
     admin_list = models.ManyToManyField("auth.User", related_name="api_group_admins")
     active = models.BooleanField(default=True)
@@ -65,6 +66,7 @@ class UserKeys(models.Model):
     )
     mnemonic = models.CharField(max_length=1024)
     key_shard = models.CharField(max_length=1024, null=True, blank=True)
+    blockchain_public_key = models.CharField(max_length=1024, null=True, blank=True)
     address = models.CharField(max_length=1024, null=True, blank=True, unique=True)
     balance = models.IntegerField(default=0)
     public_diffie_hellman_key = models.CharField(max_length=1024, null=True, blank=True)

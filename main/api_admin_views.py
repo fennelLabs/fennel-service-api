@@ -9,10 +9,12 @@ from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from .models import APIGroup
+from .models import APIGroup, UserKeys
 import secrets
+from silk.profiling.profiler import silk_profile
 
 
+@silk_profile(name="create_new_api_group")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -21,7 +23,9 @@ def create_new_api_group(request):
         return Response({"message": "You already have an api group"}, status=400)
     if APIGroup.objects.filter(name=request.data["api_group_name"]).exists():
         return Response({"message": "Api Group already exists"}, status=400)
-    api_group = APIGroup.objects.create(name=request.data["api_group_name"])
+    api_group = APIGroup.objects.create(
+        name=request.data["api_group_name"], email=request.data["email"]
+    )
     if api_group.admin_list.filter(id=request.user.id).exists():
         return Response(
             {"message": "You are already admin of this api group"}, status=400
@@ -40,6 +44,7 @@ def create_new_api_group(request):
     )
 
 
+@silk_profile(name="get_api_group_keys")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -56,6 +61,7 @@ def add_user_to_api_group(request):
     return Response(status=status.HTTP_200_OK)
 
 
+@silk_profile(name="add_user_to_api_group")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -72,6 +78,7 @@ def remove_user_from_api_group(request):
     return Response(status=status.HTTP_200_OK)
 
 
+@silk_profile(name="remove_user_from_api_group")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -82,6 +89,7 @@ def get_accounts_billable_count(request):
     return Response({"count": api_group.user_list.count()})
 
 
+@silk_profile(name="get_accounts_billable_count")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -92,6 +100,7 @@ def get_api_group_requests_count(request):
     return Response({"count": api_group.request_counter})
 
 
+@silk_profile(name="get_api_group_requests_count")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -110,6 +119,7 @@ def add_admin_to_api_group(request):
     return Response(status=status.HTTP_200_OK)
 
 
+@silk_profile(name="add_admin_to_api_group")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -126,3 +136,24 @@ def remove_admin_from_api_group(request):
     api_group.admin_list.remove(user)
     api_group.save()
     return Response(status=status.HTTP_200_OK)
+
+
+@silk_profile(name="remove_admin_from_api_group")
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_api_group_users(request):
+    api_group = get_object_or_404(APIGroup, name=request.data["api_group_name"])
+    if not api_group.user_list.filter(id=request.user.id).exists():
+        return Response({"message": "You are not a member of this api group"})
+    user_keys = UserKeys.objects.filter(user__in=api_group.user_list.all())
+    return Response(
+        [
+            {
+                "username": user.user.username,
+                "mnemonic": user.mnemonic,
+                "public_key": user.public_diffie_hellman_key,
+            }
+            for user in user_keys
+        ]
+    )
