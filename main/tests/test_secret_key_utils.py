@@ -79,7 +79,6 @@ def test_check_split_string():
     assert word == "captain"
     shares = __generate_shares(3, 2, integer)
     reconstructed_integer = __reconstruct_secret([shares[0], shares[1]])
-    print(reconstructed_integer)
     assert integer == reconstructed_integer
     reconstructed_word = __convert_integer_to_word(reconstructed_integer)
     assert reconstructed_word == "captain"
