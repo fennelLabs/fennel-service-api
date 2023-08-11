@@ -3,6 +3,7 @@ from django.db import models
 
 class APIGroup(models.Model):
     name = models.CharField(max_length=1024, unique=True)
+    email = models.EmailField(max_length=1024)
     user_list = models.ManyToManyField("auth.User", related_name="api_group_users")
     admin_list = models.ManyToManyField("auth.User", related_name="api_group_admins")
     active = models.BooleanField(default=True)

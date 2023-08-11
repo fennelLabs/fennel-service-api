@@ -21,7 +21,9 @@ def create_new_api_group(request):
         return Response({"message": "You already have an api group"}, status=400)
     if APIGroup.objects.filter(name=request.data["api_group_name"]).exists():
         return Response({"message": "Api Group already exists"}, status=400)
-    api_group = APIGroup.objects.create(name=request.data["api_group_name"])
+    api_group = APIGroup.objects.create(
+        name=request.data["api_group_name"], email=request.data["email"]
+    )
     if api_group.admin_list.filter(id=request.user.id).exists():
         return Response(
             {"message": "You are already admin of this api group"}, status=400

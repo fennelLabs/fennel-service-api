@@ -27,6 +27,7 @@ def test_create_new_api_group():
         "/v1/group/create/",
         {
             "api_group_name": "test_create_new_api_group",
+            "email": "test_create_new_api_group@test.com",
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -71,6 +72,7 @@ def test_add_user_to_api_group():
         "/v1/group/create/",
         {
             "api_group_name": "test_add_user_to_api_group",
+            "email": "test_add_user_to_api_group@test.com",
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -140,6 +142,7 @@ def test_add_user_to_api_group_as_non_admin():
         "/v1/group/create/",
         {
             "api_group_name": "test_add_user_to_api_group_as_non_admin",
+            "email": "test_add_user_to_api_group_as_non_admin@test.com",
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -200,6 +203,7 @@ def test_remove_user_from_api_group():
         "/v1/group/create/",
         {
             "api_group_name": "test_remove_user_from_api_group",
+            "email": "test_remove_user_from_api_group@test.com",
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -273,6 +277,7 @@ def test_remove_user_from_api_group_as_non_admin():
         "/v1/group/create/",
         {
             "api_group_name": "test_remove_user_from_api_group",
+            "email": "test_remove_user_from_api_group@test.com",
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -343,6 +348,7 @@ def test_remove_user_from_api_group_not_in_group():
         "/v1/group/create/",
         {
             "api_group_name": "test_remove_user_from_api_group",
+            "email": "test@test.com",
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -401,6 +407,7 @@ def test_add_admin_to_api_group():
         "/v1/group/create/",
         {
             "api_group_name": "test_add_admin_to_api_group",
+            "email": "test@test.com",
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -482,6 +489,7 @@ def test_add_admin_to_api_group_as_non_admin():
         "/v1/group/create/",
         {
             "api_group_name": "test_add_admin_to_api_group_as_non_admin",
+            "email": "test@test.com",
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -559,6 +567,7 @@ def test_add_admin_to_api_group_already_in_group():
         "/v1/group/create/",
         {
             "api_group_name": "test_add_admin_to_api_group_already_in_group",
+            "email": "test@test.com",
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -633,6 +642,7 @@ def test_remove_admin_from_api_group():
         "/v1/group/create/",
         {
             "api_group_name": "test_remove_admin_from_api_group",
+            "email": "test@test.com",
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -733,6 +743,7 @@ def test_remove_admin_from_api_group_as_non_admin():
         "/v1/group/create/",
         {
             "api_group_name": "test_remove_admin_from_api_group_as_non_admin",
+            "email": "test@test.com",
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -849,6 +860,7 @@ def test_remove_admin_from_api_group_not_in_group():
         "/v1/group/create/",
         {
             "api_group_name": "test_remove_admin_from_api_group_not_in_group",
+            "email": "test@test.com",
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )
@@ -966,6 +978,7 @@ def test_get_api_group_users():
         "/v1/group/create/",
         {
             "api_group_name": "test_get_api_group_users",
+            "email": "test_get_api_group_users@test.com",
         },
         HTTP_AUTHORIZATION=f"Token {token}",
     )

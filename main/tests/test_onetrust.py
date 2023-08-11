@@ -19,7 +19,7 @@ def test_create_self_custodial_account():
     user = User.objects.get(username="create_self_custodial_account_test")
     response = client.post(
         "/v1/group/create/",
-        {"api_group_name": "test"},
+        {"api_group_name": "test", "email": "test@test.com"},
         HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
     )
     response = client.post(
@@ -56,7 +56,7 @@ def test_reconstruct_self_custodial_account():
     user = User.objects.get(username="reconstruct_self_custodial_account_test")
     response = client.post(
         "/v1/group/create/",
-        {"api_group_name": "test"},
+        {"api_group_name": "test", "email": "test@test.com"},
         HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
     )
     assert response.status_code == 200
@@ -112,7 +112,7 @@ def test_get_self_custodial_account_address():
     user = User.objects.get(username="get_self_custodial_account_address_test")
     response = client.post(
         "/v1/group/create/",
-        {"api_group_name": "test"},
+        {"api_group_name": "test", "email": "test_group@test.com"},
         HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
     )
     assert response.status_code == 200

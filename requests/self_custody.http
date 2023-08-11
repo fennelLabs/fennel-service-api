@@ -81,7 +81,8 @@ Content-Type: application/json
 Authorization: Token <token>
 
 {
-    "api_group_name": "test"
+    "api_group_name": "test",
+    "email": "test@test.com"
 }
 
 
