@@ -37,3 +37,13 @@ class DhDecryptWhiteflagMessageForm(forms.Form):
         super(DhDecryptWhiteflagMessageForm, self).__init__(*args, **kwargs)
         self.fields["message"].widget.attrs.update({"class": "form-control"})
         self.fields["shared_secret"].widget.attrs.update({"class": "form-control"})
+
+
+class PrivateMessageForm(forms.Form):
+    receiver = forms.CharField(label="Receiver", max_length=1024)
+    message = forms.CharField(label="Message", max_length=1024)
+
+    def __init__(self, *args, **kwargs):
+        super(PrivateMessageForm, self).__init__(*args, **kwargs)
+        self.fields["receiver"].widget.attrs.update({"class": "form-control"})
+        self.fields["message"].widget.attrs.update({"class": "form-control"})

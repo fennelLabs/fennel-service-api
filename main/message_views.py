@@ -6,7 +6,12 @@ from rest_framework.decorators import (
 from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from main.forms import PrivateMessageForm
 from main.models import PrivateMessage
+from django.contrib.auth import get_user_model
+
+
+User = get_user_model()
 
 
 @api_view(["GET"])
@@ -65,9 +70,12 @@ def get_message_by_id(_, message_id):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def send_message(request):
+    form = PrivateMessageForm(request.data)
+    if not form.is_valid():
+        return Response({"error": form.errors.items()})
     PrivateMessage.objects.create(
         sender=request.user,
-        receiver=request.data["receiver"],
-        message=request.data["message"],
+        receiver=User.objects.get(username=form.cleaned_data["receiver"]),
+        message=form.cleaned_data["message"],
     )
     return Response({"success": "message sent"})
