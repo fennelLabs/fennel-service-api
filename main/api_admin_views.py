@@ -15,7 +15,42 @@ from django.core.mail import send_mail
 from main.forms import APIGroupForm
 from .models import APIGroup, UserKeys
 import secrets
+from main.decorators import fennel_admin_only
 from silk.profiling.profiler import silk_profile
+
+
+@silk_profile(name="get_api_group_list")
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+@fennel_admin_only
+def get_api_group_list(request):
+    api_groups = APIGroup.objects.filter(user_list__in=[request.user])
+    return Response(
+        [
+            {
+                "active": api_group.active,
+                "user_list": [
+                    {
+                        "username": user.username,
+                        "email": user.email,
+                    }
+                    for user in api_group.user_list.all()
+                ],
+                "admin_list": [
+                    {
+                        "username": user.username,
+                        "email": user.email,
+                    }
+                    for user in api_group.admin_list.all()
+                ],
+                "request_count": api_group.request_counter,
+                "email": api_group.email,
+                "api_group_name": api_group.name,
+            }
+            for api_group in api_groups
+        ]
+    )
 
 
 @silk_profile(name="create_new_api_group")

@@ -1,5 +1,6 @@
 from django.test import Client
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from main.models import APIGroup, UserKeys
 
 
@@ -1015,3 +1016,40 @@ def test_get_api_group_users():
     User.objects.all().delete()
     APIGroup.objects.all().delete()
     UserKeys.objects.all().delete()
+
+
+def test_get_api_group_list():
+    client = Client()
+    User = get_user_model()
+    auth_response = client.post(
+        "/v1/auth/register/",
+        {
+            "username": "test_get_api_group_list",
+            "password": "testpassword",
+            "email": "test_get_api_group_list@test.com",
+        },
+    )
+    user = User.objects.get(username="test_get_api_group_list")
+    Group.objects.get_or_create(name="FennelAdmin")[0].user_set.add(user)
+    assert auth_response.status_code == 200
+    token = auth_response.json()["token"]
+    assert token is not None
+    response = client.post(
+        "/v1/group/create/",
+        {
+            "api_group_name": "test_get_api_group_list",
+            "email": "test_get_api_group_list@test.com",
+        },
+        HTTP_AUTHORIZATION=f"Token {token}",
+    )
+    assert response.status_code == 200
+    response = client.get(
+        "/v1/group/get_list/",
+        HTTP_AUTHORIZATION=f"Token {token}",
+    )
+    assert response.status_code == 200
+    assert len(response.json()) == 1
+    assert response.json()[0]["api_group_name"] == "test_get_api_group_list"
+    User.objects.all().delete()
+    APIGroup.objects.all().delete()
+    Group.objects.all().delete()
