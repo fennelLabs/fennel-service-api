@@ -65,6 +65,7 @@ class UserKeys(models.Model):
     )
     mnemonic = models.CharField(max_length=1024)
     key_shard = models.CharField(max_length=1024, null=True, blank=True)
+    blockchain_public_key = models.CharField(max_length=1024, null=True, blank=True)
     address = models.CharField(max_length=1024, null=True, blank=True, unique=True)
     balance = models.IntegerField(default=0)
     public_diffie_hellman_key = models.CharField(max_length=1024, null=True, blank=True)

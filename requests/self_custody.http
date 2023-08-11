@@ -11,18 +11,6 @@ GET /v1/get_version/
 Host: {{hostname}}:{{port}}
 
 ###
-# @name Health Check
-# @no-cookie-jar
-GET /v1/healthcheck/
-Host: {{hostname}}:{{port}}
-
-###
-# @name Fennel Healthcheck
-# @no-cookie-jar
-GET /v1/fennel/healthcheck/
-Host: {{hostname}}:{{port}}
-
-###
 # @name Register
 # @no-cookie-jar
 POST /v1/auth/register/
@@ -180,9 +168,9 @@ Authorization: Token <token>
 }
 
 ###
-# @name Fennel - Create Self Custodial Account
+# @name OneTrust - Create Self Custodial Account
 # @no-cookie-jar
-POST /v1/fennel/create_self_custodial_account/
+POST /v1/onetrust/create_self_custodial_account/
 Host: {{hostname}}:{{port}}
 Authorization: Token c1fdf33d948a726102a447de1d9bcd09970337308263d6bf2fe6b26281d8bab2
 
@@ -192,9 +180,9 @@ Authorization: Token c1fdf33d948a726102a447de1d9bcd09970337308263d6bf2fe6b26281d
 }
 
 ###
-# @name Fennel - Reconstruct Self Custodial Account
+# @name OneTrust - Reconstruct Self Custodial Account
 # @no-cookie-jar
-POST /v1/fennel/reconstruct_self_custodial_account/
+POST /v1/onetrust/reconstruct_self_custodial_account/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token c1fdf33d948a726102a447de1d9bcd09970337308263d6bf2fe6b26281d8bab2
@@ -206,9 +194,9 @@ Authorization: Token c1fdf33d948a726102a447de1d9bcd09970337308263d6bf2fe6b26281d
 }
 
 ###
-# @name Fennel - Get Self Custodial Account Address
+# @name OneTrust - Get Self Custodial Account Address
 # @no-cookie-jar
-POST /v1/fennel/get_self_custodial_account_address/
+POST /v1/onetrust/get_self_custodial_account_address/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token <token>
@@ -218,9 +206,9 @@ Authorization: Token <token>
 }
 
 ###
-# @name Fennel - Download Self Custodial Account As JSON
+# @name OneTrust - Download Self Custodial Account As JSON
 # @no-cookie-jar
-POST /v1/fennel/download_self_custodial_account_as_json/
+POST /v1/onetrust/download_self_custodial_account_as_json/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token c1fdf33d948a726102a447de1d9bcd09970337308263d6bf2fe6b26281d8bab2

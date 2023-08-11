@@ -33,13 +33,19 @@ def create_self_custodial_account(request):
         keys = UserKeys.objects.create(user=request.user)
     r = requests.get(f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/create_account")
     mnemonic = r.json()["mnemonic"]
+    public_key = r.json()["publicKey"]
+    address = r.json()["address"]
     key_shards = split_mnemonic(mnemonic)
     keys.key_shard = str(key_shards[1])
+    keys.blockchain_public_key = public_key
+    keys.address = address
     keys.save()
     return Response(
         {
             "user_shard": str(key_shards[0]).encode("utf-8").hex(),
             "recovery_shard": str(key_shards[2]).encode("utf-8").hex(),
+            "address": address,
+            "public_key": public_key,
         }
     )
 
