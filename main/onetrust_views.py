@@ -6,6 +6,7 @@ from rest_framework.decorators import (
 )
 from rest_framework.response import Response
 from knox.auth import TokenAuthentication
+from silk.profiling.profiler import silk_profile
 from rest_framework.permissions import IsAuthenticated
 from .models import UserKeys
 from .secret_key_utils import split_mnemonic, reconstruct_mnemonic
@@ -15,6 +16,7 @@ import os
 import ast
 
 
+@silk_profile(name="create_self_custodial_account")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -50,6 +52,7 @@ def create_self_custodial_account(request):
     )
 
 
+@silk_profile(name="reconstruct_self_custodial_account")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -68,6 +71,7 @@ def reconstruct_self_custodial_account(request):
     )
 
 
+@silk_profile(name="download_self_custodial_account_as_json")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -90,6 +94,7 @@ def download_self_custodial_account_as_json(request):
         return Response({"error": "could not get account json"})
 
 
+@silk_profile(name="get_self_custodial_account_address")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])

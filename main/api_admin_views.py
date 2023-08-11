@@ -11,8 +11,10 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from .models import APIGroup, UserKeys
 import secrets
+from silk.profiling.profiler import silk_profile
 
 
+@silk_profile(name="create_new_api_group")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -42,6 +44,7 @@ def create_new_api_group(request):
     )
 
 
+@silk_profile(name="get_api_group_keys")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -58,6 +61,7 @@ def add_user_to_api_group(request):
     return Response(status=status.HTTP_200_OK)
 
 
+@silk_profile(name="add_user_to_api_group")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -74,6 +78,7 @@ def remove_user_from_api_group(request):
     return Response(status=status.HTTP_200_OK)
 
 
+@silk_profile(name="remove_user_from_api_group")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -84,6 +89,7 @@ def get_accounts_billable_count(request):
     return Response({"count": api_group.user_list.count()})
 
 
+@silk_profile(name="get_accounts_billable_count")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -94,6 +100,7 @@ def get_api_group_requests_count(request):
     return Response({"count": api_group.request_counter})
 
 
+@silk_profile(name="get_api_group_requests_count")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -112,6 +119,7 @@ def add_admin_to_api_group(request):
     return Response(status=status.HTTP_200_OK)
 
 
+@silk_profile(name="add_admin_to_api_group")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -130,6 +138,7 @@ def remove_admin_from_api_group(request):
     return Response(status=status.HTTP_200_OK)
 
 
+@silk_profile(name="remove_admin_from_api_group")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
