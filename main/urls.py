@@ -17,6 +17,7 @@ urlpatterns = [
     path("get_version/", views.get_version),
     path("healthcheck/", views.healthcheck),
     path("group/create/", api_admin_views.create_new_api_group),
+    path("group/get_list/", api_admin_views.get_api_group_list),
     path("group/add_user/", api_admin_views.add_user_to_api_group),
     path("group/remove_user/", api_admin_views.remove_user_from_api_group),
     path("group/add_admin/", api_admin_views.add_admin_to_api_group),

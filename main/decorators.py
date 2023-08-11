@@ -4,6 +4,17 @@ from rest_framework.response import Response
 from main.models import APIGroup
 
 
+def fennel_admin_only(view_func):
+    def wrap(request, *args, **kwargs):
+        # Check if request.user is a FennelAdmin
+        if request.user.groups.filter(name="FennelAdmin").exists():
+            return view_func(request, *args, **kwargs)
+        else:
+            return Response({"error": "permission denied."}, status=400)
+
+    return wrap
+
+
 def subject_to_api_limit(view_func):
     def wrap(request, *args, **kwargs):
         api_key = request.data.get("api_key", None)
