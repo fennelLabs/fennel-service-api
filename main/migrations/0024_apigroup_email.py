@@ -14,7 +14,8 @@ class Migration(migrations.Migration):
             model_name="apigroup",
             name="email",
             field=models.EmailField(
-                default="info@fennellabs.com", max_length=1024, unique=True
+                default="info@fennellabs.com",
+                max_length=1024,
             ),
             preserve_default=False,
         ),
