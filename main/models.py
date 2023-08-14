@@ -75,7 +75,7 @@ class UserKeys(models.Model):
     )
 
     def __str__(self):
-        return self.user
+        return self.user.username
 
 
 class PrivateMessage(models.Model):
