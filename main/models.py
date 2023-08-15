@@ -22,7 +22,7 @@ class Transaction(models.Model):
     fee = models.IntegerField(default=0)
 
     def __str__(self):
-        return self.tx_hash
+        return self.function + " " + str(self.timestamp)
 
 
 class Signal(models.Model):
