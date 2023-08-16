@@ -151,8 +151,33 @@ def test_decode_list_does_not_exist():
         {"signals": [0]},
         HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
     )
+    assert response.status_code == 400
+    User.objects.all().delete()
+    Signal.objects.all().delete()
+    UserKeys.objects.all().delete()
+
+
+def test_decode_list_empty_input():
+    client = Client()
+    User = get_user_model()
+    response = client.post(
+        "/v1/auth/register/",
+        {
+            "username": "decode_list_empty_input_test",
+            "password": "test",
+            "email": "decode_list_empty_input_test@test.com",
+        },
+    )
     assert response.status_code == 200
-    assert response.json() == []
+    assert response.json()["token"] is not None
+    user = User.objects.get(username="decode_list_empty_input_test")
+    baker.make(UserKeys, user=user)
+    response = client.post(
+        "/v1/whiteflag/decode_list/",
+        {"signals": []},
+        HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
+    )
+    assert response.status_code == 400
     User.objects.all().delete()
     Signal.objects.all().delete()
     UserKeys.objects.all().delete()

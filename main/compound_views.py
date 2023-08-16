@@ -37,6 +37,11 @@ def decode_list(request):
         signals = request.data.getlist("signals")
     except:
         signals = request.data.get("signals")
+    if signals is None:
+        return Response({"message": "No signals given"}, status=400)
+    signals_list = Signal.objects.filter(pk__in=signals)
+    if len(signals_list) == 0:
+        return Response({"message": "No signals found for the given list"}, status=400)
     return Response(
         [
             {
@@ -63,6 +68,6 @@ def decode_list(request):
                     for confirmation in ConfirmationRecord.objects.filter(signal=signal)
                 ],
             }
-            for signal in Signal.objects.filter(pk__in=signals)
+            for signal in signals_list
         ]
     )
