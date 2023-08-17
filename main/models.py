@@ -12,7 +12,7 @@ class APIGroup(models.Model):
     request_counter = models.IntegerField(default=0)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class Transaction(models.Model):
@@ -40,7 +40,7 @@ class Signal(models.Model):
     synced = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.signal_text
+        return str(self.signal_text)
 
 
 class ConfirmationRecord(models.Model):
@@ -94,7 +94,7 @@ class PrivateMessage(models.Model):
     read = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.message
+        return str(self.message)
 
 
 class TrustConnection(models.Model):

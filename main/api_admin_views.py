@@ -1,4 +1,6 @@
 import os
+import secrets
+
 from rest_framework import status
 from rest_framework.decorators import (
     api_view,
@@ -6,17 +8,19 @@ from rest_framework.decorators import (
     permission_classes,
 )
 from rest_framework.response import Response
-from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+
+from silk.profiling.profiler import silk_profile
+
+from knox.auth import TokenAuthentication
+
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 
 from main.forms import APIGroupForm
-from .models import APIGroup, UserKeys
-import secrets
+from main.models import APIGroup, UserKeys
 from main.decorators import fennel_admin_only
-from silk.profiling.profiler import silk_profile
 
 
 @silk_profile(name="get_api_group_list")
@@ -97,8 +101,8 @@ def create_new_api_group(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def add_user_to_api_group(request):
-    User = get_user_model()
-    user = get_object_or_404(User, username=request.data["username"])
+    user_model = get_user_model()
+    user = get_object_or_404(user_model, username=request.data["username"])
     if APIGroup.objects.filter(user_list__in=[user]).exists():
         return Response({"message": "User already has an api group"}, status=400)
     api_group = get_object_or_404(APIGroup, name=request.data["api_group_name"])
@@ -114,8 +118,8 @@ def add_user_to_api_group(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def remove_user_from_api_group(request):
-    User = get_user_model()
-    user = get_object_or_404(User, username=request.data["username"])
+    user_model = get_user_model()
+    user = get_object_or_404(user_model, username=request.data["username"])
     api_group = get_object_or_404(APIGroup, name=request.data["api_group_name"])
     if not api_group.admin_list.filter(id=request.user.id).exists():
         return Response({"message": "You are not admin of this api group"})
@@ -153,8 +157,8 @@ def get_api_group_requests_count(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def add_admin_to_api_group(request):
-    User = get_user_model()
-    user = get_object_or_404(User, username=request.data["username"])
+    user_model = get_user_model()
+    user = get_object_or_404(user_model, username=request.data["username"])
     api_group = get_object_or_404(APIGroup, name=request.data["api_group_name"])
     if not api_group.admin_list.filter(id=request.user.id).exists():
         return Response({"message": "You are not admin of this api group"})
@@ -172,8 +176,8 @@ def add_admin_to_api_group(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def remove_admin_from_api_group(request):
-    User = get_user_model()
-    user = get_object_or_404(User, username=request.data["username"])
+    user_model = get_user_model()
+    user = get_object_or_404(user_model, username=request.data["username"])
     api_group = get_object_or_404(APIGroup, name=request.data["api_group_name"])
     if not api_group.admin_list.filter(id=request.user.id).exists():
         return Response({"message": "You are not admin of this api group"})

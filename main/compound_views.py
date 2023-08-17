@@ -22,11 +22,11 @@ def __decode(signal: str) -> dict:
         }
     else:
         signal = json.dumps(signal)
-        r = requests.post(
+        response = requests.post(
             "{0}/v1/whiteflag_decode".format(os.environ.get("FENNEL_CLI_IP", None)),
             data=signal,
         )
-        return json.loads(r.json())
+        return json.loads(response.json())
 
 
 @api_view(["POST"])

@@ -1,5 +1,4 @@
 from rest_framework.generics import ListCreateAPIView
-from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import User
 from rest_framework import generics
@@ -8,7 +7,6 @@ from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
 from django.contrib.auth import login
 from .serializers import ChangePasswordSerializer
 from rest_framework.generics import UpdateAPIView
-from rest_framework import status
 from django.dispatch import receiver
 from django_rest_passwordreset.signals import reset_password_token_created
 from django.core.mail import EmailMultiAlternatives
@@ -31,12 +29,12 @@ class UserRegisterView(ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        newUser = serializer.save()
-        token = AuthToken.objects.create(newUser)[1]
+        new_user = serializer.save()
+        token = AuthToken.objects.create(new_user)[1]
         return Response(
             {
                 "user": UserSerializer(
-                    newUser, context=self.get_serializer_context()
+                    new_user, context=self.get_serializer_context()
                 ).data,
                 "token": token,
             }
@@ -101,7 +99,7 @@ class ChangePasswordView(UpdateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class CustomPasswordResetView(object):
+class CustomPasswordResetView:
     @receiver(reset_password_token_created)
     def password_reset_token_created(sender, reset_password_token, *args, **kwargs):
         """

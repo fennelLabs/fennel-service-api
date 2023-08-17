@@ -9,8 +9,8 @@ def test_register_view():
         "/v1/auth/register/",
         {"username": "testuser", "email": "test@test.com", "password": "testpassword"},
     )
-    User = get_user_model()
-    User.objects.get(username="testuser").delete()
+    user_model = get_user_model()
+    user_model.objects.get(username="testuser").delete()
     assert response.status_code == 200
 
 
@@ -26,8 +26,8 @@ def test_login_view():
     )
     assert response.status_code == 200
     assert response.data["token"] is not None
-    User = get_user_model()
-    User.objects.get(username="testuser").delete()
+    user_model = get_user_model()
+    user_model.objects.get(username="testuser").delete()
 
 
 def test_change_password_view():
@@ -59,8 +59,8 @@ def test_change_password_view():
     )
     assert response.status_code == 200
     assert response.json()["token"] is not None
-    User = get_user_model()
-    User.objects.all().delete()
+    user_model = get_user_model()
+    user_model.objects.all().delete()
 
 
 def test_reset_password_view():
@@ -79,8 +79,8 @@ def test_reset_password_view():
         {"email": "test_reset_password_user@test.com"},
     )
     assert response.status_code == 200
-    User = get_user_model()
-    User.objects.all().delete()
+    user_model = get_user_model()
+    user_model.objects.all().delete()
 
 
 def test_reset_password_confirm_view():
@@ -109,8 +109,8 @@ def test_reset_password_confirm_view():
         },
     )
     assert response.status_code == 200
-    User = get_user_model()
-    User.objects.all().delete()
+    user_model = get_user_model()
+    user_model.objects.all().delete()
 
 
 def test_reset_password_confirm_fails():
@@ -137,5 +137,5 @@ def test_reset_password_confirm_fails():
         },
     )
     assert response.status_code == 404
-    User = get_user_model()
-    User.objects.all().delete()
+    user_model = get_user_model()
+    user_model.objects.all().delete()

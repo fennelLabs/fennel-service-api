@@ -1,7 +1,7 @@
 from django.test.client import Client
 from django.contrib.auth import get_user_model
-from main.models import Signal, UserKeys
 from model_bakery import baker
+from main.models import Signal, UserKeys
 from main.compound_views import __decode
 
 
@@ -27,7 +27,7 @@ def test_decode_encrypted():
 
 def test_decode_list_not_encrypted():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     response = client.post(
         "/v1/auth/register/",
         {
@@ -38,7 +38,7 @@ def test_decode_list_not_encrypted():
     )
     assert response.status_code == 200
     assert response.json()["token"] is not None
-    user = User.objects.get(username="decode_list_test")
+    user = user_model.objects.get(username="decode_list_test")
     baker.make(UserKeys, user=user)
     signal = baker.make(
         Signal,
@@ -55,14 +55,14 @@ def test_decode_list_not_encrypted():
     assert response.json()[0]["signal_text"]["prefix"] == "WF"
     assert response.json()[0]["signal_text"]["version"] == "1"
     assert response.json()[0]["signal_text"]["encryptionIndicator"] == "0"
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     Signal.objects.all().delete()
     UserKeys.objects.all().delete()
 
 
 def test_decode_list_encrypted():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     response = client.post(
         "/v1/auth/register/",
         {
@@ -73,7 +73,7 @@ def test_decode_list_encrypted():
     )
     assert response.status_code == 200
     assert response.json()["token"] is not None
-    user = User.objects.get(username="decode_list_test")
+    user = user_model.objects.get(username="decode_list_test")
     baker.make(UserKeys, user=user)
     signal = baker.make(
         Signal,
@@ -90,14 +90,14 @@ def test_decode_list_encrypted():
     assert response.json()[0]["signal_text"]["prefix"] == "WF"
     assert response.json()[0]["signal_text"]["version"] == "1"
     assert response.json()[0]["signal_text"]["encryptionIndicator"] == "1"
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     Signal.objects.all().delete()
     UserKeys.objects.all().delete()
 
 
 def test_decode_long_signal_list():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     response = client.post(
         "/v1/auth/register/",
         {
@@ -108,7 +108,7 @@ def test_decode_long_signal_list():
     )
     assert response.status_code == 200
     assert response.json()["token"] is not None
-    user = User.objects.get(username="decode_long_list_test")
+    user = user_model.objects.get(username="decode_long_list_test")
     baker.make(UserKeys, user=user)
     signals = [
         baker.make(
@@ -126,14 +126,14 @@ def test_decode_long_signal_list():
     )
     assert response.status_code == 200
     assert len(response.json()) == 100
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     Signal.objects.all().delete()
     UserKeys.objects.all().delete()
 
 
 def test_decode_list_does_not_exist():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     response = client.post(
         "/v1/auth/register/",
         {
@@ -144,7 +144,7 @@ def test_decode_list_does_not_exist():
     )
     assert response.status_code == 200
     assert response.json()["token"] is not None
-    user = User.objects.get(username="decode_list_does_not_exist_test")
+    user = user_model.objects.get(username="decode_list_does_not_exist_test")
     baker.make(UserKeys, user=user)
     response = client.post(
         "/v1/whiteflag/decode_list/",
@@ -152,14 +152,14 @@ def test_decode_list_does_not_exist():
         HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
     )
     assert response.status_code == 400
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     Signal.objects.all().delete()
     UserKeys.objects.all().delete()
 
 
 def test_decode_list_empty_input():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     response = client.post(
         "/v1/auth/register/",
         {
@@ -170,7 +170,7 @@ def test_decode_list_empty_input():
     )
     assert response.status_code == 200
     assert response.json()["token"] is not None
-    user = User.objects.get(username="decode_list_empty_input_test")
+    user = user_model.objects.get(username="decode_list_empty_input_test")
     baker.make(UserKeys, user=user)
     response = client.post(
         "/v1/whiteflag/decode_list/",
@@ -178,6 +178,6 @@ def test_decode_list_empty_input():
         HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
     )
     assert response.status_code == 400
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     Signal.objects.all().delete()
     UserKeys.objects.all().delete()

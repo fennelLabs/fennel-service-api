@@ -23,16 +23,16 @@ import datetime
 
 
 def __record_signal_fee(payload: dict) -> dict:
-    r = requests.post(
+    response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_new_signal",
         data=payload,
     )
     Transaction.objects.create(
         function="send_new_signal",
         payload_size=len(payload["content"]),
-        fee=r.json()["fee"],
+        fee=response.json()["fee"],
     )
-    return r.json()
+    return response.json()
 
 
 @api_view(["POST"])
@@ -51,8 +51,10 @@ def create_account(request):
             keys = UserKeys.objects.get(user=request.user)
     else:
         keys = UserKeys.objects.create(user=request.user)
-    r = requests.get(f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/create_account")
-    mnemonic = r.json()["mnemonic"]
+    response = requests.get(
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/create_account"
+    )
+    mnemonic = response.json()["mnemonic"]
     keys.mnemonic = mnemonic
     keys.save()
     return Response(mnemonic == keys.mnemonic)
@@ -72,11 +74,11 @@ def download_account_as_json(request):
     key = UserKeys.objects.filter(user=request.user).first()
     try:
         payload = {"mnemonic": key.mnemonic}
-        r = requests.post(
+        response = requests.post(
             f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/download_account_as_json",
             data=payload,
         )
-        return Response(r.json())
+        return Response(response.json())
     except Exception:
         return Response({"error": "could not get account json"})
 
@@ -95,13 +97,13 @@ def get_account_balance(request):
     key = UserKeys.objects.filter(user=request.user).first()
     try:
         payload = {"mnemonic": key.mnemonic}
-        r = requests.post(
+        response = requests.post(
             f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_account_balance",
             data=payload,
         )
-        key.balance = r.json()["balance"]
+        key.balance = response.json()["balance"]
         key.save()
-        return Response(r.json())
+        return Response(response.json())
     except Exception:
         return Response({"balance": key.balance})
 
@@ -125,12 +127,12 @@ def get_address(request):
             status=400,
         )
     payload = {"mnemonic": key.mnemonic}
-    r = requests.post(
+    response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_address", data=payload
     )
-    key.address = r.json()["address"]
+    key.address = response.json()["address"]
     key.save()
-    return Response(r.json())
+    return Response(response.json())
 
 
 @api_view(["POST"])
@@ -144,16 +146,16 @@ def get_fee_for_transfer_token(request):
     }
     if not payload["mnemonic"]:
         return Response({"error": "user does not have a blockchain account"})
-    r = requests.post(
+    response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_transfer_token",
         data=payload,
     )
     Transaction.objects.create(
         function="transfer_token",
         payload_size=0,
-        fee=r.json()["fee"],
+        fee=response.json()["fee"],
     )
-    return Response(r.json())
+    return Response(response.json())
 
 
 @api_view(["POST"])
@@ -167,10 +169,10 @@ def transfer_token(request):
     }
     if not payload["mnemonic"]:
         return Response({"error": "user does not have a blockchain account"})
-    r = requests.post(
+    response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/transfer_token", data=payload
     )
-    return Response(r.json())
+    return Response(response.json())
 
 
 @api_view(["POST"])
@@ -212,15 +214,15 @@ def send_new_signal(request):
         if not payload["mnemonic"]:
             return Response({"error": "user does not have a blockchain account"})
         __record_signal_fee(payload)
-        r = requests.post(
+        response = requests.post(
             f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/send_new_signal",
             data=payload,
         )
-        signal.tx_hash = r.json()["hash"]
+        signal.tx_hash = response.json()["hash"]
         signal.synced = True
         signal.mempool_timestamp = datetime.datetime.now()
         signal.save()
-        return Response(r.json())
+        return Response(response.json())
     except Exception:
         return Response({"signal": "saved as unsynced"})
 
@@ -229,8 +231,8 @@ def send_new_signal(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def get_fee_for_sync_signal(request):
-    id = request.data["id"]
-    signal = get_object_or_404(Signal, id=id)
+    signal_id = request.data["id"]
+    signal = get_object_or_404(Signal, id=signal_id)
     payload = {
         "mnemonic": UserKeys.objects.filter(user=request.user).first().mnemonic,
         "content": signal.signal_text,
@@ -245,14 +247,11 @@ def get_fee_for_sync_signal(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def sync_signal(request):
-    id = request.data["id"]
-    signal = get_object_or_404(Signal, id=id)
+    signal_id = request.data["id"]
+    signal = get_object_or_404(Signal, id=signal_id)
     if signal.sender != request.user:
         return Response({"error": "sender is not current user"})
     try:
-        r = requests.get(
-            f"{os.environ.get('FENNEL_KEYSERVER_IP', None)}/api/keys?user={request.user.username}"
-        )
         payload = {
             "mnemonic": UserKeys.objects.filter(user=request.user).first().mnemonic,
             "content": signal.signal_text,
@@ -260,15 +259,15 @@ def sync_signal(request):
         if not payload["mnemonic"]:
             return Response({"error": "user does not have a blockchain account"})
         __record_signal_fee(payload)
-        r = requests.post(
+        response = requests.post(
             f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/send_new_signal",
             data=payload,
         )
         signal.synced = True
-        signal.tx_hash = r.json()["hash"]
+        signal.tx_hash = response.json()["hash"]
         signal.mempool_timestamp = datetime.datetime.now()
         signal.save()
-        return Response(r.json())
+        return Response(response.json())
     except Exception:
         return Response({"signal": "saved as unsynced"})
 
@@ -371,16 +370,16 @@ def get_fee_for_issue_trust(request):
     }
     if not payload["mnemonic"]:
         return Response({"error": "user does not have a blockchain account"})
-    r = requests.post(
+    response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_issue_trust",
         data=payload,
     )
     Transaction.objects.create(
         function="issue_trust",
         payload_size=0,
-        fee=r.json()["fee"],
+        fee=response.json()["fee"],
     )
-    return Response(r.json())
+    return Response(response.json())
 
 
 @api_view(["POST"])
@@ -401,10 +400,10 @@ def issue_trust(request):
     TrustConnection.objects.update_or_create(
         user=request.user, trusted_user=trust_target
     )
-    r = requests.post(
+    response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/issue_trust", data=payload
     )
-    return Response(r.json())
+    return Response(response.json())
 
 
 @api_view(["POST"])
@@ -417,16 +416,16 @@ def get_fee_for_remove_trust(request):
     }
     if not payload["mnemonic"]:
         return Response({"error": "user does not have a blockchain account"})
-    r = requests.post(
+    response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_remove_trust",
         data=payload,
     )
     Transaction.objects.create(
         function="remove_trust",
         payload_size=0,
-        fee=r.json()["fee"],
+        fee=response.json()["fee"],
     )
-    return Response(r.json())
+    return Response(response.json())
 
 
 @api_view(["POST"])
@@ -447,10 +446,10 @@ def remove_trust(request):
     TrustConnection.objects.filter(
         user=request.user, trusted_user=trust_target
     ).delete()
-    r = requests.post(
+    response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/remove_trust", data=payload
     )
-    return Response(r.json())
+    return Response(response.json())
 
 
 @api_view(["POST"])
@@ -463,16 +462,16 @@ def get_fee_for_request_trust(request):
     }
     if not payload["mnemonic"]:
         return Response({"error": "user does not have a blockchain account"})
-    r = requests.post(
+    response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_request_trust",
         data=payload,
     )
     Transaction.objects.create(
         function="request_trust",
         payload_size=0,
-        fee=r.json()["fee"],
+        fee=response.json()["fee"],
     )
-    return Response(r.json())
+    return Response(response.json())
 
 
 @api_view(["POST"])
@@ -491,10 +490,10 @@ def request_trust(request):
     if not trust_target:
         return Response({"error": "user does not exist"})
     TrustRequest.objects.update_or_create(user=request.user, trusted_user=trust_target)
-    r = requests.post(
+    response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/request_trust", data=payload
     )
-    return Response(r.json())
+    return Response(response.json())
 
 
 @api_view(["POST"])
@@ -507,16 +506,16 @@ def get_fee_for_cancel_trust_request(request):
     }
     if not payload["mnemonic"]:
         return Response({"error": "user does not have a blockchain account"})
-    r = requests.post(
+    response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_cancel_trust_request",
         data=payload,
     )
     Transaction.objects.create(
         function="cancel_trust_request",
         payload_size=0,
-        fee=r.json()["fee"],
+        fee=response.json()["fee"],
     )
-    return Response(r.json())
+    return Response(response.json())
 
 
 @api_view(["POST"])
@@ -535,11 +534,11 @@ def cancel_trust_request(request):
     if not trust_target:
         return Response({"error": "user does not exist"})
     TrustRequest.objects.filter(user=request.user, trusted_user=trust_target).delete()
-    r = requests.post(
+    response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/cancel_trust_request",
         data=payload,
     )
-    return Response(r.json())
+    return Response(response.json())
 
 
 @api_view(["GET"])

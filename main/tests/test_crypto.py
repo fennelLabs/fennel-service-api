@@ -6,7 +6,7 @@ from main.models import UserKeys
 
 def test_get_dh_public_key_by_username():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     response = client.post(
         "/v1/auth/register/",
         {
@@ -17,7 +17,7 @@ def test_get_dh_public_key_by_username():
     )
     assert response.status_code == 200
     assert response.json()["token"] is not None
-    user = User.objects.get(username="public_key_by_username_test")
+    user = user_model.objects.get(username="public_key_by_username_test")
     UserKeys.objects.update_or_create(
         user=user,
         public_diffie_hellman_key="test",
@@ -31,13 +31,13 @@ def test_get_dh_public_key_by_username():
     assert response.status_code == 200
     assert response.json()["public_key"] is not None
     assert response.json()["public_key"] == "test"
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     UserKeys.objects.all().delete()
 
 
 def test_get_dh_public_key_by_address():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     response = client.post(
         "/v1/auth/register/",
         {
@@ -48,7 +48,7 @@ def test_get_dh_public_key_by_address():
     )
     assert response.status_code == 200
     assert response.json()["token"] is not None
-    user = User.objects.get(username="public_key_by_address_test")
+    user = user_model.objects.get(username="public_key_by_address_test")
     UserKeys.objects.update_or_create(
         user=user,
         public_diffie_hellman_key="test",
@@ -63,13 +63,13 @@ def test_get_dh_public_key_by_address():
     assert response.status_code == 200
     assert response.json()["public_key"] is not None
     assert response.json()["public_key"] == "test"
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     UserKeys.objects.all().delete()
 
 
 def test_check_if_encrypted():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     response = client.post(
         "/v1/auth/register/",
         {
@@ -89,13 +89,13 @@ def test_check_if_encrypted():
     )
     assert response.status_code == 200
     assert response.json()["encrypted"] is not None
-    assert response.json()["encrypted"] == False
-    User.objects.all().delete()
+    assert not response.json()["encrypted"]
+    user_model.objects.all().delete()
 
 
 def test_check_if_encrypted_true():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     response = client.post(
         "/v1/auth/register/",
         {
@@ -115,13 +115,13 @@ def test_check_if_encrypted_true():
     )
     assert response.status_code == 200
     assert response.json()["encrypted"] is not None
-    assert response.json()["encrypted"] == True
-    User.objects.all().delete()
+    assert response.json()["encrypted"]
+    user_model.objects.all().delete()
 
 
 def test_encrypt_message():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     response = client.post(
         "/v1/auth/register/",
         {
@@ -142,12 +142,12 @@ def test_encrypt_message():
     )
     assert response.status_code == 200
     assert response.json()["encrypted"] is not None
-    User.objects.all().delete()
+    user_model.objects.all().delete()
 
 
 def test_decrypt_message():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     response = client.post(
         "/v1/auth/register/",
         {
@@ -168,4 +168,4 @@ def test_decrypt_message():
     )
     assert response.status_code == 200
     assert response.json()["decrypted"] is not None
-    User.objects.all().delete()
+    user_model.objects.all().delete()

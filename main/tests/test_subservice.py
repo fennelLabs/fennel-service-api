@@ -12,8 +12,8 @@ def test_create_account():
     )
     assert auth_response.status_code == 200
     assert auth_response.json()["token"] is not None
-    User = get_user_model()
-    user = User.objects.get(username="test")
+    user_model = get_user_model()
+    user = user_model.objects.get(username="test")
     account_response = client.post(
         "/v1/fennel/create_account/",
         HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
@@ -32,8 +32,8 @@ def test_create_account_userkey_exists_no_mnemonic():
     )
     assert auth_response.status_code == 200
     assert auth_response.json()["token"] is not None
-    User = get_user_model()
-    user = User.objects.get(username="test")
+    user_model = get_user_model()
+    user = user_model.objects.get(username="test")
     UserKeys.objects.create(user=user)
     account_response = client.post(
         "/v1/fennel/create_account/",
@@ -53,8 +53,8 @@ def test_create_account_mnemomic_exists():
     )
     assert auth_response.status_code == 200
     assert auth_response.json()["token"] is not None
-    User = get_user_model()
-    user = User.objects.get(username="test")
+    user_model = get_user_model()
+    user = user_model.objects.get(username="test")
     client.post(
         "/v1/fennel/create_account/",
         HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
@@ -77,11 +77,11 @@ def test_get_account_balance_no_account():
     )
     assert response.status_code == 200
     assert response.json()["token"] is not None
-    User = get_user_model()
+    user_model = get_user_model()
     response = client.post(
         "/v1/fennel/get_account_balance/",
         HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
     )
-    User.objects.get(username="test").delete()
+    user_model.objects.get(username="test").delete()
     assert response.status_code == 200
     assert response.json()["error"] == "user does not have an account"

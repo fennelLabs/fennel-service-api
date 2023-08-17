@@ -5,7 +5,7 @@ from main.models import APIGroup, UserKeys
 
 def test_create_self_custodial_account():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     auth_response = client.post(
         "/v1/auth/register/",
         {
@@ -16,7 +16,7 @@ def test_create_self_custodial_account():
     )
     assert auth_response.status_code == 200
     assert auth_response.json()["token"] is not None
-    user = User.objects.get(username="create_self_custodial_account_test")
+    user = user_model.objects.get(username="create_self_custodial_account_test")
     response = client.post(
         "/v1/group/create/",
         {"api_group_name": "test", "email": "test@test.com"},
@@ -35,14 +35,14 @@ def test_create_self_custodial_account():
     assert UserKeys.objects.filter(user=user).first().key_shard != ""
     assert response.json()["user_shard"] is not None
     assert response.json()["recovery_shard"] is not None
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     UserKeys.objects.all().delete()
     APIGroup.objects.all().delete()
 
 
 def test_reconstruct_self_custodial_account():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     auth_response = client.post(
         "/v1/auth/register/",
         {
@@ -53,7 +53,7 @@ def test_reconstruct_self_custodial_account():
     )
     assert auth_response.status_code == 200
     assert auth_response.json()["token"] is not None
-    user = User.objects.get(username="reconstruct_self_custodial_account_test")
+    user = user_model.objects.get(username="reconstruct_self_custodial_account_test")
     response = client.post(
         "/v1/group/create/",
         {"api_group_name": "test", "email": "test@test.com"},
@@ -91,14 +91,14 @@ def test_reconstruct_self_custodial_account():
     )
     assert response.status_code == 200
     assert response.json()["mnemonic"] is not None
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     UserKeys.objects.all().delete()
     APIGroup.objects.all().delete()
 
 
 def test_get_self_custodial_account_address():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     auth_response = client.post(
         "/v1/auth/register/",
         {
@@ -109,7 +109,7 @@ def test_get_self_custodial_account_address():
     )
     assert auth_response.status_code == 200
     assert auth_response.json()["token"] is not None
-    user = User.objects.get(username="get_self_custodial_account_address_test")
+    user = user_model.objects.get(username="get_self_custodial_account_address_test")
     response = client.post(
         "/v1/group/create/",
         {"api_group_name": "test", "email": "test_group@test.com"},
@@ -161,6 +161,6 @@ def test_get_self_custodial_account_address():
     assert response.status_code == 200
     assert response.json()["address"] is not None
     assert response.json()["address"] == address
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     UserKeys.objects.all().delete()
     APIGroup.objects.all().delete()

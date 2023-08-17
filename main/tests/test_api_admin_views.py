@@ -6,7 +6,7 @@ from main.models import APIGroup, UserKeys
 
 def test_create_new_api_group():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     auth_response = client.post(
         "/v1/auth/register/",
         {
@@ -37,13 +37,13 @@ def test_create_new_api_group():
     assert group is not None
     assert group.name == "test_create_new_api_group"
     assert group.admin_list.filter(username="test_create_new_api_group").exists()
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     APIGroup.objects.all().delete()
 
 
 def test_add_user_to_api_group():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     auth_response = client.post(
         "/v1/auth/register/",
         {
@@ -94,13 +94,13 @@ def test_add_user_to_api_group():
     )
     assert response.status_code == 200
     assert group.user_list.filter(username="test_add_user_to_api_group_two").exists()
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     APIGroup.objects.all().delete()
 
 
 def test_add_user_to_api_group_as_non_admin():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     auth_response = client.post(
         "/v1/auth/register/",
         {
@@ -168,13 +168,13 @@ def test_add_user_to_api_group_as_non_admin():
     assert group.user_list.filter(
         username="test_add_user_to_api_group_as_non_admin_two"
     ).exists()
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     APIGroup.objects.all().delete()
 
 
 def test_remove_user_from_api_group():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     auth_response = client.post(
         "/v1/auth/register/",
         {
@@ -241,13 +241,13 @@ def test_remove_user_from_api_group():
     assert not group.user_list.filter(
         username="test_remove_user_from_api_group_two"
     ).exists()
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     APIGroup.objects.all().delete()
 
 
 def test_remove_user_from_api_group_as_non_admin():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     auth_response = client.post(
         "/v1/auth/register/",
         {
@@ -313,13 +313,13 @@ def test_remove_user_from_api_group_as_non_admin():
     assert group.user_list.filter(
         username="test_remove_user_from_api_group_two"
     ).exists()
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     APIGroup.objects.all().delete()
 
 
 def test_remove_user_from_api_group_not_in_group():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     auth_response = client.post(
         "/v1/auth/register/",
         {
@@ -372,13 +372,13 @@ def test_remove_user_from_api_group_not_in_group():
     assert not group.user_list.filter(
         username="test_remove_user_from_api_group_two"
     ).exists()
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     APIGroup.objects.all().delete()
 
 
 def test_add_admin_to_api_group():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     auth_response = client.post(
         "/v1/auth/register/",
         {
@@ -441,13 +441,13 @@ def test_add_admin_to_api_group():
     )
     assert response.status_code == 200
     assert group.admin_list.filter(username="test_add_admin_to_api_group_two").exists()
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     APIGroup.objects.all().delete()
 
 
 def test_add_admin_to_api_group_as_non_admin():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     auth_response = client.post(
         "/v1/auth/register/",
         {
@@ -529,13 +529,13 @@ def test_add_admin_to_api_group_as_non_admin():
     assert not group.admin_list.filter(
         username="test_add_admin_to_api_group_as_non_admin_two"
     ).exists()
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     APIGroup.objects.all().delete()
 
 
 def test_add_admin_to_api_group_already_in_group():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     auth_response = client.post(
         "/v1/auth/register/",
         {
@@ -607,13 +607,13 @@ def test_add_admin_to_api_group_already_in_group():
     assert group.user_list.filter(
         username="test_add_admin_to_api_group_already_in_group_two"
     ).exists()
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     APIGroup.objects.all().delete()
 
 
 def test_remove_admin_from_api_group():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     auth_response = client.post(
         "/v1/auth/register/",
         {
@@ -694,13 +694,13 @@ def test_remove_admin_from_api_group():
     assert not group.admin_list.filter(
         username="test_remove_admin_from_api_group_two"
     ).exists()
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     APIGroup.objects.all().delete()
 
 
 def test_remove_admin_from_api_group_as_non_admin():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     auth_response = client.post(
         "/v1/auth/register/",
         {
@@ -737,7 +737,6 @@ def test_remove_admin_from_api_group_as_non_admin():
     )
     assert login_response.status_code == 200
     token = login_response.json()["token"]
-    token_two = auth_response_two.json()["token"]
     token_three = auth_response_three.json()["token"]
     assert token is not None
     response = client.post(
@@ -811,13 +810,13 @@ def test_remove_admin_from_api_group_as_non_admin():
     assert group.admin_list.filter(
         username="test_remove_admin_from_api_group_as_non_admin_two"
     ).exists()
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     APIGroup.objects.all().delete()
 
 
 def test_remove_admin_from_api_group_not_in_group():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     auth_response = client.post(
         "/v1/auth/register/",
         {
@@ -855,7 +854,6 @@ def test_remove_admin_from_api_group_not_in_group():
     assert login_response.status_code == 200
     token = login_response.json()["token"]
     token_two = auth_response_two.json()["token"]
-    token_three = auth_response_three.json()["token"]
     assert token is not None
     response = client.post(
         "/v1/group/create/",
@@ -931,13 +929,13 @@ def test_remove_admin_from_api_group_not_in_group():
     assert not group.admin_list.filter(
         username="test_remove_admin_from_api_group_not_in_group_three"
     ).exists()
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     APIGroup.objects.all().delete()
 
 
 def test_get_api_group_users():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     auth_response = client.post(
         "/v1/auth/register/",
         {
@@ -968,11 +966,11 @@ def test_get_api_group_users():
     token_two = auth_response_two.json()["token"]
     assert token is not None
     UserKeys.objects.create(
-        user=User.objects.get(username="test_get_api_group_users"),
+        user=user_model.objects.get(username="test_get_api_group_users"),
         mnemonic="test_get_api_group_users",
     )
     UserKeys.objects.create(
-        user=User.objects.get(username="test_get_api_group_users_two"),
+        user=user_model.objects.get(username="test_get_api_group_users_two"),
         mnemonic="test_get_api_group_users_two",
     )
     response = client.post(
@@ -1013,14 +1011,14 @@ def test_get_api_group_users():
     assert len(response.json()) == 2
     assert response.json()[0]["username"] == "test_get_api_group_users"
     assert response.json()[1]["username"] == "test_get_api_group_users_two"
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     APIGroup.objects.all().delete()
     UserKeys.objects.all().delete()
 
 
 def test_get_api_group_list():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     auth_response = client.post(
         "/v1/auth/register/",
         {
@@ -1029,7 +1027,7 @@ def test_get_api_group_list():
             "email": "test_get_api_group_list@test.com",
         },
     )
-    user = User.objects.get(username="test_get_api_group_list")
+    user = user_model.objects.get(username="test_get_api_group_list")
     Group.objects.get_or_create(name="FennelAdmin")[0].user_set.add(user)
     assert auth_response.status_code == 200
     token = auth_response.json()["token"]
@@ -1050,6 +1048,6 @@ def test_get_api_group_list():
     assert response.status_code == 200
     assert len(response.json()) == 1
     assert response.json()[0]["api_group_name"] == "test_get_api_group_list"
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     APIGroup.objects.all().delete()
     Group.objects.all().delete()

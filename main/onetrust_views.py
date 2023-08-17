@@ -33,10 +33,12 @@ def create_self_custodial_account(request):
             keys = UserKeys.objects.get(user=request.user)
     else:
         keys = UserKeys.objects.create(user=request.user)
-    r = requests.get(f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/create_account")
-    mnemonic = r.json()["mnemonic"]
-    public_key = r.json()["publicKey"]
-    address = r.json()["address"]
+    response = requests.get(
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/create_account"
+    )
+    mnemonic = response.json()["mnemonic"]
+    public_key = response.json()["publicKey"]
+    address = response.json()["address"]
     key_shards = split_mnemonic(mnemonic)
     keys.key_shard = str(key_shards[1])
     keys.blockchain_public_key = public_key
@@ -85,11 +87,11 @@ def download_self_custodial_account_as_json(request):
     mnemonic = reconstruct_mnemonic(key_shards)
     try:
         payload = {"mnemonic": mnemonic}
-        r = requests.post(
+        response = requests.post(
             f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/download_account_as_json",
             data=payload,
         )
-        return Response(r.json())
+        return Response(response.json())
     except Exception:
         return Response({"error": "could not get account json"})
 
@@ -101,7 +103,7 @@ def download_self_custodial_account_as_json(request):
 @subject_to_api_limit
 def get_self_custodial_account_address(request):
     payload = {"mnemonic": request.data["mnemonic"]}
-    r = requests.post(
+    response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_address", data=payload
     )
-    return Response(r.json())
+    return Response(response.json())

@@ -9,8 +9,7 @@ def fennel_admin_only(view_func):
         # Check if request.user is a FennelAdmin
         if request.user.groups.filter(name="FennelAdmin").exists():
             return view_func(request, *args, **kwargs)
-        else:
-            return Response({"error": "permission denied."}, status=400)
+        return Response({"error": "permission denied."}, status=400)
 
     return wrap
 
@@ -23,7 +22,7 @@ def subject_to_api_limit(view_func):
             api_group = get_object_or_404(
                 APIGroup, api_key=api_key, api_secret=api_secret
             )
-            if not request.user in api_group.user_list.all():
+            if request.user not in api_group.user_list.all():
                 return Response(
                     {"error": "you don't have access to this api group"}, status=400
                 )
@@ -37,7 +36,6 @@ def subject_to_api_limit(view_func):
             api_group.request_counter += 1
             api_group.save()
             return view_func(request, *args, **kwargs)
-        else:
-            return Response({"error": "API key and secret required."}, status=400)
+        return Response({"error": "API key and secret required."}, status=400)
 
     return wrap

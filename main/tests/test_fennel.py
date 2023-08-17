@@ -1,15 +1,15 @@
 from django.test.client import Client
 from django.contrib.auth import get_user_model
+from model_bakery import baker
 from main.models import Transaction, Signal, ConfirmationRecord, UserKeys
 from main.fennel_views import (
     __record_signal_fee,
 )
-from model_bakery import baker
 
 
 def test_create_account():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     auth_response = client.post(
         "/v1/auth/register/",
         {
@@ -31,14 +31,14 @@ def test_create_account():
     )
     assert response.status_code == 200
     assert response.json()["address"] is not None
-    User.objects.all().delete()
+    user_model.objects.all().delete()
 
 
 def test_get_fee_history_count():
     for _ in range(100):
         baker.make("main.Transaction")
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     response = client.post(
         "/v1/auth/register/",
         {
@@ -56,14 +56,14 @@ def test_get_fee_history_count():
     assert response.status_code == 200
     assert len(response.json()) == 10
     Transaction.objects.all().delete()
-    User.objects.all().delete()
+    user_model.objects.all().delete()
 
 
 def test_get_fee_history():
     for _ in range(100):
         baker.make("main.Transaction")
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     response = client.post(
         "/v1/auth/register/",
         {
@@ -81,12 +81,12 @@ def test_get_fee_history():
     assert response.status_code == 200
     assert len(response.json()) == 100
     Transaction.objects.all().delete()
-    User.objects.all().delete()
+    user_model.objects.all().delete()
 
 
 def test_get_signals():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     response = client.post(
         "/v1/auth/register/",
         {
@@ -97,7 +97,7 @@ def test_get_signals():
     )
     assert response.status_code == 200
     assert response.json()["token"] is not None
-    user = User.objects.get(username="signals_test")
+    user = user_model.objects.get(username="signals_test")
     UserKeys.objects.update_or_create(
         user=user,
         address="test",
@@ -111,12 +111,12 @@ def test_get_signals():
     assert response.status_code == 200
     assert len(response.json()) == 100
     Signal.objects.all().delete()
-    User.objects.all().delete()
+    user_model.objects.all().delete()
 
 
 def test_confirm_signal():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     response = client.post(
         "/v1/auth/register/",
         {
@@ -127,7 +127,7 @@ def test_confirm_signal():
     )
     assert response.status_code == 200
     assert response.json()["token"] is not None
-    user = User.objects.get(username="confirm_signal_test")
+    user = user_model.objects.get(username="confirm_signal_test")
     signal = baker.make("main.Signal", sender=user)
     response = client.post(
         "/v1/fennel/confirm_signal/",
@@ -140,13 +140,13 @@ def test_confirm_signal():
     assert confirmation is not None
     assert confirmation.confirmer == user
     Signal.objects.all().delete()
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     ConfirmationRecord.objects.all().delete()
 
 
 def test_confirm_signal_updates():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     auth_response = client.post(
         "/v1/auth/register/",
         {
@@ -157,7 +157,7 @@ def test_confirm_signal_updates():
     )
     assert auth_response.status_code == 200
     assert auth_response.json()["token"] is not None
-    user = User.objects.get(username="confirm_signal_test")
+    user = user_model.objects.get(username="confirm_signal_test")
     signal = baker.make("main.Signal", sender=user)
     response = client.post(
         "/v1/fennel/confirm_signal/",
@@ -178,13 +178,13 @@ def test_confirm_signal_updates():
     assert response.json()["status"] == "ok"
     assert len(ConfirmationRecord.objects.filter(signal=signal)) == 1
     Signal.objects.all().delete()
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     ConfirmationRecord.objects.all().delete()
 
 
 def test_signal_confirmation_list():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     auth_response = client.post(
         "/v1/auth/register/",
         {
@@ -195,7 +195,7 @@ def test_signal_confirmation_list():
     )
     assert auth_response.status_code == 200
     assert auth_response.json()["token"] is not None
-    user = User.objects.get(username="confirm_signal_list_test")
+    user = user_model.objects.get(username="confirm_signal_list_test")
     UserKeys.objects.update_or_create(
         user=user,
         address="test",
@@ -219,13 +219,13 @@ def test_signal_confirmation_list():
     assert len(response.json()) == 1
     assert len(response.json()[0]["confirmations"]) == 1
     Signal.objects.all().delete()
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     ConfirmationRecord.objects.all().delete()
 
 
 def test_get_signals_address_included():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     response = client.post(
         "/v1/auth/register/",
         {
@@ -236,7 +236,7 @@ def test_get_signals_address_included():
     )
     assert response.status_code == 200
     assert response.json()["token"] is not None
-    user = User.objects.get(username="signals_test")
+    user = user_model.objects.get(username="signals_test")
     UserKeys.objects.update_or_create(
         user=user,
         address="test",
@@ -251,12 +251,12 @@ def test_get_signals_address_included():
     assert len(response.json()) == 100
     assert response.json()[0]["sender"]["address"] == "test"
     Signal.objects.all().delete()
-    User.objects.all().delete()
+    user_model.objects.all().delete()
 
 
 def test_get_signals_count():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     response = client.post(
         "/v1/auth/register/",
         {
@@ -267,7 +267,7 @@ def test_get_signals_count():
     )
     assert response.status_code == 200
     assert response.json()["token"] is not None
-    user = User.objects.get(username="signals_count_test")
+    user = user_model.objects.get(username="signals_count_test")
     UserKeys.objects.update_or_create(
         user=user,
         address="test",
@@ -281,12 +281,12 @@ def test_get_signals_count():
     assert response.status_code == 200
     assert len(response.json()) == 10
     Signal.objects.all().delete()
-    User.objects.all().delete()
+    user_model.objects.all().delete()
 
 
 def test_get_unsynced_signals():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     response = client.post(
         "/v1/auth/register/",
         {
@@ -297,7 +297,7 @@ def test_get_unsynced_signals():
     )
     assert response.status_code == 200
     assert response.json()["token"] is not None
-    user = User.objects.get(username="unsynced_signals_test")
+    user = user_model.objects.get(username="unsynced_signals_test")
     for _ in range(100):
         baker.make("main.Signal", sender=user)
     response = client.get(
@@ -307,12 +307,12 @@ def test_get_unsynced_signals():
     assert response.status_code == 200
     assert len(response.json()) == 100
     Signal.objects.all().delete()
-    User.objects.all().delete()
+    user_model.objects.all().delete()
 
 
 def test_record_signal_fee():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     auth_response = client.post(
         "/v1/auth/register/",
         {
@@ -323,7 +323,7 @@ def test_record_signal_fee():
     )
     assert auth_response.status_code == 200
     assert auth_response.json()["token"] is not None
-    user = User.objects.get(username="record_signal_fee_test")
+    user = user_model.objects.get(username="record_signal_fee_test")
     response = client.post(
         "/v1/fennel/create_account/",
         HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
@@ -337,13 +337,13 @@ def test_record_signal_fee():
     response = __record_signal_fee(payload)
     assert response["fee"] is not None
     assert response["fee"] > 0
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     UserKeys.objects.all().delete()
 
 
 def test_get_fee_for_new_signal():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     auth_response = client.post(
         "/v1/auth/register/",
         {
@@ -354,7 +354,7 @@ def test_get_fee_for_new_signal():
     )
     assert auth_response.status_code == 200
     assert auth_response.json()["token"] is not None
-    user = User.objects.get(username="get_fee_for_new_signal_test")
+    user = user_model.objects.get(username="get_fee_for_new_signal_test")
     response = client.post(
         "/v1/fennel/create_account/",
         HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
@@ -373,13 +373,13 @@ def test_get_fee_for_new_signal():
     assert response.status_code == 200
     assert response.json()["fee"] is not None
     assert response.json()["fee"] > 0
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     UserKeys.objects.all().delete()
 
 
 def test_get_address_no_error_when_userkeys_is_none():
     client = Client()
-    User = get_user_model()
+    user_model = get_user_model()
     response = client.post(
         "/v1/auth/register/",
         {
@@ -395,5 +395,5 @@ def test_get_address_no_error_when_userkeys_is_none():
         HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
     )
     assert response.status_code == 400
-    User.objects.all().delete()
+    user_model.objects.all().delete()
     UserKeys.objects.all().delete()

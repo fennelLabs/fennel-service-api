@@ -10,10 +10,10 @@ import os
 
 @api_view(["GET"])
 def fennel_cli_healthcheck(request):
-    r = requests.get(
+    response = requests.get(
         "{0}/v1/hello_there/".format(os.environ.get("FENNEL_CLI_IP", None))
     )
-    if r.status_code == 200:
+    if response.status_code == 200:
         return Response("Ok")
     else:
         raise Http404
@@ -34,14 +34,14 @@ def whiteflag_authenticate(request):
             "verificationData": request.data["verificationData"],
         }
     )
-    r = requests.post(
+    response = requests.post(
         "{0}/v1/whiteflag_encode".format(os.environ.get("FENNEL_CLI_IP", None)),
         data=payload,
     )
     try:
-        return Response(r.json())
+        return Response(response.json())
     except:
-        return Response(r.text)
+        return Response(response.text)
 
 
 @api_view(["POST"])
@@ -59,69 +59,72 @@ def whiteflag_discontinue_authentication(request):
             "verificationData": request.data["verificationData"],
         }
     )
-    r = requests.post(
+    response = requests.post(
         "{0}/v1/whiteflag_encode".format(os.environ.get("FENNEL_CLI_IP", None)),
         data=payload,
     )
     try:
-        return Response(r.json())
+        return Response(response.json())
     except:
-        return Response(r.text)
+        return Response(response.text)
 
 
 @api_view(["POST"])
 def whiteflag_encode(request):
-    json_packet = {"prefix": "WF", "version": "1"}
-    json_packet["encryptionIndicator"] = request.data.get("encryptionIndicator", None)
-    json_packet["duressIndicator"] = request.data.get("duressIndicator", None)
-    json_packet["messageCode"] = request.data.get("messageCode", None)
-    json_packet["referenceIndicator"] = request.data.get("referenceIndicator", None)
-    json_packet["referencedMessage"] = request.data.get("referencedMessage", None)
-    json_packet["verificationMethod"] = request.data.get("verificationMethod", None)
-    json_packet["verificationData"] = request.data.get("verificationData", None)
-    json_packet["cryptoDataType"] = request.data.get("cryptoDataType", None)
-    json_packet["cryptoData"] = request.data.get("cryptoData", None)
-    json_packet["text"] = request.data.get("text", None)
-    json_packet["resourceMethod"] = request.data.get("resourceMethod", None)
-    json_packet["resourceData"] = request.data.get("resourceData", None)
-    json_packet["pseudoMessageCode"] = request.data.get("pseudoMessageCode", None)
-    json_packet["subjectCode"] = request.data.get("subjectCode", None)
-    json_packet["datetime"] = request.data.get("datetime", None)
-    json_packet["duration"] = request.data.get("duration", None)
-    json_packet["objectType"] = request.data.get("objectType", None)
-    json_packet["objectLatitude"] = request.data.get("objectLatitude", None)
-    json_packet["objectLongitude"] = request.data.get("objectLongitude", None)
-    json_packet["objectSizeDim1"] = request.data.get("objectSizeDim1", None)
-    json_packet["objectSizeDim2"] = request.data.get("objectSizeDim2", None)
-    json_packet["objectOrientation"] = request.data.get("objectOrientation", None)
-    json_packet["objectTypeQuant"] = request.data.get("objectTypeQuant", None)
+    json_packet = {
+        "prefix": "WF",
+        "version": "1",
+        "encryptionIndicator": request.data.get("encryptionIndicator", None),
+        "duressIndicator": request.data.get("duressIndicator", None),
+        "messageCode": request.data.get("messageCode", None),
+        "referenceIndicator": request.data.get("referenceIndicator", None),
+        "referencedMessage": request.data.get("referencedMessage", None),
+        "verificationMethod": request.data.get("verificationMethod", None),
+        "verificationData": request.data.get("verificationData", None),
+        "cryptoDataType": request.data.get("cryptoDataType", None),
+        "cryptoData": request.data.get("cryptoData", None),
+        "text": request.data.get("text", None),
+        "resourceMethod": request.data.get("resourceMethod", None),
+        "resourceData": request.data.get("resourceData", None),
+        "pseudoMessageCode": request.data.get("pseudoMessageCode", None),
+        "subjectCode": request.data.get("subjectCode", None),
+        "datetime": request.data.get("datetime", None),
+        "duration": request.data.get("duration", None),
+        "objectType": request.data.get("objectType", None),
+        "objectLatitude": request.data.get("objectLatitude", None),
+        "objectLongitude": request.data.get("objectLongitude", None),
+        "objectSizeDim1": request.data.get("objectSizeDim1", None),
+        "objectSizeDim2": request.data.get("objectSizeDim2", None),
+        "objectOrientation": request.data.get("objectOrientation", None),
+        "objectTypeQuant": request.data.get("objectTypeQuant", None),
+    }
     payload = json.dumps({k: v for k, v in json_packet.items() if v})
-    r = requests.post(
+    response = requests.post(
         "{0}/v1/whiteflag_encode".format(os.environ.get("FENNEL_CLI_IP", None)),
         data=payload,
     )
     try:
-        return Response(r.json())
+        return Response(response.json())
     except:
-        return Response(r.text)
+        return Response(response.text)
 
 
 @api_view(["POST"])
 def whiteflag_decode(request):
     payload = json.dumps(request.data["message"])
-    r = requests.post(
+    response = requests.post(
         "{0}/v1/whiteflag_decode".format(os.environ.get("FENNEL_CLI_IP", None)),
         data=payload,
     )
-    return Response(json.loads(r.json()))
+    return Response(json.loads(response.json()))
 
 
 @api_view(["GET"])
 def whiteflag_generate_shared_token(request):
-    r = {
+    response = {
         "sharedToken": str(uuid.uuid4()),
     }
-    return Response(r)
+    return Response(response)
 
 
 @api_view(["POST"])
@@ -134,5 +137,5 @@ def whiteflag_generate_public_token(request):
     )
     h = hashlib.sha3_512()
     h.update(payload.encode("utf-8"))
-    r = h.hexdigest()
-    return Response(r)
+    response = h.hexdigest()
+    return Response(response)
