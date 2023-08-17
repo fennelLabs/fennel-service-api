@@ -111,8 +111,19 @@ def get_account_balance(request):
 @permission_classes([IsAuthenticated])
 def get_address(request):
     key = UserKeys.objects.filter(user=request.user).first()
+    if not key:
+        UserKeys.objects.create(user=request.user)
+        key = UserKeys.objects.filter(user=request.user).first()
     if key.address:
         return Response({"address": key.address})
+    if not key.mnemonic:
+        return Response(
+            {
+                "error": "user does not have a blockchain account",
+                "fix": "call /v1/fennel/create_account first",
+            },
+            status=400,
+        )
     payload = {"mnemonic": key.mnemonic}
     r = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_address", data=payload

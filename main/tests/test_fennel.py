@@ -375,3 +375,25 @@ def test_get_fee_for_new_signal():
     assert response.json()["fee"] > 0
     User.objects.all().delete()
     UserKeys.objects.all().delete()
+
+
+def test_get_address_no_error_when_userkeys_is_none():
+    client = Client()
+    User = get_user_model()
+    response = client.post(
+        "/v1/auth/register/",
+        {
+            "username": "no_error_when_address_is_none_test",
+            "password": "no_error_when_address_is_none_test",
+            "email": "no_error_when_address_is_none_test@test.com",
+        },
+    )
+    assert response.status_code == 200
+    assert response.json()["token"] is not None
+    response = client.post(
+        "/v1/fennel/get_address/",
+        HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
+    )
+    assert response.status_code == 400
+    User.objects.all().delete()
+    UserKeys.objects.all().delete()
