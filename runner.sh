@@ -70,6 +70,7 @@ function setup() {
   python manage.py createadmin
 }
 
+mkdir -p profile
 case "$1" in
 
 check)
