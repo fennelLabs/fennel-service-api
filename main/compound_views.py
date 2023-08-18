@@ -1,15 +1,19 @@
-import requests
 import os
 import json
+
 from rest_framework.decorators import (
     api_view,
     authentication_classes,
     permission_classes,
 )
 from rest_framework.response import Response
-from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from .models import Signal, UserKeys, ConfirmationRecord
+
+from knox.auth import TokenAuthentication
+
+import requests
+
+from main.models import Signal, UserKeys, ConfirmationRecord
 
 
 def __decode(signal: str) -> dict:
@@ -20,13 +24,12 @@ def __decode(signal: str) -> dict:
             "encryptionIndicator": "1",
             "signal_body": signal[8:],
         }
-    else:
-        signal = json.dumps(signal)
-        response = requests.post(
-            "{0}/v1/whiteflag_decode".format(os.environ.get("FENNEL_CLI_IP", None)),
-            data=signal,
-        )
-        return json.loads(response.json())
+    signal = json.dumps(signal)
+    response = requests.post(
+        f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_decode",
+        data=signal,
+    )
+    return json.loads(response.json())
 
 
 @api_view(["POST"])
@@ -35,7 +38,7 @@ def __decode(signal: str) -> dict:
 def decode_list(request):
     try:
         signals = request.data.getlist("signals")
-    except:
+    except AttributeError:
         signals = request.data.get("signals")
     if signals is None:
         return Response({"message": "No signals given"}, status=400)

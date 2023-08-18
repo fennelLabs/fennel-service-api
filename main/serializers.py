@@ -4,14 +4,12 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 
 
-# User Serializer
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("id", "username", "email")
 
 
-# Register Serializer
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -27,7 +25,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 
-# Login Serializer
+# pylint: disable=W0223
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(
@@ -49,6 +47,7 @@ class LoginSerializer(serializers.Serializer):
         return user
 
 
+# pylint: disable=W0223
 class ChangePasswordSerializer(serializers.Serializer):
     model = User
 
@@ -58,6 +57,7 @@ class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
 
+    # pylint: disable=R0201
     def validate_new_password(self, value):
         validate_password(value)
         return value

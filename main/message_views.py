@@ -1,14 +1,17 @@
+from django.contrib.auth import get_user_model
+
 from rest_framework.decorators import (
     api_view,
     authentication_classes,
     permission_classes,
 )
-from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
+from knox.auth import TokenAuthentication
+
 from main.forms import PrivateMessageForm
 from main.models import PrivateMessage
-from django.contrib.auth import get_user_model
 
 
 User = get_user_model()

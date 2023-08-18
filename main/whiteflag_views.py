@@ -1,22 +1,22 @@
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from django.http import Http404
-import requests
 import json
 import uuid
 import hashlib
 import os
 
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+from django.http import Http404
+
+import requests
+
 
 @api_view(["GET"])
 def fennel_cli_healthcheck(request):
-    response = requests.get(
-        "{0}/v1/hello_there/".format(os.environ.get("FENNEL_CLI_IP", None))
-    )
+    response = requests.get(f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/hello_there/")
     if response.status_code == 200:
         return Response("Ok")
-    else:
-        raise Http404
+    raise Http404
 
 
 @api_view(["POST"])
@@ -35,12 +35,12 @@ def whiteflag_authenticate(request):
         }
     )
     response = requests.post(
-        "{0}/v1/whiteflag_encode".format(os.environ.get("FENNEL_CLI_IP", None)),
+        f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_encode",
         data=payload,
     )
     try:
         return Response(response.json())
-    except:
+    except requests.JSONDecodeError:
         return Response(response.text)
 
 
@@ -60,12 +60,12 @@ def whiteflag_discontinue_authentication(request):
         }
     )
     response = requests.post(
-        "{0}/v1/whiteflag_encode".format(os.environ.get("FENNEL_CLI_IP", None)),
+        f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_encode",
         data=payload,
     )
     try:
         return Response(response.json())
-    except:
+    except requests.JSONDecodeError:
         return Response(response.text)
 
 
@@ -100,12 +100,12 @@ def whiteflag_encode(request):
     }
     payload = json.dumps({k: v for k, v in json_packet.items() if v})
     response = requests.post(
-        "{0}/v1/whiteflag_encode".format(os.environ.get("FENNEL_CLI_IP", None)),
+        f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_encode",
         data=payload,
     )
     try:
         return Response(response.json())
-    except:
+    except requests.JSONDecodeError:
         return Response(response.text)
 
 
@@ -113,7 +113,7 @@ def whiteflag_encode(request):
 def whiteflag_decode(request):
     payload = json.dumps(request.data["message"])
     response = requests.post(
-        "{0}/v1/whiteflag_decode".format(os.environ.get("FENNEL_CLI_IP", None)),
+        f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_decode",
         data=payload,
     )
     return Response(json.loads(response.json()))
@@ -135,7 +135,7 @@ def whiteflag_generate_public_token(request):
             "address": request.data["address"],
         }
     )
-    h = hashlib.sha3_512()
-    h.update(payload.encode("utf-8"))
-    response = h.hexdigest()
+    payload_hash = hashlib.sha3_512()
+    payload_hash.update(payload.encode("utf-8"))
+    response = payload_hash.hexdigest()
     return Response(response)

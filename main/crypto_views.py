@@ -45,7 +45,7 @@ def generate_diffie_hellman_keypair(request):
                 "secret_key": response.json()["secret"],
             }
         )
-    except Exception:
+    except requests.HTTPError:
         return Response({"error": "keypair not created"})
 
 
@@ -64,7 +64,7 @@ def get_diffie_hellman_shared_secret(request):
                 "shared_secret": response.json()["shared_secret"],
             }
         )
-    except Exception:
+    except requests.HTTPError:
         return Response({"error": "shared secret not created"})
 
 
@@ -81,7 +81,7 @@ def dh_encrypt_message(request):
             },
         )
         return Response({"success": "message encrypted", "encrypted": response.text})
-    except Exception:
+    except requests.HTTPError:
         return Response({"error": "message not encrypted"})
 
 
@@ -98,7 +98,7 @@ def dh_decrypt_message(request):
             },
         )
         return Response({"success": "message decrypted", "decrypted": response.text})
-    except Exception:
+    except requests.HTTPError:
         return Response({"error": "message not decrypted"})
 
 
@@ -128,7 +128,7 @@ def dh_encrypt_whiteflag_message(request):
                 ),
             }
         )
-    except Exception:
+    except requests.HTTPError:
         return Response({"error": "message not encrypted"})
 
 
@@ -153,7 +153,7 @@ def dh_decrypt_whiteflag_message(request):
                 "decrypted": (form.cleaned_data["message"][0:9] + response.text),
             }
         )
-    except Exception:
+    except requests.HTTPError:
         return Response({"error": "message not decrypted"})
 
 

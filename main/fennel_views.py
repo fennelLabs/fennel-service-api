@@ -1,14 +1,8 @@
+import os
+import datetime
+
 from django.shortcuts import get_object_or_404
 
-from main.forms import SignalForm
-from .models import (
-    Signal,
-    Transaction,
-    TrustConnection,
-    TrustRequest,
-    UserKeys,
-    ConfirmationRecord,
-)
 from rest_framework.decorators import (
     api_view,
     authentication_classes,
@@ -17,9 +11,18 @@ from rest_framework.decorators import (
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from knox.auth import TokenAuthentication
+
 import requests
-import os
-import datetime
+
+from main.forms import SignalForm
+from main.models import (
+    Signal,
+    Transaction,
+    TrustConnection,
+    TrustRequest,
+    UserKeys,
+    ConfirmationRecord,
+)
 
 
 def __record_signal_fee(payload: dict) -> dict:
@@ -47,8 +50,7 @@ def create_account(request):
                     "fix": "you can make other calls to /v1/fennel to get the address and balance",
                 }
             )
-        else:
-            keys = UserKeys.objects.get(user=request.user)
+        keys = UserKeys.objects.get(user=request.user)
     else:
         keys = UserKeys.objects.create(user=request.user)
     response = requests.get(
@@ -79,7 +81,7 @@ def download_account_as_json(request):
             data=payload,
         )
         return Response(response.json())
-    except Exception:
+    except requests.HTTPError:
         return Response({"error": "could not get account json"})
 
 
@@ -104,7 +106,7 @@ def get_account_balance(request):
         key.balance = response.json()["balance"]
         key.save()
         return Response(response.json())
-    except Exception:
+    except requests.HTTPError:
         return Response({"balance": key.balance})
 
 
@@ -192,7 +194,7 @@ def get_fee_for_new_signal(request):
     try:
         response = __record_signal_fee(payload)
         return Response(response)
-    except Exception:
+    except requests.HTTPError:
         return Response({"error": "could not get fee"})
 
 
@@ -223,7 +225,7 @@ def send_new_signal(request):
         signal.mempool_timestamp = datetime.datetime.now()
         signal.save()
         return Response(response.json())
-    except Exception:
+    except requests.HTTPError:
         return Response({"signal": "saved as unsynced"})
 
 
@@ -268,7 +270,7 @@ def sync_signal(request):
         signal.mempool_timestamp = datetime.datetime.now()
         signal.save()
         return Response(response.json())
-    except Exception:
+    except requests.HTTPError:
         return Response({"signal": "saved as unsynced"})
 
 

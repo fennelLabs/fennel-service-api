@@ -1,19 +1,25 @@
+import os
+import ast
+
 from django.shortcuts import get_object_or_404
+
 from rest_framework.decorators import (
     api_view,
     authentication_classes,
     permission_classes,
 )
 from rest_framework.response import Response
-from knox.auth import TokenAuthentication
-from silk.profiling.profiler import silk_profile
 from rest_framework.permissions import IsAuthenticated
-from .models import UserKeys
-from .secret_key_utils import split_mnemonic, reconstruct_mnemonic
-from .decorators import subject_to_api_limit
+
+from knox.auth import TokenAuthentication
+
+from silk.profiling.profiler import silk_profile
+
 import requests
-import os
-import ast
+
+from main.models import UserKeys
+from main.secret_key_utils import split_mnemonic, reconstruct_mnemonic
+from main.decorators import subject_to_api_limit
 
 
 @silk_profile(name="create_self_custodial_account")
@@ -29,8 +35,7 @@ def create_self_custodial_account(request):
                     "error": "user already has an account",
                 }
             )
-        else:
-            keys = UserKeys.objects.get(user=request.user)
+        keys = UserKeys.objects.get(user=request.user)
     else:
         keys = UserKeys.objects.create(user=request.user)
     response = requests.get(
@@ -92,7 +97,7 @@ def download_self_custodial_account_as_json(request):
             data=payload,
         )
         return Response(response.json())
-    except Exception:
+    except requests.HTTPError:
         return Response({"error": "could not get account json"})
 
 

@@ -1,24 +1,30 @@
-from rest_framework.generics import ListCreateAPIView
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from datetime import timedelta
+from typing import Any
+
 from django.contrib.auth.models import User
-from rest_framework import generics
-from knox.models import AuthToken
-from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
 from django.contrib.auth import login
-from .serializers import ChangePasswordSerializer
-from rest_framework.generics import UpdateAPIView
+from django.utils import timezone
 from django.dispatch import receiver
-from django_rest_passwordreset.signals import reset_password_token_created
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
+
+from knox.models import AuthToken
+
 from rest_framework.views import APIView
 from rest_framework import parsers, renderers, status
 from rest_framework.response import Response
-from .serializers import CustomTokenSerializer
+from rest_framework.generics import ListCreateAPIView
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework import generics
+from rest_framework.generics import UpdateAPIView
+
 from django_rest_passwordreset.models import ResetPasswordToken
 from django_rest_passwordreset.views import get_password_reset_token_expiry_time
-from django.utils import timezone
-from datetime import timedelta
+from django_rest_passwordreset.signals import reset_password_token_created
+
+from main.serializers import RegisterSerializer, LoginSerializer, UserSerializer
+from main.serializers import ChangePasswordSerializer
+from main.serializers import CustomTokenSerializer
 
 
 class UserRegisterView(ListCreateAPIView):
@@ -77,6 +83,10 @@ class ChangePasswordView(UpdateAPIView):
     model = User
     permission_classes = [IsAuthenticated]
 
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.object = None
+
     def get_object(self, queryset=None):
         obj = self.request.user
         return obj
@@ -100,6 +110,7 @@ class ChangePasswordView(UpdateAPIView):
 
 
 class CustomPasswordResetView:
+    # pylint: disable=E0213, R0201
     @receiver(reset_password_token_created)
     def password_reset_token_created(sender, reset_password_token, *args, **kwargs):
         """
@@ -111,9 +122,7 @@ class CustomPasswordResetView:
             "current_user": reset_password_token.user,
             "username": reset_password_token.user.username,
             "email": reset_password_token.user.email,
-            "password_reset_token": "https://api.fennellabs.com/v1/auth/reset_password/{}".format(
-                reset_password_token.key
-            ),
+            "password_reset_token": f"https://api.fennellabs.com/v1/auth/reset_password/{reset_password_token.key}",
         }
 
         # render email text
