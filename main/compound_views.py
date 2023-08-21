@@ -42,7 +42,10 @@ def decode_list(request):
         signals = request.data.get("signals")
     if signals is None:
         return Response({"message": "No signals given"}, status=400)
-    signals_list = Signal.objects.filter(pk__in=signals)
+    signals_list = Signal.objects.filter(
+        pk__in=signals,
+        signal_text__startswith="574631",
+    )
     if len(signals_list) == 0:
         return Response({"message": "No signals found for the given list"}, status=400)
     return Response(
