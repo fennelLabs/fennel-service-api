@@ -208,13 +208,14 @@ def send_new_signal(request):
     signal = Signal.objects.create(
         signal_text=form.cleaned_data["signal"], sender=request.user
     )
+    mnemonic = UserKeys.objects.filter(user=request.user).first().mnemonic
+    if not mnemonic:
+        return Response({"error": "user does not have a blockchain account"})
     try:
         payload = {
-            "mnemonic": UserKeys.objects.filter(user=request.user).first().mnemonic,
+            "mnemonic": mnemonic,
             "content": form.cleaned_data["signal"],
         }
-        if not payload["mnemonic"]:
-            return Response({"error": "user does not have a blockchain account"})
         __record_signal_fee(payload)
         response = requests.post(
             f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/send_new_signal",
@@ -226,7 +227,11 @@ def send_new_signal(request):
         signal.save()
         return Response(response.json())
     except requests.HTTPError:
-        return Response({"signal": "saved as unsynced"})
+        return Response(
+            {
+                "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction"
+            }
+        )
 
 
 @api_view(["POST"])
@@ -253,13 +258,14 @@ def sync_signal(request):
     signal = get_object_or_404(Signal, id=signal_id)
     if signal.sender != request.user:
         return Response({"error": "sender is not current user"})
+    mnemonic = UserKeys.objects.filter(user=request.user).first().mnemonic
+    if not mnemonic:
+        return Response({"error": "user does not have a blockchain account"})
     try:
         payload = {
-            "mnemonic": UserKeys.objects.filter(user=request.user).first().mnemonic,
+            "mnemonic": mnemonic,
             "content": signal.signal_text,
         }
-        if not payload["mnemonic"]:
-            return Response({"error": "user does not have a blockchain account"})
         __record_signal_fee(payload)
         response = requests.post(
             f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/send_new_signal",
@@ -271,7 +277,11 @@ def sync_signal(request):
         signal.save()
         return Response(response.json())
     except requests.HTTPError:
-        return Response({"signal": "saved as unsynced"})
+        return Response(
+            {
+                "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction"
+            }
+        )
 
 
 @api_view(["POST"])
