@@ -19,7 +19,7 @@ class Transaction(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     function = models.CharField(max_length=1024)
     payload_size = models.IntegerField(default=0)
-    fee = models.IntegerField(default=0)
+    fee = models.CharField(max_length=1024, null=True, blank=True)
 
     def __str__(self):
         return self.function + " " + str(self.timestamp)
