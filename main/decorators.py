@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 
-from main.models import APIGroup
+from main.models import APIGroup, UserKeys
 
 
 def fennel_admin_only(view_func):
@@ -10,6 +10,22 @@ def fennel_admin_only(view_func):
         if request.user.groups.filter(name="FennelAdmin").exists():
             return view_func(request, *args, **kwargs)
         return Response({"error": "permission denied."}, status=400)
+
+    return wrap
+
+
+def requires_mnemonic_created(view_func):
+    def wrap(request, *args, **kwargs):
+        user_keys = UserKeys.objects.filter(user=request.user)
+        if user_keys.exists() and user_keys.first().mnemonic:
+            return view_func(request, *args, **kwargs)
+        return Response(
+            {
+                "error": "user does not have a blockchain account",
+                "fix": "call /v1/fennel/create_account first",
+            },
+            status=400,
+        )
 
     return wrap
 
