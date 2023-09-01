@@ -334,7 +334,8 @@ def test_record_signal_fee():
         "mnemonic": mnemonic_from_database,
         "content": "This is a test.",
     }
-    response = __record_signal_fee(payload)
+    response, success = __record_signal_fee(payload)
+    assert success
     assert response["fee"] is not None
     assert response["fee"] > 0
     user_model.objects.all().delete()

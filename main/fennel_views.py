@@ -26,7 +26,7 @@ from main.models import (
 )
 
 
-def __record_signal_fee(payload: dict) -> dict:
+def __record_signal_fee(payload: dict) -> (dict, bool):
     response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_new_signal",
         data=payload,
@@ -43,8 +43,8 @@ def __record_signal_fee(payload: dict) -> dict:
             "content": payload["content"],
             "content_length": len(payload["content"]),
             "fee": response.json()["fee"],
-        }
-    return response.json()
+        }, False
+    return response.json(), True
 
 
 @api_view(["POST"])
@@ -209,8 +209,9 @@ def get_fee_for_new_signal(request):
         "content": form.cleaned_data["signal"],
     }
     try:
-        response = __record_signal_fee(payload)
-        return Response(response)
+        response, success = __record_signal_fee(payload)
+        code = 400 if not success else 200
+        return Response(response, status=code)
     except requests.HTTPError:
         return Response({"error": "could not get fee"})
 
@@ -235,9 +236,9 @@ def send_new_signal(request):
             "mnemonic": mnemonic,
             "content": form.cleaned_data["signal"],
         }
-        signal_fee_result = __record_signal_fee(payload)
-        if "error" in signal_fee_result:
-            return Response(signal_fee_result)
+        signal_fee_result, success = __record_signal_fee(payload)
+        if not success:
+            return Response(signal_fee_result, status=400)
         response = requests.post(
             f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/send_new_signal",
             data=payload,
@@ -269,8 +270,9 @@ def get_fee_for_sync_signal(request):
         return Response(
             {"error": "user does not have a blockchain account"}, status=400
         )
-    response = __record_signal_fee(payload)
-    return Response(response)
+    response, success = __record_signal_fee(payload)
+    code = 400 if not success else 200
+    return Response(response, status=code)
 
 
 @api_view(["POST"])
@@ -291,8 +293,8 @@ def sync_signal(request):
             "mnemonic": mnemonic,
             "content": signal.signal_text,
         }
-        signal_fee_result = __record_signal_fee(payload)
-        if "error" in signal_fee_result:
+        signal_fee_result, success = __record_signal_fee(payload)
+        if not success:
             return Response(signal_fee_result, status=400)
         response = requests.post(
             f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/send_new_signal",
