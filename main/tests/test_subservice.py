@@ -83,5 +83,5 @@ def test_get_account_balance_no_account():
         HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
     )
     user_model.objects.get(username="test").delete()
-    assert response.status_code == 200
-    assert response.json()["error"] == "user does not have an account"
+    assert response.status_code == 400
+    assert response.json()["error"] == "user does not have a blockchain account"
