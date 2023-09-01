@@ -1,5 +1,6 @@
 import os
 import datetime
+from django.db import DataError
 
 from django.shortcuts import get_object_or_404
 
@@ -30,11 +31,19 @@ def __record_signal_fee(payload: dict) -> dict:
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_new_signal",
         data=payload,
     )
-    Transaction.objects.create(
-        function="send_new_signal",
-        payload_size=len(payload["content"]),
-        fee=response.json()["fee"],
-    )
+    try:
+        Transaction.objects.create(
+            function="send_new_signal",
+            payload_size=len(payload["content"]),
+            fee=response.json()["fee"],
+        )
+    except DataError:
+        return {
+            "error": "could not record transaction",
+            "content": payload["content"],
+            "content_length": len(payload["content"]),
+            "fee": response.json()["fee"],
+        }
     return response.json()
 
 
@@ -226,7 +235,9 @@ def send_new_signal(request):
             "mnemonic": mnemonic,
             "content": form.cleaned_data["signal"],
         }
-        __record_signal_fee(payload)
+        signal_fee_result = __record_signal_fee(payload)
+        if "error" in signal_fee_result:
+            return Response(signal_fee_result)
         response = requests.post(
             f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/send_new_signal",
             data=payload,
@@ -280,7 +291,9 @@ def sync_signal(request):
             "mnemonic": mnemonic,
             "content": signal.signal_text,
         }
-        __record_signal_fee(payload)
+        signal_fee_result = __record_signal_fee(payload)
+        if "error" in signal_fee_result:
+            return Response(signal_fee_result, status=400)
         response = requests.post(
             f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/send_new_signal",
             data=payload,
