@@ -65,7 +65,7 @@ def test_create_account_mnemomic_exists():
     )
     user.delete()
     UserKeys.objects.all().delete()
-    assert account_response.status_code == 200
+    assert account_response.status_code == 400
     assert account_response.json()["error"] == "user already has an account"
 
 

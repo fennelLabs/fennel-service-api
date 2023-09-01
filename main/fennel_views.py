@@ -48,7 +48,8 @@ def create_account(request):
                 {
                     "error": "user already has an account",
                     "fix": "you can make other calls to /v1/fennel to get the address and balance",
-                }
+                },
+                status=400,
             )
         keys = UserKeys.objects.get(user=request.user)
     else:
@@ -71,7 +72,8 @@ def download_account_as_json(request):
             {
                 "error": "user does not have an account",
                 "fix": "call /v1/fennel/create_account first",
-            }
+            },
+            status=400,
         )
     key = UserKeys.objects.filter(user=request.user).first()
     try:
@@ -147,7 +149,9 @@ def get_fee_for_transfer_token(request):
         "amount": request.data["amount"],
     }
     if not payload["mnemonic"]:
-        return Response({"error": "user does not have a blockchain account"})
+        return Response(
+            {"error": "user does not have a blockchain account"}, status=400
+        )
     response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_transfer_token",
         data=payload,
@@ -170,7 +174,9 @@ def transfer_token(request):
         "amount": request.data["amount"],
     }
     if not payload["mnemonic"]:
-        return Response({"error": "user does not have a blockchain account"})
+        return Response(
+            {"error": "user does not have a blockchain account"}, status=400
+        )
     response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/transfer_token", data=payload
     )
@@ -183,10 +189,12 @@ def transfer_token(request):
 def get_fee_for_new_signal(request):
     form = SignalForm(request.data)
     if not form.is_valid():
-        return Response({"error": dict(form.errors.items())})
+        return Response({"error": dict(form.errors.items())}, status=400)
     mnemonic_from_database = UserKeys.objects.filter(user=request.user).first().mnemonic
     if not mnemonic_from_database:
-        return Response({"error": "user does not have a blockchain account"})
+        return Response(
+            {"error": "user does not have a blockchain account"}, status=400
+        )
     payload = {
         "mnemonic": mnemonic_from_database,
         "content": form.cleaned_data["signal"],
@@ -204,13 +212,15 @@ def get_fee_for_new_signal(request):
 def send_new_signal(request):
     form = SignalForm(request.data)
     if not form.is_valid():
-        return Response({"error": dict(form.errors.items())})
+        return Response({"error": dict(form.errors.items())}, status=400)
     signal = Signal.objects.create(
         signal_text=form.cleaned_data["signal"], sender=request.user
     )
     mnemonic = UserKeys.objects.filter(user=request.user).first().mnemonic
     if not mnemonic:
-        return Response({"error": "user does not have a blockchain account"})
+        return Response(
+            {"error": "user does not have a blockchain account"}, status=400
+        )
     try:
         payload = {
             "mnemonic": mnemonic,
@@ -245,7 +255,9 @@ def get_fee_for_sync_signal(request):
         "content": signal.signal_text,
     }
     if not payload["mnemonic"]:
-        return Response({"error": "user does not have a blockchain account"})
+        return Response(
+            {"error": "user does not have a blockchain account"}, status=400
+        )
     response = __record_signal_fee(payload)
     return Response(response)
 
@@ -257,10 +269,12 @@ def sync_signal(request):
     signal_id = request.data["id"]
     signal = get_object_or_404(Signal, id=signal_id)
     if signal.sender != request.user:
-        return Response({"error": "sender is not current user"})
+        return Response({"error": "sender is not current user"}, status=400)
     mnemonic = UserKeys.objects.filter(user=request.user).first().mnemonic
     if not mnemonic:
-        return Response({"error": "user does not have a blockchain account"})
+        return Response(
+            {"error": "user does not have a blockchain account"}, status=400
+        )
     try:
         payload = {
             "mnemonic": mnemonic,
@@ -381,7 +395,9 @@ def get_fee_for_issue_trust(request):
         "address": request.data["address"],
     }
     if not payload["mnemonic"]:
-        return Response({"error": "user does not have a blockchain account"})
+        return Response(
+            {"error": "user does not have a blockchain account"}, status=400
+        )
     response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_issue_trust",
         data=payload,
@@ -403,9 +419,11 @@ def issue_trust(request):
         "address": request.data["address"],
     }
     if not payload["mnemonic"]:
-        return Response({"error": "user does not have a blockchain account"})
+        return Response(
+            {"error": "user does not have a blockchain account"}, status=400
+        )
     if payload["address"] == UserKeys.objects.filter(user=request.user).first().address:
-        return Response({"error": "user cannot trust themselves"})
+        return Response({"error": "user cannot trust themselves"}, status=400)
     trust_target = get_object_or_404(UserKeys, address=payload["address"]).user
     if not trust_target:
         return Response({"error": "user does not exist"})
@@ -427,7 +445,9 @@ def get_fee_for_remove_trust(request):
         "address": request.data["address"],
     }
     if not payload["mnemonic"]:
-        return Response({"error": "user does not have a blockchain account"})
+        return Response(
+            {"error": "user does not have a blockchain account"}, status=400
+        )
     response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_remove_trust",
         data=payload,
@@ -449,9 +469,11 @@ def remove_trust(request):
         "address": request.data["address"],
     }
     if not payload["mnemonic"]:
-        return Response({"error": "user does not have a blockchain account"})
+        return Response(
+            {"error": "user does not have a blockchain account"}, status=400
+        )
     if payload["address"] == UserKeys.objects.filter(user=request.user).first().address:
-        return Response({"error": "user cannot trust themselves"})
+        return Response({"error": "user cannot trust themselves"}, status=400)
     trust_target = get_object_or_404(UserKeys, address=payload["address"]).user
     if not trust_target:
         return Response({"error": "user does not exist"})
@@ -473,7 +495,9 @@ def get_fee_for_request_trust(request):
         "address": request.data["address"],
     }
     if not payload["mnemonic"]:
-        return Response({"error": "user does not have a blockchain account"})
+        return Response(
+            {"error": "user does not have a blockchain account"}, status=400
+        )
     response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_request_trust",
         data=payload,
@@ -495,9 +519,11 @@ def request_trust(request):
         "address": request.data["address"],
     }
     if not payload["mnemonic"]:
-        return Response({"error": "user does not have a blockchain account"})
+        return Response(
+            {"error": "user does not have a blockchain account"}, status=400
+        )
     if payload["address"] == UserKeys.objects.filter(user=request.user).first().address:
-        return Response({"error": "user cannot trust themselves"})
+        return Response({"error": "user cannot trust themselves"}, status=400)
     trust_target = get_object_or_404(UserKeys, address=payload["address"]).user
     if not trust_target:
         return Response({"error": "user does not exist"})
@@ -517,7 +543,9 @@ def get_fee_for_cancel_trust_request(request):
         "address": request.data["address"],
     }
     if not payload["mnemonic"]:
-        return Response({"error": "user does not have a blockchain account"})
+        return Response(
+            {"error": "user does not have a blockchain account"}, status=400
+        )
     response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_cancel_trust_request",
         data=payload,
@@ -539,9 +567,11 @@ def cancel_trust_request(request):
         "address": request.data["address"],
     }
     if not payload["mnemonic"]:
-        return Response({"error": "user does not have a blockchain account"})
+        return Response(
+            {"error": "user does not have a blockchain account"}, status=400
+        )
     if payload["address"] == UserKeys.objects.filter(user=request.user).first().address:
-        return Response({"error": "user cannot trust themselves"})
+        return Response({"error": "user cannot trust themselves"}, status=400)
     trust_target = get_object_or_404(UserKeys, address=payload["address"]).user
     if not trust_target:
         return Response({"error": "user does not exist"})

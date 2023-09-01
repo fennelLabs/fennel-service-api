@@ -377,6 +377,77 @@ def test_get_fee_for_new_signal():
     UserKeys.objects.all().delete()
 
 
+def test_get_fee_for_new_signal_with_empty_signal():
+    client = Client()
+    user_model = get_user_model()
+    auth_response = client.post(
+        "/v1/auth/register/",
+        {
+            "username": "get_fee_for_new_signal_test_empty",
+            "password": "get_fee_for_new_signal_test_empty",
+            "email": "get_fee_for_new_signal_test_empty@test.com",
+        },
+    )
+    assert auth_response.status_code == 200
+    assert auth_response.json()["token"] is not None
+    user = user_model.objects.get(username="get_fee_for_new_signal_test_empty")
+    response = client.post(
+        "/v1/fennel/create_account/",
+        HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+    )
+    assert response.status_code == 200
+    assert UserKeys.objects.filter(user=user).first().mnemonic is not None
+    assert UserKeys.objects.filter(user=user).first().mnemonic != ""
+    payload = {
+        "signal": "",
+    }
+    response = client.post(
+        "/v1/fennel/get_fee_for_new_signal/",
+        payload,
+        HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+    )
+    print(response.json())
+    assert response.status_code == 400
+    user_model.objects.all().delete()
+    UserKeys.objects.all().delete()
+
+
+def test_get_fee_for_new_signal_with_whiteflag_signal():
+    client = Client()
+    user_model = get_user_model()
+    auth_response = client.post(
+        "/v1/auth/register/",
+        {
+            "username": "get_fee_for_new_signal_test_whiteflag",
+            "password": "get_fee_for_new_signal_test_whiteflag",
+            "email": "get_fee_for_new_signal_test_whiteflag@test.com",
+        },
+    )
+    assert auth_response.status_code == 200
+    assert auth_response.json()["token"] is not None
+    user = user_model.objects.get(username="get_fee_for_new_signal_test_whiteflag")
+    response = client.post(
+        "/v1/fennel/create_account/",
+        HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+    )
+    assert response.status_code == 200
+    assert UserKeys.objects.filter(user=user).first().mnemonic is not None
+    assert UserKeys.objects.filter(user=user).first().mnemonic != ""
+    payload = {
+        "signal": "5746313024a00000000000000000000000000000000000000000000000000000000000000002910118480881290000000114e4245102400706000000000000",
+    }
+    response = client.post(
+        "/v1/fennel/get_fee_for_new_signal/",
+        payload,
+        HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+    )
+    assert response.status_code == 200
+    assert response.json()["fee"] is not None
+    assert response.json()["fee"] > 0
+    user_model.objects.all().delete()
+    UserKeys.objects.all().delete()
+
+
 def test_get_address_no_error_when_userkeys_is_none():
     client = Client()
     user_model = get_user_model()
