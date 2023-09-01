@@ -71,6 +71,9 @@ def whiteflag_discontinue_authentication(request):
 
 @api_view(["POST"])
 def whiteflag_encode(request):
+    datetime_field = request.data.get("datetime", None)
+    if datetime_field is None:
+        datetime_field = request.data.get("dateTime", None)
     json_packet = {
         "prefix": "WF",
         "version": "1",
@@ -88,7 +91,7 @@ def whiteflag_encode(request):
         "resourceData": request.data.get("resourceData", None),
         "pseudoMessageCode": request.data.get("pseudoMessageCode", None),
         "subjectCode": request.data.get("subjectCode", None),
-        "datetime": request.data.get("datetime", None),
+        "datetime": datetime_field,
         "duration": request.data.get("duration", None),
         "objectType": request.data.get("objectType", None),
         "objectLatitude": request.data.get("objectLatitude", None),
@@ -103,6 +106,13 @@ def whiteflag_encode(request):
         f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_encode",
         data=payload,
     )
+    if response.status_code == 502:
+        return Response(
+            {
+                "error": "the whiteflag service is inaccessible",
+            },
+            status=400,
+        )
     try:
         return Response(response.json())
     except requests.JSONDecodeError:
@@ -116,6 +126,13 @@ def whiteflag_decode(request):
         f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_decode",
         data=payload,
     )
+    if response.status_code == 502:
+        return Response(
+            {
+                "error": "the whiteflag service is inaccessible",
+            },
+            status=400,
+        )
     return Response(json.loads(response.json()))
 
 
