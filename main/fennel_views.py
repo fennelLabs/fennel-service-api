@@ -215,7 +215,17 @@ def send_new_signal(request):
             "mnemonic": mnemonic,
             "content": form.cleaned_data["signal"],
         }
+        old_balance = check_balance(user_key)["balance"]
         signal_fee_result, success = record_signal_fee(payload)
+        if signal_fee_result["fee"] > old_balance:
+            return Response(
+                {
+                    "error": "insufficient balance",
+                    "balance": check_balance(user_key)["balance"],
+                    "fee": signal_fee_result["fee"],
+                },
+                status=400,
+            )
         if not success:
             return Response(signal_fee_result, status=400)
         response = requests.post(
@@ -280,6 +290,16 @@ def sync_signal(request):
             "content": signal.signal_text,
         }
         signal_fee_result, success = record_signal_fee(payload)
+        old_balance = check_balance(user_key)["balance"]
+        if signal_fee_result["fee"] > old_balance:
+            return Response(
+                {
+                    "error": "insufficient balance",
+                    "balance": check_balance(user_key)["balance"],
+                    "fee": signal_fee_result["fee"],
+                },
+                status=400,
+            )
         if not success:
             return Response(signal_fee_result, status=400)
         response = requests.post(
