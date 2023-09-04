@@ -222,7 +222,14 @@ def send_new_signal(request):
             f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/send_new_signal",
             data=payload,
         )
-        # signal.tx_hash = response.json()["hash"]
+        if not response.json()["hash"]:
+            return Response(
+                {
+                    "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
+                    "balance": check_balance(user_key)["balance"],
+                }
+            )
+        signal.tx_hash = response.json()["hash"]
         signal.synced = True
         signal.mempool_timestamp = datetime.datetime.now()
         signal.save()
@@ -279,6 +286,13 @@ def sync_signal(request):
             f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/send_new_signal",
             data=payload,
         )
+        if not response.json()["hash"]:
+            return Response(
+                {
+                    "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
+                    "balance": check_balance(user_key)["balance"],
+                }
+            )
         signal.synced = True
         signal.tx_hash = response.json()["hash"]
         signal.mempool_timestamp = datetime.datetime.now()
