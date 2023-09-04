@@ -22,7 +22,7 @@ services:
 
   apidev:
     entrypoint:
-      - /opt/app/build.sh
+      - /opt/app/docker-test.sh
     build:
       context: .
       dockerfile: Dockerfile
