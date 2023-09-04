@@ -84,6 +84,6 @@ def polynom(share_component, coefficients):
 
 
 def coeff(coeff_t, secret):
-    coeff = [random.randrange(0, FIELD_SIZE) for _ in range(coeff_t - 1)]
-    coeff.append(secret)
-    return coeff
+    coeff_value = [random.randrange(0, FIELD_SIZE) for _ in range(coeff_t - 1)]
+    coeff_value.append(secret)
+    return coeff_value
