@@ -223,6 +223,8 @@ def send_new_signal(request):
                     "error": "insufficient balance",
                     "balance": check_balance(user_key)["balance"],
                     "fee": signal_fee_result["fee"],
+                    "signal_id": signal.id,
+                    "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
                 },
                 status=400,
             )
@@ -236,6 +238,7 @@ def send_new_signal(request):
             return Response(
                 {
                     "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
+                    "signal_id": signal.id,
                     "balance": check_balance(user_key)["balance"],
                 }
             )
@@ -250,6 +253,7 @@ def send_new_signal(request):
         return Response(
             {
                 "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
+                "signal_id": signal.id,
                 "balance": check_balance(user_key)["balance"],
             }
         )
