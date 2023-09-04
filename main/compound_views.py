@@ -16,7 +16,7 @@ import requests
 from main.models import Signal, UserKeys, ConfirmationRecord
 
 
-def __decode(signal: str) -> dict:
+def decode(signal: str) -> dict:
     if signal[7] == "1":
         return {
             "prefix": "WF",
@@ -55,7 +55,7 @@ def decode_list(request):
                 "tx_hash": signal.tx_hash,
                 "timestamp": signal.timestamp,
                 "mempool_timestamp": signal.mempool_timestamp,
-                "signal_text": __decode(signal.signal_text),
+                "signal_text": decode(signal.signal_text),
                 "sender": {
                     "id": signal.sender.id,
                     "username": signal.sender.username,

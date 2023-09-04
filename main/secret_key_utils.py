@@ -11,10 +11,8 @@ FIELD_SIZE = 10**5
 
 def split_mnemonic(mnemonic):
     mnemonic_words = mnemonic.split(" ")
-    mnemonic_integers = [__convert_word_to_integer(word) for word in mnemonic_words]
-    mnemonic_shares = [
-        __generate_shares(3, 2, integer) for integer in mnemonic_integers
-    ]
+    mnemonic_integers = [convert_word_to_integer(word) for word in mnemonic_words]
+    mnemonic_shares = [generate_shares(3, 2, integer) for integer in mnemonic_integers]
     share_group_one = [share[0] for share in mnemonic_shares]
     share_group_two = [share[1] for share in mnemonic_shares]
     share_group_three = [share[2] for share in mnemonic_shares]
@@ -23,16 +21,13 @@ def split_mnemonic(mnemonic):
 
 def reconstruct_mnemonic(shares):
     mnemonic_integers = [
-        __reconstruct_secret([shares[0][i], shares[1][i]])
-        for i in range(len(shares[0]))
+        reconstruct_secret([shares[0][i], shares[1][i]]) for i in range(len(shares[0]))
     ]
-    mnemonic_words = [
-        __convert_integer_to_word(integer) for integer in mnemonic_integers
-    ]
+    mnemonic_words = [convert_integer_to_word(integer) for integer in mnemonic_integers]
     return " ".join(mnemonic_words)
 
 
-def __convert_word_to_integer(mnemonic: str) -> int:
+def convert_word_to_integer(mnemonic: str) -> int:
     mnemonic_integers = [ord(word) for word in list(mnemonic)]
     mnemonic_strings = [str(integer) for integer in mnemonic_integers]
     padded_mnemonic_strings = [
@@ -42,7 +37,7 @@ def __convert_word_to_integer(mnemonic: str) -> int:
     return int("".join(padded_mnemonic_strings))
 
 
-def __convert_integer_to_word(mnemonic: int) -> str:
+def convert_integer_to_word(mnemonic: int) -> str:
     mnemonic_string = str(mnemonic)[1:]
     mnemonic_strings = [
         mnemonic_string[i : i + 3] for i in range(0, len(mnemonic_string), 3)
@@ -52,18 +47,18 @@ def __convert_integer_to_word(mnemonic: int) -> str:
     return "".join(mnemonic_characters)
 
 
-def __generate_shares(shares_count, threshold, secret):
-    coefficients = __coeff(threshold, secret)
+def generate_shares(shares_count, threshold, secret):
+    coefficients = coeff(threshold, secret)
     shares = []
 
     for _ in range(1, shares_count + 1):
         share_component = random.randrange(1, FIELD_SIZE)
-        shares.append((share_component, __polynom(share_component, coefficients)))
+        shares.append((share_component, polynom(share_component, coefficients)))
 
     return shares
 
 
-def __reconstruct_secret(shares):
+def reconstruct_secret(shares):
     sums = 0
 
     for j, share_j in enumerate(shares):
@@ -81,14 +76,14 @@ def __reconstruct_secret(shares):
     return int(round(Decimal(sums), 0))
 
 
-def __polynom(share_component, coefficients):
+def polynom(share_component, coefficients):
     point = 0
     for coefficient_index, coefficient_value in enumerate(coefficients[::-1]):
         point += share_component**coefficient_index * coefficient_value
     return point
 
 
-def __coeff(coeff_t, secret):
+def coeff(coeff_t, secret):
     coeff = [random.randrange(0, FIELD_SIZE) for _ in range(coeff_t - 1)]
     coeff.append(secret)
     return coeff

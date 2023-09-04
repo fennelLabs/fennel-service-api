@@ -11,7 +11,7 @@ function all() {
 }
 
 function run_tests() {
-  python3 manage.py test
+  coverage run manage.py test -v 2
 }
 
 function clean() {

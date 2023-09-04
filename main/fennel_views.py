@@ -27,7 +27,7 @@ from main.models import (
 )
 
 
-def __record_signal_fee(payload: dict) -> (dict, bool):
+def record_signal_fee(payload: dict) -> (dict, bool):
     response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_new_signal",
         data=payload,
@@ -48,7 +48,7 @@ def __record_signal_fee(payload: dict) -> (dict, bool):
     return response.json(), True
 
 
-def __check_balance(key):
+def check_balance(key):
     try:
         payload = {"mnemonic": key.mnemonic}
         response = requests.post(
@@ -110,7 +110,7 @@ def download_account_as_json(request):
 @requires_mnemonic_created
 def get_account_balance(request):
     key = UserKeys.objects.filter(user=request.user).first()
-    return __check_balance(key)
+    return check_balance(key)
 
 
 @api_view(["POST"])
@@ -151,7 +151,7 @@ def get_fee_for_transfer_token(request):
         fee=response.json()["fee"],
     )
     response_json = response.json()
-    response_json["balance"] = __check_balance(user_key)["balance"]
+    response_json["balance"] = check_balance(user_key)["balance"]
     return Response(response_json)
 
 
@@ -170,7 +170,7 @@ def transfer_token(request):
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/transfer_token", data=payload
     )
     response_json = response.json()
-    response_json["balance"] = __check_balance(user_key)["balance"]
+    response_json["balance"] = check_balance(user_key)["balance"]
     return Response(response_json)
 
 
@@ -189,9 +189,9 @@ def get_fee_for_new_signal(request):
         "content": form.cleaned_data["signal"],
     }
     try:
-        response, success = __record_signal_fee(payload)
+        response, success = record_signal_fee(payload)
         code = 400 if not success else 200
-        response["balance"] = __check_balance(user_key)["balance"]
+        response["balance"] = check_balance(user_key)["balance"]
         return Response(response, status=code)
     except requests.HTTPError:
         return Response({"error": "could not get fee"})
@@ -215,25 +215,25 @@ def send_new_signal(request):
             "mnemonic": mnemonic,
             "content": form.cleaned_data["signal"],
         }
-        signal_fee_result, success = __record_signal_fee(payload)
+        signal_fee_result, success = record_signal_fee(payload)
         if not success:
             return Response(signal_fee_result, status=400)
         response = requests.post(
             f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/send_new_signal",
             data=payload,
         )
-        #signal.tx_hash = response.json()["hash"]
+        # signal.tx_hash = response.json()["hash"]
         signal.synced = True
         signal.mempool_timestamp = datetime.datetime.now()
         signal.save()
         response_json = response.json()
-        response_json["balance"] = __check_balance(user_key)["balance"]
+        response_json["balance"] = check_balance(user_key)["balance"]
         return Response(response_json)
     except requests.HTTPError:
         return Response(
             {
                 "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
-                "balance": __check_balance(user_key)["balance"],
+                "balance": check_balance(user_key)["balance"],
             }
         )
 
@@ -250,9 +250,9 @@ def get_fee_for_sync_signal(request):
         "mnemonic": user_key.mnemonic,
         "content": signal.signal_text,
     }
-    response, success = __record_signal_fee(payload)
+    response, success = record_signal_fee(payload)
     code = 400 if not success else 200
-    response["balance"] = __check_balance(user_key)["balance"]
+    response["balance"] = check_balance(user_key)["balance"]
     return Response(response, status=code)
 
 
@@ -272,7 +272,7 @@ def sync_signal(request):
             "mnemonic": mnemonic,
             "content": signal.signal_text,
         }
-        signal_fee_result, success = __record_signal_fee(payload)
+        signal_fee_result, success = record_signal_fee(payload)
         if not success:
             return Response(signal_fee_result, status=400)
         response = requests.post(
@@ -284,13 +284,13 @@ def sync_signal(request):
         signal.mempool_timestamp = datetime.datetime.now()
         signal.save()
         response_json = response.json()
-        response_json["balance"] = __check_balance(user_key)["balance"]
+        response_json["balance"] = check_balance(user_key)["balance"]
         return Response(response_json)
     except requests.HTTPError:
         return Response(
             {
                 "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
-                "balance": __check_balance(user_key)["balance"],
+                "balance": check_balance(user_key)["balance"],
             }
         )
 
@@ -403,7 +403,7 @@ def get_fee_for_issue_trust(request):
         fee=response.json()["fee"],
     )
     response_json = response.json()
-    response_json["balance"] = __check_balance(user_key)["balance"]
+    response_json["balance"] = check_balance(user_key)["balance"]
     return Response(response_json)
 
 
@@ -429,7 +429,7 @@ def issue_trust(request):
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/issue_trust", data=payload
     )
     response_json = response.json()
-    response_json["balance"] = __check_balance(user_key)["balance"]
+    response_json["balance"] = check_balance(user_key)["balance"]
     return Response(response_json)
 
 
@@ -453,7 +453,7 @@ def get_fee_for_remove_trust(request):
         fee=response.json()["fee"],
     )
     response_json = response.json()
-    response_json["balance"] = __check_balance(user_key)["balance"]
+    response_json["balance"] = check_balance(user_key)["balance"]
     return Response(response_json)
 
 
@@ -479,7 +479,7 @@ def remove_trust(request):
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/remove_trust", data=payload
     )
     response_json = response.json()
-    response_json["balance"] = __check_balance(user_key)["balance"]
+    response_json["balance"] = check_balance(user_key)["balance"]
     return Response(response_json)
 
 
@@ -503,7 +503,7 @@ def get_fee_for_request_trust(request):
         fee=response.json()["fee"],
     )
     response_json = response.json()
-    response_json["balance"] = __check_balance(user_key)["balance"]
+    response_json["balance"] = check_balance(user_key)["balance"]
     return Response(response_json)
 
 
@@ -527,7 +527,7 @@ def request_trust(request):
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/request_trust", data=payload
     )
     response_json = response.json()
-    response_json["balance"] = __check_balance(user_key)["balance"]
+    response_json["balance"] = check_balance(user_key)["balance"]
     return Response(response_json)
 
 
@@ -551,7 +551,7 @@ def get_fee_for_cancel_trust_request(request):
         fee=response.json()["fee"],
     )
     response_json = response.json()
-    response_json["balance"] = __check_balance(user_key)["balance"]
+    response_json["balance"] = check_balance(user_key)["balance"]
     return Response(response_json)
 
 
@@ -576,7 +576,7 @@ def cancel_trust_request(request):
         data=payload,
     )
     response_json = response.json()
-    response_json["balance"] = __check_balance(user_key)["balance"]
+    response_json["balance"] = check_balance(user_key)["balance"]
     return Response(response_json)
 
 

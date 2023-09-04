@@ -13,3 +13,5 @@ export FENNEL_CLI_IP=https://bitwise.fennellabs.com
 export FENNEL_SUBSERVICE_IP=https://subservice.fennellabs.com
 python -m black .
 ./runner.sh all
+coverage report
+coverage html
