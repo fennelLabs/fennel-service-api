@@ -225,6 +225,7 @@ def send_new_signal(request):
                     "fee": signal_fee_result["fee"],
                     "signal_id": signal.id,
                     "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
+                    "synced": False,
                 },
                 status=400,
             )
@@ -240,6 +241,7 @@ def send_new_signal(request):
                     "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
                     "signal_id": signal.id,
                     "balance": check_balance(user_key)["balance"],
+                    "synced": False,
                 }
             )
         signal.tx_hash = response.json()["hash"]
@@ -248,6 +250,8 @@ def send_new_signal(request):
         signal.save()
         response_json = response.json()
         response_json["balance"] = check_balance(user_key)["balance"]
+        response_json["signal_id"] = signal.id
+        response_json["synced"] = True
         return Response(response_json)
     except requests.HTTPError:
         return Response(
@@ -255,6 +259,7 @@ def send_new_signal(request):
                 "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
                 "signal_id": signal.id,
                 "balance": check_balance(user_key)["balance"],
+                "synced": False,
             }
         )
 
