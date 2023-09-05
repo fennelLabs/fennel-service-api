@@ -110,7 +110,7 @@ def download_account_as_json(request):
 @requires_mnemonic_created
 def get_account_balance(request):
     key = UserKeys.objects.filter(user=request.user).first()
-    return check_balance(key)
+    return Response(check_balance(key))
 
 
 @api_view(["POST"])
