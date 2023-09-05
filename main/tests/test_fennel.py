@@ -491,30 +491,58 @@ class TestFennelViews(TestCase):
         UserKeys.objects.all().delete()
         Signal.objects.all().delete()
 
+    def test_get_account_balance(self):
+        client = Client()
+        user_model = get_user_model()
+        auth_response = client.post(
+            "/v1/auth/register/",
+            {
+                "username": "get_account_balance_test",
+                "password": "get_account_balance_test",
+                "email": "get_account_balance_test@test.com",
+            },
+        )
+        assert auth_response.status_code == 200
+        assert auth_response.json()["token"] is not None
+        client.post(
+            "/v1/fennel/create_account/",
+            HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+        )
+        response = client.post(
+            "/v1/fennel/get_account_balance/",
+            HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+        )
+        assert response.status_code == 200
+        assert response.json()["balance"] is not None
+        assert int(response.json()["balance"]) >= 0
+        user_model.objects.all().delete()
+        UserKeys.objects.all().delete()
 
-def test_get_account_balance():
-    client = Client()
-    user_model = get_user_model()
-    auth_response = client.post(
-        "/v1/auth/register/",
-        {
-            "username": "get_account_balance_test",
-            "password": "get_account_balance_test",
-            "email": "get_account_balance_test@test.com",
-        },
-    )
-    assert auth_response.status_code == 200
-    assert auth_response.json()["token"] is not None
-    client.post(
-        "/v1/fennel/create_account/",
-        HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
-    )
-    response = client.post(
-        "/v1/fennel/get_account_balance/",
-        HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
-    )
-    assert response.status_code == 200
-    assert response.json()["balance"] is not None
-    assert response.json()["balance"] >= 0
-    user_model.objects.all().delete()
-    UserKeys.objects.all().delete()
+    def test_send_new_signal_no_balance(self):
+        client = Client()
+        user_model = get_user_model()
+        auth_response = client.post(
+            "/v1/auth/register/",
+            {
+                "username": "send_new_signal_no_balance_test",
+                "password": "send_new_signal_no_balance_test",
+                "email": "send_new_signal_no_balance_test@test.com",
+            },
+        )
+        assert auth_response.status_code == 200
+        assert auth_response.json()["token"] is not None
+        client.post(
+            "/v1/fennel/create_account/",
+            HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+        )
+        payload = {
+            "signal": "This is a test.",
+        }
+        response = client.post(
+            "/v1/fennel/send_new_signal/",
+            payload,
+            HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+        )
+        assert response.status_code == 400
+        user_model.objects.all().delete()
+        UserKeys.objects.all().delete()
