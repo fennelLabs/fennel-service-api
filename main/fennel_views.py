@@ -235,7 +235,7 @@ def send_new_signal(request):
             f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/send_new_signal",
             data=payload,
         )
-        if not response.json()["hash"]:
+        if not "hash" in response.json():
             return Response(
                 {
                     "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
