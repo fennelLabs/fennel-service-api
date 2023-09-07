@@ -20,8 +20,6 @@ from main.forms import SignalForm
 from main.models import (
     Signal,
     Transaction,
-    TrustConnection,
-    TrustRequest,
     UserKeys,
     ConfirmationRecord,
 )
@@ -31,6 +29,7 @@ def record_signal_fee(payload: dict) -> (dict, bool):
     response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_new_signal",
         data=payload,
+        timeout=5,
     )
     try:
         Transaction.objects.create(
@@ -54,6 +53,7 @@ def check_balance(key):
         response = requests.post(
             f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_account_balance",
             data=payload,
+            timeout=5,
         )
         key.balance = response.json()["balance"]
         key.save()
@@ -79,7 +79,8 @@ def create_account(request):
     else:
         keys = UserKeys.objects.create(user=request.user)
     response = requests.get(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/create_account"
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/create_account",
+        timeout=5,
     )
     mnemonic = response.json()["mnemonic"]
     keys.mnemonic = mnemonic
@@ -98,6 +99,7 @@ def download_account_as_json(request):
         response = requests.post(
             f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/download_account_as_json",
             data=payload,
+            timeout=5,
         )
         return Response(response.json())
     except requests.HTTPError:
@@ -123,7 +125,9 @@ def get_address(request):
         return Response({"address": key.address})
     payload = {"mnemonic": key.mnemonic}
     response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_address", data=payload
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_address",
+        data=payload,
+        timeout=5,
     )
     key.address = response.json()["address"]
     key.save()
@@ -144,6 +148,7 @@ def get_fee_for_transfer_token(request):
     response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_transfer_token",
         data=payload,
+        timeout=5,
     )
     Transaction.objects.create(
         function="transfer_token",
@@ -167,7 +172,9 @@ def transfer_token(request):
         "amount": request.data["amount"],
     }
     response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/transfer_token", data=payload
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/transfer_token",
+        data=payload,
+        timeout=5,
     )
     response_json = response.json()
     response_json["balance"] = check_balance(user_key)["balance"]
@@ -234,6 +241,7 @@ def send_new_signal(request):
         response = requests.post(
             f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/send_new_signal",
             data=payload,
+            timeout=5,
         )
         if not "hash" in response.json():
             return Response(
@@ -317,6 +325,7 @@ def sync_signal(request):
         response = requests.post(
             f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/send_new_signal",
             data=payload,
+            timeout=5,
         )
         if not response.json()["hash"]:
             return Response(
@@ -430,255 +439,4 @@ def get_fee_history(request, count=None):
             }
             for transaction in queryset
         ]
-    )
-
-
-@api_view(["POST"])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-@requires_mnemonic_created
-def get_fee_for_issue_trust(request):
-    user_key = UserKeys.objects.filter(user=request.user).first()
-    payload = {
-        "mnemonic": user_key.mnemonic,
-        "address": request.data["address"],
-    }
-    response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_issue_trust",
-        data=payload,
-    )
-    Transaction.objects.create(
-        function="issue_trust",
-        payload_size=0,
-        fee=response.json()["fee"],
-    )
-    response_json = response.json()
-    response_json["balance"] = check_balance(user_key)["balance"]
-    return Response(response_json)
-
-
-@api_view(["POST"])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-@requires_mnemonic_created
-def issue_trust(request):
-    user_key = UserKeys.objects.filter(user=request.user).first()
-    payload = {
-        "mnemonic": user_key.mnemonic,
-        "address": request.data["address"],
-    }
-    if payload["address"] == user_key.address:
-        return Response({"error": "user cannot trust themselves"}, status=400)
-    trust_target = get_object_or_404(UserKeys, address=payload["address"]).user
-    if not trust_target:
-        return Response({"error": "user does not exist"})
-    TrustConnection.objects.update_or_create(
-        user=request.user, trusted_user=trust_target
-    )
-    response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/issue_trust", data=payload
-    )
-    response_json = response.json()
-    response_json["balance"] = check_balance(user_key)["balance"]
-    return Response(response_json)
-
-
-@api_view(["POST"])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-@requires_mnemonic_created
-def get_fee_for_remove_trust(request):
-    user_key = UserKeys.objects.filter(user=request.user).first()
-    payload = {
-        "mnemonic": user_key.mnemonic,
-        "address": request.data["address"],
-    }
-    response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_remove_trust",
-        data=payload,
-    )
-    Transaction.objects.create(
-        function="remove_trust",
-        payload_size=0,
-        fee=response.json()["fee"],
-    )
-    response_json = response.json()
-    response_json["balance"] = check_balance(user_key)["balance"]
-    return Response(response_json)
-
-
-@api_view(["POST"])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-@requires_mnemonic_created
-def remove_trust(request):
-    user_key = UserKeys.objects.filter(user=request.user).first()
-    payload = {
-        "mnemonic": user_key.mnemonic,
-        "address": request.data["address"],
-    }
-    if payload["address"] == user_key.address:
-        return Response({"error": "user cannot trust themselves"}, status=400)
-    trust_target = get_object_or_404(UserKeys, address=payload["address"]).user
-    if not trust_target:
-        return Response({"error": "user does not exist"})
-    TrustConnection.objects.filter(
-        user=request.user, trusted_user=trust_target
-    ).delete()
-    response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/remove_trust", data=payload
-    )
-    response_json = response.json()
-    response_json["balance"] = check_balance(user_key)["balance"]
-    return Response(response_json)
-
-
-@api_view(["POST"])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-@requires_mnemonic_created
-def get_fee_for_request_trust(request):
-    user_key = UserKeys.objects.filter(user=request.user).first()
-    payload = {
-        "mnemonic": user_key.mnemonic,
-        "address": request.data["address"],
-    }
-    response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_request_trust",
-        data=payload,
-    )
-    Transaction.objects.create(
-        function="request_trust",
-        payload_size=0,
-        fee=response.json()["fee"],
-    )
-    response_json = response.json()
-    response_json["balance"] = check_balance(user_key)["balance"]
-    return Response(response_json)
-
-
-@api_view(["POST"])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-@requires_mnemonic_created
-def request_trust(request):
-    user_key = UserKeys.objects.filter(user=request.user).first()
-    payload = {
-        "mnemonic": user_key.mnemonic,
-        "address": request.data["address"],
-    }
-    if payload["address"] == user_key.address:
-        return Response({"error": "user cannot trust themselves"}, status=400)
-    trust_target = get_object_or_404(UserKeys, address=payload["address"]).user
-    if not trust_target:
-        return Response({"error": "user does not exist"})
-    TrustRequest.objects.update_or_create(user=request.user, trusted_user=trust_target)
-    response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/request_trust", data=payload
-    )
-    response_json = response.json()
-    response_json["balance"] = check_balance(user_key)["balance"]
-    return Response(response_json)
-
-
-@api_view(["POST"])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-@requires_mnemonic_created
-def get_fee_for_cancel_trust_request(request):
-    user_key = UserKeys.objects.filter(user=request.user).first()
-    payload = {
-        "mnemonic": user_key.mnemonic,
-        "address": request.data["address"],
-    }
-    response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_cancel_trust_request",
-        data=payload,
-    )
-    Transaction.objects.create(
-        function="cancel_trust_request",
-        payload_size=0,
-        fee=response.json()["fee"],
-    )
-    response_json = response.json()
-    response_json["balance"] = check_balance(user_key)["balance"]
-    return Response(response_json)
-
-
-@api_view(["POST"])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-@requires_mnemonic_created
-def cancel_trust_request(request):
-    user_key = UserKeys.objects.filter(user=request.user).first()
-    payload = {
-        "mnemonic": user_key.mnemonic,
-        "address": request.data["address"],
-    }
-    if payload["address"] == user_key.address:
-        return Response({"error": "user cannot trust themselves"}, status=400)
-    trust_target = get_object_or_404(UserKeys, address=payload["address"]).user
-    if not trust_target:
-        return Response({"error": "user does not exist"})
-    TrustRequest.objects.filter(user=request.user, trusted_user=trust_target).delete()
-    response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/cancel_trust_request",
-        data=payload,
-    )
-    response_json = response.json()
-    response_json["balance"] = check_balance(user_key)["balance"]
-    return Response(response_json)
-
-
-@api_view(["GET"])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-def get_trust_requests(request):
-    return Response(
-        [
-            {
-                "id": trust_request.id,
-                "timestamp": trust_request.timestamp,
-                "requesting_user": {
-                    "id": trust_request.user.id,
-                    "username": trust_request.user.username,
-                },
-            }
-            for trust_request in TrustRequest.objects.filter(trusted_user=request.user)
-        ]
-    )
-
-
-@api_view(["GET"])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-def get_trust_connections(request):
-    return Response(
-        [
-            {
-                "id": trust_connection.id,
-                "timestamp": trust_connection.timestamp,
-                "trusted_user": {
-                    "id": trust_connection.trusted_user.id,
-                    "username": trust_connection.trusted_user.username,
-                },
-            }
-            for trust_connection in TrustConnection.objects.filter(user=request.user)
-        ]
-    )
-
-
-@api_view(["GET"])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-def check_if_trust_exists(request):
-    Response(
-        {
-            "trust_exists": TrustConnection.objects.filter(
-                user=get_object_or_404(UserKeys, address=request.data["address"]).user,
-                trusted_user=get_object_or_404(
-                    UserKeys, address=request.data["address"]
-                ).user,
-            ).exists()
-        }
     )
