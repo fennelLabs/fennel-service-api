@@ -9,7 +9,7 @@ import requests
 
 @api_view(["GET"])
 def get_version(request):
-    return Response({"version": "v1.0.0-alpha.6"})
+    return Response({"version": "v1.0.0-alpha.10"})
 
 
 @api_view(["GET"])
@@ -20,7 +20,8 @@ def healthcheck(request):
 @api_view(["GET"])
 def subservice_healthcheck(request):
     response = requests.get(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/healthcheck"
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/healthcheck",
+        timeout=5,
     )
     if response.status_code == 200:
         return Response("Ok")
