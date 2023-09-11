@@ -38,6 +38,7 @@ class Signal(models.Model):
         blank=True,
     )
     synced = models.BooleanField(default=False)
+    references = models.ManyToManyField("self")
 
     def __str__(self):
         return str(self.signal_text)

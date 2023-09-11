@@ -519,6 +519,13 @@ Content-Type: application/json
 }
 
 ###
+# @name Fennel - Get Signal by ID
+# @no-cookie-jar
+GET /v1/fennel/get_signal_by_id/0/
+HOST: {{hostname}}:{{port}}
+Authorization: Token <token>
+
+###
 # @name Fennel - Get Signals
 # @no-cookie-jar
 GET /v1/fennel/get_signals/

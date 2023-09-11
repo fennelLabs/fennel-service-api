@@ -244,7 +244,7 @@ class TestFennelViews(TestCase):
         )
         assert response.status_code == 200
         assert len(response.json()) == 100
-        assert response.json()[0]["sender"]["address"] == "test"
+        assert response.json()[0]["sender"]["keys"]["address"] == "test"
         Signal.objects.all().delete()
         user_model.objects.all().delete()
 
