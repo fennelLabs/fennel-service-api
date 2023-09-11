@@ -3,11 +3,27 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 
+from main.models import ConfirmationRecord, Signal, Transaction, UserKeys
+
+
+class UserKeysSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserKeys
+        fields = (
+            "id",
+            "address",
+            "blockchain_public_key",
+            "balance",
+            "public_diffie_hellman_key",
+        )
+
 
 class UserSerializer(serializers.ModelSerializer):
+    keys = UserKeysSerializer(read_only=True)
+
     class Meta:
         model = User
-        fields = ("id", "username", "email")
+        fields = ("id", "username", "email", "keys")
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -65,3 +81,34 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 class CustomTokenSerializer(serializers.Serializer):
     token = serializers.CharField()
+
+
+class TransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Transaction
+        fields = "__all__"
+
+
+class ConfirmationRecordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConfirmationRecord
+        fields = "__all__"
+
+
+class SignalSerializer(serializers.ModelSerializer):
+    sender = UserSerializer(read_only=True)
+    confirmations = ConfirmationRecordSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Signal
+        fields = [
+            "id",
+            "tx_hash",
+            "signal_text",
+            "timestamp",
+            "mempool_timestamp",
+            "sender",
+            "synced",
+            "references",
+            "confirmations",
+        ]

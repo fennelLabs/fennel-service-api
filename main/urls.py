@@ -135,6 +135,7 @@ urlpatterns = [
     path("fennel/get_fee_for_sync_signal/", fennel_views.get_fee_for_sync_signal),
     path("fennel/sync_signal/", fennel_views.sync_signal),
     path("fennel/confirm_signal/", fennel_views.confirm_signal),
+    path("fennel/get_signal_by_id/<int:signal_id>/", fennel_views.get_signal_by_id),
     path("fennel/get_signals/", fennel_views.get_signals),
     path("fennel/get_signals/<int:count>/", fennel_views.get_signals),
     path("fennel/get_unsynced_signals/", fennel_views.get_unsynced_signals),

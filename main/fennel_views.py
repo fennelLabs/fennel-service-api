@@ -23,6 +23,7 @@ from main.models import (
     UserKeys,
     ConfirmationRecord,
 )
+from main.serializers import SignalSerializer, TransactionSerializer
 
 
 def record_signal_fee(payload: dict) -> (dict, bool):
@@ -366,59 +367,31 @@ def confirm_signal(request):
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
+def get_signal_by_id(request, signal_id):
+    signal = get_object_or_404(Signal, id=signal_id)
+    serializer = SignalSerializer(signal)
+    return Response(serializer.data)
+
+
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def get_signals(request, count=None):
     if count is not None:
         queryset = Signal.objects.all().order_by("-timestamp")[:count]
     else:
         queryset = Signal.objects.all().order_by("-timestamp")
-    return Response(
-        [
-            {
-                "id": signal.id,
-                "tx_hash": signal.tx_hash,
-                "timestamp": signal.timestamp,
-                "mempool_timestamp": signal.mempool_timestamp,
-                "signal_text": signal.signal_text,
-                "sender": {
-                    "id": signal.sender.id,
-                    "username": signal.sender.username,
-                    "address": UserKeys.objects.get(user=signal.sender).address,
-                },
-                "synced": signal.synced,
-                "confirmations": [
-                    {
-                        "id": confirmation.id,
-                        "timestamp": confirmation.timestamp,
-                        "confirming_user": {
-                            "id": confirmation.confirmer.id,
-                            "username": confirmation.confirmer.username,
-                        },
-                    }
-                    for confirmation in ConfirmationRecord.objects.filter(signal=signal)
-                ],
-            }
-            for signal in queryset
-        ]
-    )
+    serializer = SignalSerializer(queryset, many=True)
+    return Response(serializer.data)
 
 
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def get_unsynced_signals(request):
-    return Response(
-        [
-            {
-                "id": signal.id,
-                "timestamp": signal.timestamp,
-                "mempool_timestamp": signal.mempool_timestamp,
-                "signal_text": signal.signal_text,
-                "sender": {"id": signal.sender.id, "username": signal.sender.username},
-                "synced": signal.synced,
-            }
-            for signal in Signal.objects.filter(sender=request.user, synced=False)
-        ]
-    )
+    queryset = Signal.objects.filter(sender=request.user, synced=False)
+    serializer = SignalSerializer(queryset, many=True)
+    return Response(serializer.data)
 
 
 @api_view(["GET"])
@@ -429,14 +402,5 @@ def get_fee_history(request, count=None):
         queryset = Transaction.objects.all().order_by("-timestamp")[:count]
     else:
         queryset = Transaction.objects.all().order_by("-timestamp")
-    return Response(
-        [
-            {
-                "timestamp": transaction.timestamp,
-                "function": transaction.function,
-                "payload_size": transaction.payload_size,
-                "fee": transaction.fee,
-            }
-            for transaction in queryset
-        ]
-    )
+    serializer = TransactionSerializer(queryset, many=True)
+    return Response(serializer.data)
