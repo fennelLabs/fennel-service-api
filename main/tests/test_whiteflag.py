@@ -98,3 +98,36 @@ class TestWhiteflagViews(TestCase):
         assert response.json()["fee"] > 0
         user_model.objects.all().delete()
         UserKeys.objects.all().delete()
+
+    def whiteflag_announce_public_key(self):
+        client = Client()
+        user_model = get_user_model()
+        auth_response = client.post(
+            "/v1/auth/register/",
+            {
+                "username": "whiteflag_announce_public_key_test",
+                "password": "whiteflag_announce_public_key_test",
+                "email": "whiteflag_announce_public_key_test@test.com",
+            },
+        )
+        assert auth_response.status_code == 200
+        assert auth_response.json()["token"] is not None
+        response = client.post(
+            "/v1/crypto/dh/generate_keypair/",
+            HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+        )
+        assert response.status_code == 200
+        assert response.json()["public_key"] is not None
+        assert response.json()["private_key"] is not None
+        response = client.post(
+            "/v1/whiteflag/announce_public_key/",
+            {
+                "public_key": response.json()["public_key"],
+            },
+            HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+        )
+        assert response.status_code == 200
+        assert response.json()["signal"] is not None
+        assert response.json()["signal"] != ""
+        user_model.objects.all().delete()
+        UserKeys.objects.all().delete()

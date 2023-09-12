@@ -136,6 +136,34 @@ def whiteflag_decode(request):
     return Response(json.loads(response.json()))
 
 
+@api_view(["POST"])
+def whiteflag_announce_public_key(request):
+    payload = {
+        "prefix": "WF",
+        "version": "1",
+        "encryptionIndicator": "0",
+        "duressIndicator": "0",
+        "messageCode": "K",
+        "referenceIndicator": "0",
+        "referencedMessage": "0000000000000000000000000000000000000000000000000000000000000000",
+        "cryptoDataType": "1",
+        "cryptoData": request.data["public_key"],
+    }
+    response = requests.post(
+        f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_encode",
+        data=payload,
+        timeout=5,
+    )
+    if response.status_code == 502:
+        return Response(
+            {
+                "error": "the whiteflag service is inaccessible",
+            },
+            status=400,
+        )
+    return Response(response.json())
+
+
 @api_view(["GET"])
 def whiteflag_generate_shared_token(request):
     response = {
