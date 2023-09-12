@@ -9,7 +9,7 @@ import requests
 
 @api_view(["GET"])
 def get_version(request):
-    return Response({"version": "v1.0.0-alpha.10"})
+    return Response({"version": "v1.0.0-alpha.11"})
 
 
 @api_view(["GET"])
