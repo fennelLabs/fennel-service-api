@@ -215,3 +215,88 @@ class TestWhiteflagViews(TestCase):
         user_model.objects.all().delete()
         Signal.objects.all().delete()
         UserKeys.objects.all().delete()
+
+    def test_decode_list_with_reference_messages(self):
+        client = Client()
+        user_model = get_user_model()
+        auth_response = client.post(
+            "/v1/auth/register/",
+            {
+                "username": "decode_list_with_reference_messages_test",
+                "password": "test",
+                "email": "decode_list_with_reference_messages_test@test.com",
+            },
+        )
+        assert auth_response.status_code == 200
+        assert auth_response.json()["token"] is not None
+        user = user_model.objects.get(
+            username="decode_list_with_reference_messages_test"
+        )
+        baker.make(UserKeys, user=user)
+        encode_response = client.post(
+            "/v1/whiteflag/encode/",
+            {
+                "encryptionIndicator": "0",
+                "duressIndicator": "0",
+                "messageCode": "I",
+                "referenceIndicator": "4",
+                "referencedMessage": "0000000000000000000000000000000000000000000000000000000000000000",
+                "subjectCode": "52",
+                "dateTime": "2023-09-01T09:37:09Z",
+                "duration": "P00D00H00M",
+                "objectType": "22",
+                "objectLatitude": "+39.09144",
+                "objectLongitude": "-120.03830",
+                "objectSizeDim1": "0000",
+                "objectSizeDim2": "0000",
+                "objectOrientation": "000",
+            },
+            HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+        )
+        assert encode_response.status_code == 200
+        assert encode_response.json() is not None
+        assert encode_response.json() != ""
+        signal = baker.make(
+            Signal,
+            sender=user,
+            signal_text=encode_response.json(),
+            tx_hash="3efb4e0cfa83122b242634254c1920a769d615dfcc4c670bb53eb6f12843c3ae",
+        )
+        encode_response2 = client.post(
+            "/v1/whiteflag/encode/",
+            {
+                "encryptionIndicator": "0",
+                "duressIndicator": "0",
+                "messageCode": "I",
+                "referenceIndicator": "4",
+                "referencedMessage": signal.tx_hash,
+                "subjectCode": "52",
+                "dateTime": "2023-09-01T09:37:09Z",
+                "duration": "P00D00H00M",
+                "objectType": "22",
+                "objectLatitude": "+39.09144",
+                "objectLongitude": "-120.03830",
+                "objectSizeDim1": "0000",
+                "objectSizeDim2": "0000",
+                "objectOrientation": "000",
+            },
+            HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+        )
+        assert encode_response2.status_code == 200
+        assert encode_response2.json() is not None
+        assert encode_response2.json() != ""
+        signal2 = baker.make(
+            Signal,
+            sender=user,
+            signal_text=encode_response2.json(),
+            tx_hash="TEST2",
+        )
+        response = client.post(
+            "/v1/whiteflag/decode_list/",
+            {"signals": [signal.id, signal2.id]},
+            HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+        )
+        assert response.status_code == 200
+        assert response.json()[1]["id"] == signal2.id
+        assert response.json()[1]["references"][0]["id"] == signal.id
+        assert response.json()[1]["references"][0]["tx_hash"] == signal.tx_hash
