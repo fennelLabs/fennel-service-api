@@ -52,6 +52,23 @@ def generate_diffie_hellman_keypair(request):
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
+def get_my_keypair(request):
+    if UserKeys.objects.filter(user=request.user).exists():
+        public_key = UserKeys.objects.get(user=request.user).public_diffie_hellman_key
+        private_key = UserKeys.objects.get(user=request.user).private_diffie_hellman_key
+        return Response(
+            {
+                "success": "keypair retrieved",
+                "public_key": public_key,
+                "private_key": private_key,
+            }
+        )
+    return Response({"error": "no keypair exists for user"}, status=404)
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def get_diffie_hellman_shared_secret(request):
     try:
         response = requests.post(

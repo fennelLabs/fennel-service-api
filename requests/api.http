@@ -275,6 +275,13 @@ Content-Type: application/json
 Authorization: Token 9512982d2a0d9030b8be56c6f80a4b1d48b3d332766b759bde305573828a829e
 
 ###
+# @name Crypto - Get My Keypair
+# @no-cookie-jar
+POST /v1/crypto/dh/get_my_keypair/
+Content-Type: application/json
+Authorization: Token <token>
+
+###
 # @name Crypto - Get Diffie-Hellman Shared Secret
 # @no-cookie-jar
 POST /v1/crypto/dh/get_shared_secret/
