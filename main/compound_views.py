@@ -14,6 +14,7 @@ from knox.auth import TokenAuthentication
 import requests
 
 from main.models import Signal, UserKeys, ConfirmationRecord
+from main.serializers import SignalSerializer
 
 
 def decode(signal: str) -> dict:
@@ -48,20 +49,28 @@ def decode_list(request):
     )
     if len(signals_list) == 0:
         return Response({"message": "No signals found for the given list"}, status=400)
-    return Response(
-        [
+    response_json = []
+    for signal in signals_list:
+        signal_body = decode(signal.signal_text)
+        if signal_body["encryptionIndicator"] != "1":
+            signal.references.set(
+                Signal.objects.filter(tx_hash=signal_body["referencedMessage"])
+            )
+        signal.save()
+        response_json.append(
             {
                 "id": signal.id,
                 "tx_hash": signal.tx_hash,
                 "timestamp": signal.timestamp,
                 "mempool_timestamp": signal.mempool_timestamp,
-                "signal_text": decode(signal.signal_text),
+                "signal_text": signal_body,
                 "sender": {
                     "id": signal.sender.id,
                     "username": signal.sender.username,
                     "address": UserKeys.objects.get(user=signal.sender).address,
                 },
                 "synced": signal.synced,
+                "references": SignalSerializer(signal.references, many=True).data,
                 "confirmations": [
                     {
                         "id": confirmation.id,
@@ -74,6 +83,8 @@ def decode_list(request):
                     for confirmation in ConfirmationRecord.objects.filter(signal=signal)
                 ],
             }
-            for signal in signals_list
-        ]
+        )
+    return Response(
+        response_json,
+        status=200,
     )
