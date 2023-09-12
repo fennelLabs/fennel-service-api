@@ -166,3 +166,61 @@ class TestCryptoViews(TestCase):
         assert response.status_code == 200
         assert response.json()["decrypted"] is not None
         user_model.objects.all().delete()
+
+    def test_get_my_keypair(self):
+        client = Client()
+        user_model = get_user_model()
+        response = client.post(
+            "/v1/auth/register/",
+            {
+                "username": "get_my_keypair_test",
+                "password": "test",
+                "email": "get_my_keypair_test@test.com",
+            },
+        )
+        assert response.status_code == 200
+        assert response.json()["token"] is not None
+        user = user_model.objects.get(username="get_my_keypair_test")
+        UserKeys.objects.update_or_create(
+            user=user,
+            public_diffie_hellman_key="test",
+            private_diffie_hellman_key="test",
+        )
+        response = client.post(
+            "/v1/crypto/dh/get_my_keypair/",
+            HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
+        )
+        assert response.status_code == 200
+        assert response.json()["public_key"] is not None
+        assert response.json()["public_key"] == "test"
+        assert response.json()["private_key"] is not None
+        assert response.json()["private_key"] == "test"
+        user_model.objects.all().delete()
+        UserKeys.objects.all().delete()
+
+    def test_get_my_keypair_no_keys(self):
+        client = Client()
+        user_model = get_user_model()
+        response = client.post(
+            "/v1/auth/register/",
+            {
+                "username": "get_my_keypair_no_keys_test",
+                "password": "test",
+                "email": "get_my_keypair_no_keys_test@test.com",
+            },
+        )
+        assert response.status_code == 200
+        assert response.json()["token"] is not None
+        user = user_model.objects.get(username="get_my_keypair_no_keys_test")
+        UserKeys.objects.update_or_create(
+            user=user,
+        )
+        response = client.post(
+            "/v1/crypto/dh/get_my_keypair/",
+            HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
+        )
+        assert response.status_code == 200
+        assert response.json()["public_key"] is None
+        assert response.json()["private_key"] is None
+        user_model.objects.all().delete()
+        UserKeys.objects.all().delete()

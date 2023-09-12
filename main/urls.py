@@ -81,6 +81,10 @@ urlpatterns = [
         crypto_views.generate_diffie_hellman_keypair,
     ),
     path(
+        "crypto/dh/get_my_keypair/",
+        crypto_views.get_my_keypair,
+    ),
+    path(
         "crypto/dh/get_shared_secret/",
         crypto_views.get_diffie_hellman_shared_secret,
     ),
