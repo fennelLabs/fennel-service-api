@@ -11,7 +11,7 @@ from django.http import Http404
 import requests
 
 
-def whiteflag_encoder_helper(payload):
+def whiteflag_encoder_helper(payload: dict) -> (dict, bool):
     datetime_field = payload.get("datetime", None)
     if datetime_field is None:
         datetime_field = payload.get("dateTime", None)
@@ -49,16 +49,16 @@ def whiteflag_encoder_helper(payload):
         timeout=5,
     )
     if response.status_code == 502:
-        return Response(
+        return (
             {
                 "error": "the whiteflag service is inaccessible",
             },
-            status=400,
+            False,
         )
     try:
-        return Response(response.json())
+        return response.json(), True
     except requests.JSONDecodeError:
-        return Response(response.text)
+        return response.text, True
 
 
 @api_view(["GET"])
@@ -86,7 +86,10 @@ def whiteflag_authenticate(request):
             "verificationData": request.data["verificationData"],
         }
     )
-    return whiteflag_encoder_helper(payload)
+    result = whiteflag_encoder_helper(payload)
+    if result[1]:
+        return Response(result[0], 200)
+    return Response(result[0], 400)
 
 
 @api_view(["POST"])
@@ -104,12 +107,18 @@ def whiteflag_discontinue_authentication(request):
             "verificationData": request.data["verificationData"],
         }
     )
-    return whiteflag_encoder_helper(payload)
+    result = whiteflag_encoder_helper(payload)
+    if result[1]:
+        return Response(result[0], 200)
+    return Response(result[0], 400)
 
 
 @api_view(["POST"])
 def whiteflag_encode(request):
-    return whiteflag_encoder_helper(request.data)
+    result = whiteflag_encoder_helper(request.data)
+    if result[1]:
+        return Response(result[0], 200)
+    return Response(result[0], 400)
 
 
 @api_view(["POST"])
@@ -143,7 +152,10 @@ def whiteflag_announce_public_key(request):
         "cryptoDataType": "1",
         "cryptoData": request.data["public_key"],
     }
-    return whiteflag_encoder_helper(payload)
+    result = whiteflag_encoder_helper(payload)
+    if result[1]:
+        return Response(result[0], 200)
+    return Response(result[0], 400)
 
 
 @api_view(["GET"])
