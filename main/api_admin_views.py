@@ -19,8 +19,9 @@ from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 
 from main.forms import APIGroupForm
-from main.models import APIGroup, UserKeys
+from main.models import APIGroup, APIGroupJoinRequest, UserKeys
 from main.decorators import fennel_admin_only
+from main.serializers import APIGroupJoinRequestSerializer
 
 
 @silk_profile(name="get_api_group_list")
@@ -209,3 +210,52 @@ def get_api_group_users(request):
             for user in user_keys
         ]
     )
+
+
+@silk_profile(name="get_api_group_join_requests")
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_join_requests(request):
+    api_group = get_object_or_404(APIGroup, name=request.data["api_group_name"])
+    if not api_group.user_list.filter(id=request.user.id).exists():
+        return Response({"message": "You are not a member of this api group"}, 400)
+    if not api_group.admin_list.filter(id=request.user.id).exists():
+        return Response({"message": "You are not admin of this api group"}, 400)
+    return Response(
+        APIGroupJoinRequestSerializer(
+            APIGroupJoinRequest.objects.filter(api_group=api_group), many=True
+        ).data
+    )
+
+
+@silk_profile(name="send_join_request")
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def send_join_request(request):
+    api_group = get_object_or_404(APIGroup, name=request.data["api_group_name"])
+    if api_group.user_list.filter(id=request.user.id).exists():
+        return Response({"message": "You are already a member of this api group"}, 400)
+    if APIGroupJoinRequest.objects.filter(
+        api_group=api_group, user=request.user
+    ).exists():
+        return Response({"message": "You have already sent a join request"}, 400)
+    APIGroupJoinRequest.objects.create(api_group=api_group, user=request.user)
+    return Response(status=status.HTTP_200_OK)
+
+
+@silk_profile(name="accept_join_request")
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def accept_join_request(request):
+    join_request = get_object_or_404(
+        APIGroupJoinRequest, id=request.data["join_request_id"]
+    )
+    if not join_request.api_group.admin_list.filter(id=request.user.id).exists():
+        return Response({"message": "You are not admin of this api group"}, 400)
+    join_request.api_group.user_list.add(join_request.user)
+    join_request.api_group.save()
+    join_request.delete()
+    return Response(status=status.HTTP_200_OK)

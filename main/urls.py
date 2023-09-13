@@ -35,6 +35,18 @@ urlpatterns = [
         "group/get_api_group_users/",
         api_admin_views.get_api_group_users,
     ),
+    path(
+        "group/get_join_requests/",
+        api_admin_views.get_join_requests,
+    ),
+    path(
+        "group/send_join_request/",
+        api_admin_views.send_join_request,
+    ),
+    path(
+        "group/accept_join_request/",
+        api_admin_views.accept_join_request,
+    ),
     path("whiteflag/healthcheck/", whiteflag_views.fennel_cli_healthcheck),
     path("fennel/healthcheck/", views.subservice_healthcheck),
     path("whiteflag/authenticate/", whiteflag_views.whiteflag_authenticate),
