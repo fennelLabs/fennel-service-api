@@ -11,9 +11,61 @@ from django.http import Http404
 import requests
 
 
+def whiteflag_encoder_helper(payload):
+    datetime_field = payload.get("datetime", None)
+    if datetime_field is None:
+        datetime_field = payload.get("dateTime", None)
+    json_packet = {
+        "prefix": "WF",
+        "version": "1",
+        "encryptionIndicator": payload.get("encryptionIndicator", None),
+        "duressIndicator": payload.get("duressIndicator", None),
+        "messageCode": payload.get("messageCode", None),
+        "referenceIndicator": payload.get("referenceIndicator", None),
+        "referencedMessage": payload.get("referencedMessage", None),
+        "verificationMethod": payload.get("verificationMethod", None),
+        "verificationData": payload.get("verificationData", None),
+        "cryptoDataType": payload.get("cryptoDataType", None),
+        "cryptoData": payload.get("cryptoData", None),
+        "text": payload.get("text", None),
+        "resourceMethod": payload.get("resourceMethod", None),
+        "resourceData": payload.get("resourceData", None),
+        "pseudoMessageCode": payload.get("pseudoMessageCode", None),
+        "subjectCode": payload.get("subjectCode", None),
+        "datetime": datetime_field,
+        "duration": payload.get("duration", None),
+        "objectType": payload.get("objectType", None),
+        "objectLatitude": payload.get("objectLatitude", None),
+        "objectLongitude": payload.get("objectLongitude", None),
+        "objectSizeDim1": payload.get("objectSizeDim1", None),
+        "objectSizeDim2": payload.get("objectSizeDim2", None),
+        "objectOrientation": payload.get("objectOrientation", None),
+        "objectTypeQuant": payload.get("objectTypeQuant", None),
+    }
+    processed_payload = json.dumps({k: v for k, v in json_packet.items() if v})
+    response = requests.post(
+        f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_encode",
+        data=processed_payload,
+        timeout=5,
+    )
+    if response.status_code == 502:
+        return Response(
+            {
+                "error": "the whiteflag service is inaccessible",
+            },
+            status=400,
+        )
+    try:
+        return Response(response.json())
+    except requests.JSONDecodeError:
+        return Response(response.text)
+
+
 @api_view(["GET"])
 def fennel_cli_healthcheck(request):
-    response = requests.get(f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/hello_there/")
+    response = requests.get(
+        f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/hello_there/", timeout=5
+    )
     if response.status_code == 200:
         return Response("Ok")
     raise Http404
@@ -34,14 +86,7 @@ def whiteflag_authenticate(request):
             "verificationData": request.data["verificationData"],
         }
     )
-    response = requests.post(
-        f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_encode",
-        data=payload,
-    )
-    try:
-        return Response(response.json())
-    except requests.JSONDecodeError:
-        return Response(response.text)
+    return whiteflag_encoder_helper(payload)
 
 
 @api_view(["POST"])
@@ -59,64 +104,12 @@ def whiteflag_discontinue_authentication(request):
             "verificationData": request.data["verificationData"],
         }
     )
-    response = requests.post(
-        f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_encode",
-        data=payload,
-    )
-    try:
-        return Response(response.json())
-    except requests.JSONDecodeError:
-        return Response(response.text)
+    return whiteflag_encoder_helper(payload)
 
 
 @api_view(["POST"])
 def whiteflag_encode(request):
-    datetime_field = request.data.get("datetime", None)
-    if datetime_field is None:
-        datetime_field = request.data.get("dateTime", None)
-    json_packet = {
-        "prefix": "WF",
-        "version": "1",
-        "encryptionIndicator": request.data.get("encryptionIndicator", None),
-        "duressIndicator": request.data.get("duressIndicator", None),
-        "messageCode": request.data.get("messageCode", None),
-        "referenceIndicator": request.data.get("referenceIndicator", None),
-        "referencedMessage": request.data.get("referencedMessage", None),
-        "verificationMethod": request.data.get("verificationMethod", None),
-        "verificationData": request.data.get("verificationData", None),
-        "cryptoDataType": request.data.get("cryptoDataType", None),
-        "cryptoData": request.data.get("cryptoData", None),
-        "text": request.data.get("text", None),
-        "resourceMethod": request.data.get("resourceMethod", None),
-        "resourceData": request.data.get("resourceData", None),
-        "pseudoMessageCode": request.data.get("pseudoMessageCode", None),
-        "subjectCode": request.data.get("subjectCode", None),
-        "datetime": datetime_field,
-        "duration": request.data.get("duration", None),
-        "objectType": request.data.get("objectType", None),
-        "objectLatitude": request.data.get("objectLatitude", None),
-        "objectLongitude": request.data.get("objectLongitude", None),
-        "objectSizeDim1": request.data.get("objectSizeDim1", None),
-        "objectSizeDim2": request.data.get("objectSizeDim2", None),
-        "objectOrientation": request.data.get("objectOrientation", None),
-        "objectTypeQuant": request.data.get("objectTypeQuant", None),
-    }
-    payload = json.dumps({k: v for k, v in json_packet.items() if v})
-    response = requests.post(
-        f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_encode",
-        data=payload,
-    )
-    if response.status_code == 502:
-        return Response(
-            {
-                "error": "the whiteflag service is inaccessible",
-            },
-            status=400,
-        )
-    try:
-        return Response(response.json())
-    except requests.JSONDecodeError:
-        return Response(response.text)
+    return whiteflag_encoder_helper(request.data)
 
 
 @api_view(["POST"])
@@ -125,6 +118,7 @@ def whiteflag_decode(request):
     response = requests.post(
         f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_decode",
         data=payload,
+        timeout=5,
     )
     if response.status_code == 502:
         return Response(
@@ -149,19 +143,7 @@ def whiteflag_announce_public_key(request):
         "cryptoDataType": "1",
         "cryptoData": request.data["public_key"],
     }
-    response = requests.post(
-        f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_encode",
-        data=payload,
-        timeout=5,
-    )
-    if response.status_code == 502:
-        return Response(
-            {
-                "error": "the whiteflag service is inaccessible",
-            },
-            status=400,
-        )
-    return Response(response.json())
+    return whiteflag_encoder_helper(payload)
 
 
 @api_view(["GET"])
