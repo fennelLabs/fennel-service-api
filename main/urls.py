@@ -69,6 +69,14 @@ urlpatterns = [
         compound_views.decode_list,
     ),
     path(
+        "whiteflag/get_fee_for_send_signal_with_annotations/",
+        compound_views.get_fee_for_send_signal_with_annotations,
+    ),
+    path(
+        "whiteflag/send_signal_with_annotations/",
+        compound_views.send_signal_with_annotations,
+    ),
+    path(
         "messages/get_messages/",
         message_views.get_messages,
     ),

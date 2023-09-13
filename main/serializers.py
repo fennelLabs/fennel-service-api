@@ -127,3 +127,8 @@ class APIGroupJoinRequestSerializer(serializers.Serializer):
     class Meta:
         model = APIGroup
         fields = "__all__"
+
+
+class AnnotatedWhiteflagSignalSerializer(serializers.Serializer):
+    signal_body = serializers.JSONField()
+    annotations = serializers.JSONField()

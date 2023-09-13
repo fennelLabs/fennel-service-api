@@ -63,6 +63,63 @@ def check_balance(key):
         return {"balance": key.balance}
 
 
+def signal_send_helper(user_key: UserKeys, signal: Signal) -> (dict, bool):
+    try:
+        payload = {
+            "mnemonic": user_key.mnemonic,
+            "content": signal.signal_text,
+        }
+        signal_fee_result, success = record_signal_fee(payload)
+        old_balance = int(check_balance(user_key)["balance"])
+        if signal_fee_result["fee"] > old_balance or old_balance == 0:
+            return (
+                {
+                    "error": "insufficient balance",
+                    "balance": check_balance(user_key)["balance"],
+                    "fee": signal_fee_result["fee"],
+                    "signal_id": signal.id,
+                    "synced": False,
+                    "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
+                },
+                False,
+            )
+        if not success:
+            return (signal_fee_result, False)
+        response_json = requests.post(
+            f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/send_new_signal",
+            data=payload,
+            timeout=5,
+        ).json()
+        if "hash" not in response_json:
+            return (
+                {
+                    "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
+                    "balance": check_balance(user_key)["balance"],
+                    "signal_id": signal.id,
+                    "synced": False,
+                },
+                False,
+            )
+        signal.synced = True
+        signal.tx_hash = response_json["hash"]
+        signal.mempool_timestamp = datetime.datetime.now()
+        signal.save()
+        response_json["balance"] = check_balance(user_key)["balance"]
+        response_json["signal_id"] = signal.id
+        response_json["synced"] = True
+        return response_json, True
+    except requests.HTTPError:
+        return (
+            {
+                "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
+                "balance": check_balance(user_key)["balance"],
+                "signal_id": signal.id,
+                "synced": False,
+            },
+            False,
+        )
+
+
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -217,60 +274,11 @@ def send_new_signal(request):
     signal = Signal.objects.create(
         signal_text=form.cleaned_data["signal"], sender=request.user
     )
-    mnemonic = user_key.mnemonic
-    try:
-        payload = {
-            "mnemonic": mnemonic,
-            "content": form.cleaned_data["signal"],
-        }
-        old_balance = int(check_balance(user_key)["balance"])
-        signal_fee_result, success = record_signal_fee(payload)
-        if signal_fee_result["fee"] > old_balance or old_balance == 0:
-            return Response(
-                {
-                    "error": "insufficient balance",
-                    "balance": check_balance(user_key)["balance"],
-                    "fee": signal_fee_result["fee"],
-                    "signal_id": signal.id,
-                    "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
-                    "synced": False,
-                },
-                status=400,
-            )
-        if not success:
-            return Response(signal_fee_result, status=400)
-        response = requests.post(
-            f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/send_new_signal",
-            data=payload,
-            timeout=5,
-        )
-        if not "hash" in response.json():
-            return Response(
-                {
-                    "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
-                    "signal_id": signal.id,
-                    "balance": check_balance(user_key)["balance"],
-                    "synced": False,
-                }
-            )
-        signal.tx_hash = response.json()["hash"]
-        signal.synced = True
-        signal.mempool_timestamp = datetime.datetime.now()
-        signal.save()
-        response_json = response.json()
-        response_json["balance"] = check_balance(user_key)["balance"]
-        response_json["signal_id"] = signal.id
-        response_json["synced"] = True
-        return Response(response_json)
-    except requests.HTTPError:
-        return Response(
-            {
-                "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
-                "signal_id": signal.id,
-                "balance": check_balance(user_key)["balance"],
-                "synced": False,
-            }
-        )
+    result, success = signal_send_helper(user_key, signal)
+    return Response(
+        result,
+        status=200 if success else 400,
+    )
 
 
 @api_view(["POST"])
@@ -301,58 +309,11 @@ def sync_signal(request):
     signal = get_object_or_404(Signal, id=signal_id)
     if signal.sender != request.user:
         return Response({"error": "sender is not current user"}, status=400)
-    mnemonic = user_key.mnemonic
-    try:
-        payload = {
-            "mnemonic": mnemonic,
-            "content": signal.signal_text,
-        }
-        signal_fee_result, success = record_signal_fee(payload)
-        old_balance = int(check_balance(user_key)["balance"])
-        if signal_fee_result["fee"] > old_balance or old_balance == 0:
-            return Response(
-                {
-                    "error": "insufficient balance",
-                    "balance": check_balance(user_key)["balance"],
-                    "fee": signal_fee_result["fee"],
-                    "signal_id": signal.id,
-                    "synced": False,
-                    "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
-                },
-                status=400,
-            )
-        if not success:
-            return Response(signal_fee_result, status=400)
-        response = requests.post(
-            f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/send_new_signal",
-            data=payload,
-            timeout=5,
-        )
-        if not response.json()["hash"]:
-            return Response(
-                {
-                    "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
-                    "balance": check_balance(user_key)["balance"],
-                    "signal_id": signal.id,
-                    "synced": False,
-                }
-            )
-        signal.synced = True
-        signal.tx_hash = response.json()["hash"]
-        signal.mempool_timestamp = datetime.datetime.now()
-        signal.save()
-        response_json = response.json()
-        response_json["balance"] = check_balance(user_key)["balance"]
-        return Response(response_json)
-    except requests.HTTPError:
-        return Response(
-            {
-                "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
-                "balance": check_balance(user_key)["balance"],
-                "signal_id": signal.id,
-                "synced": False,
-            }
-        )
+    result, success = signal_send_helper(user_key, signal)
+    return Response(
+        result,
+        status=200 if success else 400,
+    )
 
 
 @api_view(["POST"])
