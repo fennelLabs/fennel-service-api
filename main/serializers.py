@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 
-from main.models import ConfirmationRecord, Signal, Transaction, UserKeys
+from main.models import APIGroup, ConfirmationRecord, Signal, Transaction, UserKeys
 
 
 class UserKeysSerializer(serializers.ModelSerializer):
@@ -112,3 +112,18 @@ class SignalSerializer(serializers.ModelSerializer):
             "references",
             "confirmations",
         ]
+
+
+class APIGroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = APIGroup
+        fields = "__all__"
+
+
+class APIGroupJoinRequestSerializer(serializers.Serializer):
+    api_group = APIGroupSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = APIGroup
+        fields = "__all__"

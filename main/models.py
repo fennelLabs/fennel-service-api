@@ -15,6 +15,16 @@ class APIGroup(models.Model):
         return str(self.name)
 
 
+class APIGroupJoinRequest(models.Model):
+    user = models.ForeignKey("auth.User", on_delete=models.CASCADE)
+    api_group = models.ForeignKey("APIGroup", on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    accepted = models.BooleanField(default=False)
+
+    def __str__(self):
+        return str(self.user) + " wants to join " + str(self.api_group)
+
+
 class Transaction(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     function = models.CharField(max_length=1024)
