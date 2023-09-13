@@ -1,7 +1,11 @@
+import json
+
 from django.test import TestCase
 from django.test.client import Client
 from django.contrib.auth import get_user_model
+
 from model_bakery import baker
+
 from main.models import Signal, UserKeys
 from main.compound_views import decode
 
@@ -300,3 +304,112 @@ class TestWhiteflagViews(TestCase):
         assert response.json()[1]["id"] == signal2.id
         assert response.json()[1]["references"][0]["id"] == signal.id
         assert response.json()[1]["references"][0]["tx_hash"] == signal.tx_hash
+
+    def test_get_fee_for_send_signal_with_annotations(self):
+        client = Client()
+        user_model = get_user_model()
+        auth_response = client.post(
+            "/v1/auth/register/",
+            {
+                "username": "send_signal_with_annotations_test",
+                "password": "test",
+                "email": "send_signal_with_annotations_test@test.com",
+            },
+        )
+        assert auth_response.status_code == 200
+        assert auth_response.json()["token"] is not None
+        user = user_model.objects.get(username="send_signal_with_annotations_test")
+        client.post(
+            "/v1/fennel/create_account/",
+            HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+        )
+        user_keys = UserKeys.objects.get(user=user)
+        user_keys.balance = "1000000000"
+        user_keys.save()
+        payload = {
+            "signal_body": json.dumps(
+                {
+                    "encryptionIndicator": "0",
+                    "duressIndicator": "0",
+                    "messageCode": "I",
+                    "referenceIndicator": "4",
+                    "referencedMessage": "0000000000000000000000000000000000000000000000000000000000000000",
+                    "subjectCode": "52",
+                    "dateTime": "2023-09-01T09:37:09Z",
+                    "duration": "P00D00H00M",
+                    "objectType": "22",
+                    "objectLatitude": "+39.09144",
+                    "objectLongitude": "-120.03830",
+                    "objectSizeDim1": "0000",
+                    "objectSizeDim2": "0000",
+                    "objectOrientation": "000",
+                }
+            ),
+            "annotations": '{"test": "test"}',
+        }
+        response = client.post(
+            "/v1/whiteflag/get_fee_for_send_signal_with_annotations/",
+            payload,
+            HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+        )
+        assert response.status_code == 200
+        assert response.json()["signal_response"]["fee"] is not None
+        assert response.json()["annotation_response"]["fee"] is not None
+        assert response.json()["total_fee"] is not None
+        user_model.objects.all().delete()
+        Signal.objects.all().delete()
+        UserKeys.objects.all().delete()
+
+    def test_send_signal_with_annotations(self):
+        client = Client()
+        user_model = get_user_model()
+        auth_response = client.post(
+            "/v1/auth/register/",
+            {
+                "username": "send_signal_with_annotations_test",
+                "password": "test",
+                "email": "send_signal_with_annotations_test@test.com",
+            },
+        )
+        assert auth_response.status_code == 200
+        assert auth_response.json()["token"] is not None
+        user = user_model.objects.get(username="send_signal_with_annotations_test")
+        client.post(
+            "/v1/fennel/create_account/",
+            HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+        )
+        user_keys = UserKeys.objects.get(user=user)
+        user_keys.balance = "1000000000"
+        user_keys.save()
+        payload = {
+            "signal_body": json.dumps(
+                {
+                    "encryptionIndicator": "0",
+                    "duressIndicator": "0",
+                    "messageCode": "I",
+                    "referenceIndicator": "4",
+                    "referencedMessage": "0000000000000000000000000000000000000000000000000000000000000000",
+                    "subjectCode": "52",
+                    "dateTime": "2023-09-01T09:37:09Z",
+                    "duration": "P00D00H00M",
+                    "objectType": "22",
+                    "objectLatitude": "+39.09144",
+                    "objectLongitude": "-120.03830",
+                    "objectSizeDim1": "0000",
+                    "objectSizeDim2": "0000",
+                    "objectOrientation": "000",
+                }
+            ),
+            "annotations": '{"test": "test"}',
+        }
+        response = client.post(
+            "/v1/whiteflag/send_signal_with_annotations/",
+            payload,
+            HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+        )
+        assert response.status_code == 400
+        assert response.json()["signal_id"] is not None
+        assert response.json()["fee"] is not None
+        user_model.objects.all().delete()
+        Signal.objects.all().delete()
+        UserKeys.objects.all().delete()
