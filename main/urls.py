@@ -69,6 +69,10 @@ urlpatterns = [
         compound_views.decode_list,
     ),
     path(
+        "whiteflag/encode_list/",
+        compound_views.encode_list,
+    ),
+    path(
         "whiteflag/get_fee_for_send_signal_with_annotations/",
         compound_views.get_fee_for_send_signal_with_annotations,
     ),
@@ -156,6 +160,11 @@ urlpatterns = [
     path("fennel/transfer_token/", fennel_views.transfer_token),
     path("fennel/get_fee_for_new_signal/", fennel_views.get_fee_for_new_signal),
     path("fennel/send_new_signal/", fennel_views.send_new_signal),
+    path(
+        "fennel/get_fee_for_send_signal_list/",
+        compound_views.get_fee_for_send_signal_list,
+    ),
+    path("fennel/send_signal_list/", compound_views.send_signal_list),
     path("fennel/get_fee_for_sync_signal/", fennel_views.get_fee_for_sync_signal),
     path("fennel/sync_signal/", fennel_views.sync_signal),
     path("fennel/confirm_signal/", fennel_views.confirm_signal),

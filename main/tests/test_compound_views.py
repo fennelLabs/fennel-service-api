@@ -10,17 +10,19 @@ from main.models import Signal, UserKeys
 from main.compound_views import decode
 
 
-class TestWhiteflagViews(TestCase):
+class TestCompoundViews(TestCase):
     def test_decode_not_encrypted(self):
         signal_text = "5746313020a00000000000000000000000000000000000000000000000000000000000000000b43a3a38399d1797b7b933b0b734b9b0ba34b7b71734b73a17bbb434ba32b33630b380"
-        result = decode(signal_text)
+        result, success = decode(signal_text)
+        assert success
         assert result["prefix"] == "WF"
         assert result["version"] == "1"
         assert result["encryptionIndicator"] == "0"
 
     def test_decode_encrypted(self):
         signal_text = "574631312af34c38e3af3ab687ac276965c11b369274da9ddf514bcc0eebf037a268f087f3bda708026b5f7a5b83e49072a2d32f83bc283c249601066c488a0a1e40bb4f27dcb409c14aa7c7b7f0f656c9bc184a8df6fbe7928a25d3e5b74a81ab16df93efcc30b1105c7ba56878afed34f318d337532a293b41c7b54d1af2c6b92414a79e68077655f7e3629bf93b2f43e553ebd518198c2cc1a782bcc3d37e1304f431c9997c803368f54ef2f2774f42543c32d"
-        result = decode(signal_text)
+        result, success = decode(signal_text)
+        assert success
         assert result["prefix"] == "WF"
         assert result["version"] == "1"
         assert result["encryptionIndicator"] == "1"
@@ -220,7 +222,7 @@ class TestWhiteflagViews(TestCase):
         Signal.objects.all().delete()
         UserKeys.objects.all().delete()
 
-    def test_decode_list_with_reference_messages(self):
+    def test_decode_list_with_reference_messages_and_confirmations(self):
         client = Client()
         user_model = get_user_model()
         auth_response = client.post(
@@ -295,6 +297,11 @@ class TestWhiteflagViews(TestCase):
             signal_text=encode_response2.json(),
             tx_hash="TEST2",
         )
+        baker.make(
+            "main.ConfirmationRecord",
+            signal=signal2,
+            confirmer=user,
+        )
         response = client.post(
             "/v1/whiteflag/decode_list/",
             {"signals": [signal.id, signal2.id]},
@@ -304,6 +311,12 @@ class TestWhiteflagViews(TestCase):
         assert response.json()[1]["id"] == signal2.id
         assert response.json()[1]["references"][0]["id"] == signal.id
         assert response.json()[1]["references"][0]["tx_hash"] == signal.tx_hash
+        assert response.json()[1]["confirmations"][0]["id"] is not None
+        assert response.json()[1]["confirmations"][0]["signal"] == signal2.id
+        assert response.json()[1]["confirmations"][0]["confirmer"] == user.id
+        user_model.objects.all().delete()
+        Signal.objects.all().delete()
+        UserKeys.objects.all().delete()
 
     def test_get_fee_for_send_signal_with_annotations(self):
         client = Client()
@@ -410,6 +423,128 @@ class TestWhiteflagViews(TestCase):
         assert response.status_code == 400
         assert response.json()["signal_id"] is not None
         assert response.json()["fee"] is not None
+        user_model.objects.all().delete()
+        Signal.objects.all().delete()
+        UserKeys.objects.all().delete()
+
+    def test_encode_list(self):
+        client = Client()
+        user_model = get_user_model()
+        response = client.post(
+            "/v1/auth/register/",
+            {
+                "username": "encode_list_test",
+                "password": "test",
+                "email": "encode_list_test@test.com",
+            },
+        )
+        assert response.status_code == 200
+        assert response.json()["token"] is not None
+        user = user_model.objects.get(username="encode_list_test")
+        baker.make(UserKeys, user=user)
+        signals_list = [
+            {
+                "encryptionIndicator": "0",
+                "duressIndicator": "0",
+                "messageCode": "I",
+                "referenceIndicator": "4",
+                "referencedMessage": "0000000000000000000000000000000000000000000000000000000000000000",
+                "subjectCode": "52",
+                "dateTime": "2023-09-01T09:37:09Z",
+                "duration": "P00D00H00M",
+                "objectType": "22",
+                "objectLatitude": "+39.09144",
+                "objectLongitude": "-120.03830",
+                "objectSizeDim1": "0000",
+                "objectSizeDim2": "0000",
+                "objectOrientation": "000",
+            }
+        ]
+        response = client.post(
+            "/v1/whiteflag/encode_list/",
+            {"signals": signals_list},
+            HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
+        )
+        assert response.status_code == 200
+        assert len(response.json()) == 1
+        user_model.objects.all().delete()
+        Signal.objects.all().delete()
+        UserKeys.objects.all().delete()
+
+    def test_get_fee_for_send_signal_list(self):
+        client = Client()
+        user_model = get_user_model()
+        response = client.post(
+            "/v1/auth/register/",
+            {
+                "username": "get_fee_for_send_signal_list_test",
+                "password": "test",
+                "email": "get_fee_for_send_signal_list_test@test.com",
+            },
+        )
+        assert response.status_code == 200
+        assert response.json()["token"] is not None
+        client.post(
+            "/v1/fennel/create_account/",
+            HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
+        )
+        signals_list = [
+            "Test.",
+            "Test.",
+            "Test.",
+            "Test.",
+            "Test.",
+        ]
+        response = client.post(
+            "/v1/fennel/get_fee_for_send_signal_list/",
+            {"signals": signals_list},
+            HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
+        )
+        assert response.status_code == 200
+        assert response.json()["signals"][0]["fee"] is not None
+        assert response.json()["total_fee"] is not None
+        assert response.json()["total_fee"] == (
+            response.json()["signals"][0]["fee"]
+            + response.json()["signals"][1]["fee"]
+            + response.json()["signals"][2]["fee"]
+            + response.json()["signals"][3]["fee"]
+            + response.json()["signals"][4]["fee"]
+        )
+        user_model.objects.all().delete()
+        Signal.objects.all().delete()
+        UserKeys.objects.all().delete()
+
+    def test_send_signal_list(self):
+        client = Client()
+        user_model = get_user_model()
+        response = client.post(
+            "/v1/auth/register/",
+            {
+                "username": "send_signal_list_test",
+                "password": "test",
+                "email": "send_signal_list_test@test.com",
+            },
+        )
+        assert response.status_code == 200
+        assert response.json()["token"] is not None
+        client.post(
+            "/v1/fennel/create_account/",
+            HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
+        )
+        signals_list = [
+            "Test.",
+            "Test.",
+            "Test.",
+            "Test.",
+            "Test.",
+        ]
+        response = client.post(
+            "/v1/fennel/send_signal_list/",
+            {"signals": signals_list},
+            HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
+        )
+        assert response.status_code == 200
+        assert len(response.json()) == 5
         user_model.objects.all().delete()
         Signal.objects.all().delete()
         UserKeys.objects.all().delete()

@@ -14,28 +14,67 @@ from knox.auth import TokenAuthentication
 import requests
 from main.decorators import requires_mnemonic_created
 from main.fennel_views import check_balance, record_signal_fee, signal_send_helper
-from main.serializers import AnnotatedWhiteflagSignalSerializer
+from main.serializers import (
+    AnnotatedWhiteflagSignalSerializer,
+    ConfirmationRecordSerializer,
+    UserSerializer,
+)
 
-from main.models import Signal, UserKeys, ConfirmationRecord
+from main.forms import SignalForm
+from main.models import ConfirmationRecord, Signal, UserKeys
 from main.serializers import SignalSerializer
 from main.whiteflag_views import whiteflag_encoder_helper
 
 
-def decode(signal: str) -> dict:
+def decode(signal: str) -> (dict, bool):
+    if signal[0:2] != "57":
+        return ({"error": "not a whiteflag signal"}, False)
     if signal[7] == "1":
-        return {
-            "prefix": "WF",
-            "version": "1",
-            "encryptionIndicator": "1",
-            "signal_body": signal[8:],
-        }
+        return (
+            {
+                "prefix": "WF",
+                "version": "1",
+                "encryptionIndicator": "1",
+                "signal_body": signal[8:],
+            },
+            True,
+        )
     signal = json.dumps(signal)
     response = requests.post(
         f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_decode",
         data=signal,
         timeout=5,
     )
-    return json.loads(response.json())
+    if response.status_code != 200:
+        return ({"error": "could not decode signal"}, False)
+    return (json.loads(response.json()), True)
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def encode_list(request):
+    signals = request.data.getlist("signals")
+    if signals is None:
+        return Response({"message": "No signals given"}, status=400)
+    processed = []
+    for signal in signals:
+        valid_signal = signal.replace("'", '"')
+        signal_dict = json.loads(valid_signal)
+        signal_text_encoded, signal_encode_success = whiteflag_encoder_helper(
+            signal_dict
+        )
+        processed.append(
+            {
+                "signal": signal_text_encoded,
+                "success": signal_encode_success,
+                "message": "signal encoded",
+            }
+        )
+    return Response(
+        processed,
+        status=200,
+    )
 
 
 @api_view(["POST"])
@@ -56,7 +95,7 @@ def decode_list(request):
         return Response({"message": "No signals found for the given list"}, status=400)
     response_json = []
     for signal in signals_list:
-        signal_body = decode(signal.signal_text)
+        signal_body, success = decode(signal.signal_text)
         if signal_body["encryptionIndicator"] != "1":
             signal.references.set(
                 Signal.objects.filter(tx_hash=signal_body["referencedMessage"])
@@ -68,25 +107,15 @@ def decode_list(request):
                 "tx_hash": signal.tx_hash,
                 "timestamp": signal.timestamp,
                 "mempool_timestamp": signal.mempool_timestamp,
-                "signal_text": signal_body,
-                "sender": {
-                    "id": signal.sender.id,
-                    "username": signal.sender.username,
-                    "address": UserKeys.objects.get(user=signal.sender).address,
-                },
+                "signal_text": signal_body if success else signal.signal_text,
+                "sender": UserSerializer(signal.sender).data,
                 "synced": signal.synced,
                 "references": SignalSerializer(signal.references, many=True).data,
-                "confirmations": [
-                    {
-                        "id": confirmation.id,
-                        "timestamp": confirmation.timestamp,
-                        "confirming_user": {
-                            "id": confirmation.confirmer.id,
-                            "username": confirmation.confirmer.username,
-                        },
-                    }
-                    for confirmation in ConfirmationRecord.objects.filter(signal=signal)
-                ],
+                "confirmations": ConfirmationRecordSerializer(
+                    ConfirmationRecord.objects.filter(signal=signal), many=True
+                ).data,
+                "decoded": success,
+                "error": signal_body["error"] if not success else None,
             }
         )
     return Response(
@@ -219,5 +248,91 @@ def send_signal_with_annotations(request):
             "signal_response": signal_sent_response,
             "annotation_response": annotation_sent_response,
         },
+        status=200,
+    )
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+@requires_mnemonic_created
+def get_fee_for_send_signal_list(request):
+    signals = request.data.getlist("signals")
+    if signals is None:
+        return Response({"message": "No signals given"}, status=400)
+    processed = []
+    for signal in signals:
+        form = SignalForm({"signal": signal})
+        if not form.is_valid():
+            processed.append(
+                {
+                    "signal": signal,
+                    "success": False,
+                    "message": form.errors,
+                    "fee": 0,
+                }
+            )
+        else:
+            payload = {
+                "mnemonic": UserKeys.objects.get(user=request.user).mnemonic,
+                "content": form.cleaned_data["signal"],
+            }
+            fee_response, fee_success = record_signal_fee(payload)
+            processed.append(
+                {
+                    "signal": signal,
+                    "success": fee_success,
+                    "message": fee_response,
+                    "fee": fee_response["fee"],
+                }
+            )
+    return Response(
+        {
+            "signals": processed,
+            "total_fee": sum(signal["fee"] for signal in processed),
+            "balance": check_balance(UserKeys.objects.get(user=request.user))[
+                "balance"
+            ],
+        },
+        status=200,
+    )
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+@requires_mnemonic_created
+def send_signal_list(request):
+    signals = request.data.getlist("signals")
+    if signals is None:
+        return Response({"message": "No signals given"}, status=400)
+    processed = []
+    for signal in signals:
+        form = SignalForm({"signal": signal})
+        if not form.is_valid():
+            processed.append(
+                {
+                    "signal": signal,
+                    "success": False,
+                    "message": form.errors,
+                }
+            )
+        else:
+            signal_object = Signal.objects.create(
+                signal_text=form.cleaned_data["signal"],
+                sender=request.user,
+            )
+            signal_sent_response, signal_success = signal_send_helper(
+                UserKeys.objects.get(user=request.user), signal_object
+            )
+            processed.append(
+                {
+                    "signal": signal,
+                    "success": signal_success,
+                    "message": signal_sent_response,
+                }
+            )
+    return Response(
+        processed,
         status=200,
     )
