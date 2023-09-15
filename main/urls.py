@@ -2,6 +2,7 @@ from django.urls import include, path
 from knox import views as knox_views
 
 from main import (
+    apigroup_views,
     views,
     auth_views,
     whiteflag_views,
@@ -23,6 +24,8 @@ urlpatterns = [
     path("group/remove_user/", api_admin_views.remove_user_from_api_group),
     path("group/add_admin/", api_admin_views.add_admin_to_api_group),
     path("group/remove_admin/", api_admin_views.remove_admin_from_api_group),
+    path("group/generate_keypair/", apigroup_views.generate_apigroup_keypair),
+    path("group/get_keypair/", apigroup_views.get_apigroup_keypair),
     path(
         "group/get_accounts_billable_count/",
         api_admin_views.get_accounts_billable_count,

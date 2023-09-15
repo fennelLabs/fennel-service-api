@@ -10,6 +10,10 @@ class APIGroup(models.Model):
     api_key = models.CharField(max_length=1024, unique=True, null=True, blank=True)
     api_secret = models.CharField(max_length=1024, unique=True, null=True, blank=True)
     request_counter = models.IntegerField(default=0)
+    public_diffie_hellman_key = models.CharField(max_length=1024, null=True, blank=True)
+    private_diffie_hellman_key = models.CharField(
+        max_length=1024, null=True, blank=True
+    )
 
     def __str__(self):
         return str(self.name)
