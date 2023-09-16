@@ -1,0 +1,30 @@
+{% extends "admin/base.html" %}
+{% block content %}
+  <h1>Members</h1>
+  <table>
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Address</th>
+            <th>Balance</th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for member in members %}
+            <tr>
+            <td>{{ member.user.username }}</td>
+            <td>{{ member.address }}</td>
+            <td>{{ member.balance }}</td>
+            <td>
+                <a href="{% url 'dashboard:transfer_tokens_to_member' group_id member.id %}">Send Tokens</a>
+            </td>
+            <td>
+                <a href="{% url 'dashboard:remove_group_member' group_id member.id %}">Delete</a>
+            </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

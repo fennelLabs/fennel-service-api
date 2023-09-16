@@ -24,6 +24,7 @@ class APIGroupJoinRequest(models.Model):
     api_group = models.ForeignKey("APIGroup", on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
     accepted = models.BooleanField(default=False)
+    rejected = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.user) + " wants to join " + str(self.api_group)
