@@ -21,7 +21,7 @@ class TestFennelViews(TestCase):
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         user.delete()
-        UserKeys.objects.all().delete()
+
         assert account_response.status_code == 200
         assert account_response.json()
 
@@ -41,7 +41,7 @@ class TestFennelViews(TestCase):
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         user.delete()
-        UserKeys.objects.all().delete()
+
         assert account_response.status_code == 200
         assert account_response.json()
 
@@ -64,7 +64,7 @@ class TestFennelViews(TestCase):
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         user.delete()
-        UserKeys.objects.all().delete()
+
         assert account_response.status_code == 400
         assert account_response.json()["error"] == "user already has an account"
 

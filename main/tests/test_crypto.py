@@ -33,8 +33,6 @@ class TestCryptoViews(TestCase):
         assert response.status_code == 200
         assert response.json()["public_key"] is not None
         assert response.json()["public_key"] == "test"
-        user_model.objects.all().delete()
-        UserKeys.objects.all().delete()
 
     def test_get_dh_public_key_by_address(self):
         client = Client()
@@ -64,12 +62,9 @@ class TestCryptoViews(TestCase):
         assert response.status_code == 200
         assert response.json()["public_key"] is not None
         assert response.json()["public_key"] == "test"
-        user_model.objects.all().delete()
-        UserKeys.objects.all().delete()
 
     def test_check_if_encrypted(self):
         client = Client()
-        user_model = get_user_model()
         response = client.post(
             "/v1/auth/register/",
             {
@@ -90,11 +85,9 @@ class TestCryptoViews(TestCase):
         assert response.status_code == 200
         assert response.json()["encrypted"] is not None
         assert not response.json()["encrypted"]
-        user_model.objects.all().delete()
 
     def test_check_if_encrypted_true(self):
         client = Client()
-        user_model = get_user_model()
         response = client.post(
             "/v1/auth/register/",
             {
@@ -115,11 +108,9 @@ class TestCryptoViews(TestCase):
         assert response.status_code == 200
         assert response.json()["encrypted"] is not None
         assert response.json()["encrypted"]
-        user_model.objects.all().delete()
 
     def test_encrypt_message(self):
         client = Client()
-        user_model = get_user_model()
         response = client.post(
             "/v1/auth/register/",
             {
@@ -140,11 +131,9 @@ class TestCryptoViews(TestCase):
         )
         assert response.status_code == 200
         assert response.json()["encrypted"] is not None
-        user_model.objects.all().delete()
 
     def test_decrypt_message(self):
         client = Client()
-        user_model = get_user_model()
         response = client.post(
             "/v1/auth/register/",
             {
@@ -165,7 +154,6 @@ class TestCryptoViews(TestCase):
         )
         assert response.status_code == 200
         assert response.json()["decrypted"] is not None
-        user_model.objects.all().delete()
 
     def test_get_my_keypair(self):
         client = Client()
@@ -195,8 +183,6 @@ class TestCryptoViews(TestCase):
         assert response.json()["public_key"] == "test"
         assert response.json()["private_key"] is not None
         assert response.json()["private_key"] == "test"
-        user_model.objects.all().delete()
-        UserKeys.objects.all().delete()
 
     def test_get_my_keypair_no_keys(self):
         client = Client()
@@ -222,5 +208,3 @@ class TestCryptoViews(TestCase):
         assert response.status_code == 200
         assert response.json()["public_key"] is None
         assert response.json()["private_key"] is None
-        user_model.objects.all().delete()
-        UserKeys.objects.all().delete()

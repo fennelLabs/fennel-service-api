@@ -68,7 +68,6 @@ class TestAuthViews(TestCase):
         assert response.status_code == 200
         assert response.json()["token"] is not None
         user_model = get_user_model()
-        user_model.objects.all().delete()
 
     def test_reset_password_view(self):
         client = Client()
@@ -87,7 +86,6 @@ class TestAuthViews(TestCase):
         )
         assert response.status_code == 200
         user_model = get_user_model()
-        user_model.objects.all().delete()
 
     def test_reset_password_confirm_view(self):
         client = Client()
@@ -116,7 +114,6 @@ class TestAuthViews(TestCase):
         )
         assert response.status_code == 200
         user_model = get_user_model()
-        user_model.objects.all().delete()
 
     def test_reset_password_confirm_fails(self):
         client = Client()
@@ -143,4 +140,3 @@ class TestAuthViews(TestCase):
         )
         assert response.status_code == 404
         user_model = get_user_model()
-        user_model.objects.all().delete()

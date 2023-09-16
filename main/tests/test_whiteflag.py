@@ -59,8 +59,6 @@ class TestWhiteflagViews(TestCase):
         assert response.status_code == 200
         assert response.json()["fee"] is not None
         assert response.json()["fee"] > 0
-        user_model.objects.all().delete()
-        UserKeys.objects.all().delete()
 
     def test_get_fee_for_new_signal_with_whiteflag_signal_production_crash_2(self):
         client = Client()
@@ -96,8 +94,6 @@ class TestWhiteflagViews(TestCase):
         assert response.status_code == 200
         assert response.json()["fee"] is not None
         assert response.json()["fee"] > 0
-        user_model.objects.all().delete()
-        UserKeys.objects.all().delete()
 
     def whiteflag_announce_public_key(self):
         client = Client()
@@ -129,5 +125,3 @@ class TestWhiteflagViews(TestCase):
         assert response.status_code == 200
         assert response.json()["signal"] is not None
         assert response.json()["signal"] != ""
-        user_model.objects.all().delete()
-        UserKeys.objects.all().delete()

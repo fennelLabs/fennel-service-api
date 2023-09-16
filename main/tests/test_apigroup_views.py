@@ -60,8 +60,6 @@ class TestAPIGroupViews(TestCase):
         assert response.status_code == 200
         assert response.json()["secret"] is not None
         assert response.json()["public"] is not None
-        user_model.objects.all().delete()
-        APIGroup.objects.all().delete()
 
     def test_get_apigroup_keypair(self):
         client = Client()
@@ -124,8 +122,6 @@ class TestAPIGroupViews(TestCase):
         assert response.status_code == 200
         assert response.json()["public"] is not None
         assert response.json()["secret"] is not None
-        user_model.objects.all().delete()
-        APIGroup.objects.all().delete()
 
     def test_get_apigroup_keypair_none_created(self):
         client = Client()
@@ -178,5 +174,3 @@ class TestAPIGroupViews(TestCase):
         )
         assert response.status_code == 400
         assert response.json()["error"] is not None
-        user_model.objects.all().delete()
-        APIGroup.objects.all().delete()

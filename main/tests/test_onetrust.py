@@ -36,9 +36,6 @@ class TestOneTrustViews(TestCase):
         assert UserKeys.objects.filter(user=user).first().key_shard != ""
         assert response.json()["user_shard"] is not None
         assert response.json()["recovery_shard"] is not None
-        user_model.objects.all().delete()
-        UserKeys.objects.all().delete()
-        APIGroup.objects.all().delete()
 
     def test_reconstruct_self_custodial_account(self):
         client = Client()
@@ -93,9 +90,6 @@ class TestOneTrustViews(TestCase):
         )
         assert response.status_code == 200
         assert response.json()["mnemonic"] is not None
-        user_model.objects.all().delete()
-        UserKeys.objects.all().delete()
-        APIGroup.objects.all().delete()
 
     def test_get_self_custodial_account_address(self):
         client = Client()
@@ -164,6 +158,3 @@ class TestOneTrustViews(TestCase):
         assert response.status_code == 200
         assert response.json()["address"] is not None
         assert response.json()["address"] == address
-        user_model.objects.all().delete()
-        UserKeys.objects.all().delete()
-        APIGroup.objects.all().delete()

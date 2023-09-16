@@ -33,7 +33,6 @@ class TestFennelViews(TestCase):
         )
         assert response.status_code == 200
         assert response.json()["address"] is not None
-        user_model.objects.all().delete()
 
     def test_get_fee_history_count(self):
         for _ in range(100):
@@ -57,7 +56,6 @@ class TestFennelViews(TestCase):
         assert response.status_code == 200
         assert len(response.json()) == 10
         Transaction.objects.all().delete()
-        user_model.objects.all().delete()
 
     def test_get_fee_history(self):
         for _ in range(100):
@@ -81,7 +79,6 @@ class TestFennelViews(TestCase):
         assert response.status_code == 200
         assert len(response.json()) == 100
         Transaction.objects.all().delete()
-        user_model.objects.all().delete()
 
     def test_get_signals(self):
         client = Client()
@@ -110,7 +107,6 @@ class TestFennelViews(TestCase):
         assert response.status_code == 200
         assert len(response.json()) == 100
         Signal.objects.all().delete()
-        user_model.objects.all().delete()
 
     def test_confirm_signal(self):
         client = Client()
@@ -138,7 +134,7 @@ class TestFennelViews(TestCase):
         assert confirmation is not None
         assert confirmation.confirmer == user
         Signal.objects.all().delete()
-        user_model.objects.all().delete()
+
         ConfirmationRecord.objects.all().delete()
 
     def test_confirm_signal_updates(self):
@@ -175,7 +171,7 @@ class TestFennelViews(TestCase):
         assert response.json()["status"] == "ok"
         assert len(ConfirmationRecord.objects.filter(signal=signal)) == 1
         Signal.objects.all().delete()
-        user_model.objects.all().delete()
+
         ConfirmationRecord.objects.all().delete()
 
     def test_signal_confirmation_list(self):
@@ -215,7 +211,7 @@ class TestFennelViews(TestCase):
         assert len(response.json()) == 1
         assert len(response.json()[0]["confirmations"]) == 1
         Signal.objects.all().delete()
-        user_model.objects.all().delete()
+
         ConfirmationRecord.objects.all().delete()
 
     def test_get_signals_address_included(self):
@@ -246,7 +242,6 @@ class TestFennelViews(TestCase):
         assert len(response.json()) == 100
         assert response.json()[0]["sender"]["keys"]["address"] == "test"
         Signal.objects.all().delete()
-        user_model.objects.all().delete()
 
     def test_get_signals_count(self):
         client = Client()
@@ -275,7 +270,6 @@ class TestFennelViews(TestCase):
         assert response.status_code == 200
         assert len(response.json()) == 10
         Signal.objects.all().delete()
-        user_model.objects.all().delete()
 
     def test_get_unsynced_signals(self):
         client = Client()
@@ -300,7 +294,6 @@ class TestFennelViews(TestCase):
         assert response.status_code == 200
         assert len(response.json()) == 100
         Signal.objects.all().delete()
-        user_model.objects.all().delete()
 
     def test_record_signal_fee(self):
         client = Client()
@@ -330,8 +323,6 @@ class TestFennelViews(TestCase):
         assert success
         assert response["fee"] is not None
         assert response["fee"] > 0
-        user_model.objects.all().delete()
-        UserKeys.objects.all().delete()
 
     def test_get_fee_for_new_signal(self):
         client = Client()
@@ -365,8 +356,6 @@ class TestFennelViews(TestCase):
         assert response.status_code == 200
         assert response.json()["fee"] is not None
         assert response.json()["fee"] > 0
-        user_model.objects.all().delete()
-        UserKeys.objects.all().delete()
 
     def test_get_fee_for_new_signal_with_empty_signal(self):
         client = Client()
@@ -398,8 +387,6 @@ class TestFennelViews(TestCase):
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         assert response.status_code == 400
-        user_model.objects.all().delete()
-        UserKeys.objects.all().delete()
 
     def test_get_fee_for_new_signal_with_whiteflag_signal(self):
         client = Client()
@@ -433,8 +420,6 @@ class TestFennelViews(TestCase):
         assert response.status_code == 200
         assert response.json()["fee"] is not None
         assert response.json()["fee"] > 0
-        user_model.objects.all().delete()
-        UserKeys.objects.all().delete()
 
     def test_get_address_no_error_when_userkeys_is_none(self):
         client = Client()
@@ -454,8 +439,6 @@ class TestFennelViews(TestCase):
             HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
         )
         assert response.status_code == 400
-        user_model.objects.all().delete()
-        UserKeys.objects.all().delete()
 
     def test_get_fee_for_sync_signal(self):
         client = Client()
@@ -487,8 +470,7 @@ class TestFennelViews(TestCase):
         assert response.status_code == 200
         assert response.json()["fee"] is not None
         assert response.json()["fee"] > 0
-        user_model.objects.all().delete()
-        UserKeys.objects.all().delete()
+
         Signal.objects.all().delete()
 
     def test_get_account_balance(self):
@@ -515,8 +497,6 @@ class TestFennelViews(TestCase):
         assert response.status_code == 200
         assert response.json()["balance"] is not None
         assert int(response.json()["balance"]) >= 0
-        user_model.objects.all().delete()
-        UserKeys.objects.all().delete()
 
     def test_send_new_signal_no_balance(self):
         client = Client()
@@ -544,5 +524,3 @@ class TestFennelViews(TestCase):
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         assert response.status_code == 400
-        user_model.objects.all().delete()
-        UserKeys.objects.all().delete()

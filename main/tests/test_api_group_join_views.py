@@ -69,9 +69,6 @@ class TestAPIGroupJoinRequestViews(TestCase):
             api_group=group,
             user__username="test_get_api_group_users_two",
         ).exists()
-        user_model.objects.all().delete()
-        APIGroup.objects.all().delete()
-        UserKeys.objects.all().delete()
 
     def test_get_api_group_join_requests(self):
         client = Client()
@@ -146,13 +143,9 @@ class TestAPIGroupJoinRequestViews(TestCase):
         )
         assert response.status_code == 200
         assert len(response.json()) == 1
-        user_model.objects.all().delete()
-        APIGroup.objects.all().delete()
-        UserKeys.objects.all().delete()
 
     def test_get_api_group_join_requests_no_requests(self):
         client = Client()
-        user_model = get_user_model()
         auth_response = client.post(
             "/v1/auth/register/",
             {
@@ -188,8 +181,6 @@ class TestAPIGroupJoinRequestViews(TestCase):
         )
         assert response.status_code == 200
         assert len(response.json()) == 0
-        user_model.objects.all().delete()
-        APIGroup.objects.all().delete()
 
     def test_accept_join_request(self):
         client = Client()
@@ -268,6 +259,3 @@ class TestAPIGroupJoinRequestViews(TestCase):
             user__username="test_get_api_group_users_two",
         ).exists()
         assert group.user_list.filter(username="test_get_api_group_users_two").exists()
-        user_model.objects.all().delete()
-        APIGroup.objects.all().delete()
-        UserKeys.objects.all().delete()
