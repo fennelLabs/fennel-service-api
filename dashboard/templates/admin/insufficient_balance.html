@@ -1,0 +1,8 @@
+{% extends "auth/base.html" %} {% block content %} {% load crispy_forms_tags %}
+
+<div>
+Your account has insufficient balance to complete this transaction.
+</div>
+
+<a href="{% url 'dashboard:api_group_members' group_id %}">Return to Members List</a>
+{% endblock %}

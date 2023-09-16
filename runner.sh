@@ -24,12 +24,14 @@ function clean() {
 function migrate() {
   pwd
   python3 manage.py makemigrations main
+  python3 manage.py makemigrations dashboard
   python3 manage.py makemigrations
   python3 manage.py migrate
 }
 
 function makemigrations() {
   python3 manage.py makemigrations main
+  python3 manage.py makemigrations dashboard
   python3 manage.py makemigrations
 }
 
@@ -39,14 +41,6 @@ function static() {
 
 function run() {
   python3 manage.py runserver 0.0.0.0:8080
-}
-
-function reset_migrations() {
-  python3 manage.py migrate --fake main
-  python3 manage.py showmigrations
-  rm -rf main/migrations
-  python3 manage.py migrate --fake-initial
-  python3 manage.py showmigrations
 }
 
 function shell() {
@@ -59,7 +53,8 @@ function check() {
   clear && \
    black . && \
    run_tests && \
-   pylint main --disable=E1101,W0613,R0903,C0301,C0114,C0115,C0116,R0801
+   pylint main --disable=E1101,W0613,R0903,C0301,C0114,C0115,C0116,R0801 && \
+   pylint dashboard --disable=E1101,W0613,R0903,C0301,C0114,C0115,C0116,R0801
 }
 
 function gunicorn_run() {
@@ -115,10 +110,6 @@ all-run)
 
 all)
   all
-  ;;
-
-reset_migrations)
-  reset_migrations
   ;;
 
 makemigrations)

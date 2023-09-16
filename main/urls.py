@@ -15,6 +15,9 @@ from main import (
     trust_views,
 )
 
+# pylint: disable=invalid-name
+app_name = "main"
+
 urlpatterns = [
     path("get_version/", views.get_version),
     path("healthcheck/", views.healthcheck),
@@ -139,7 +142,7 @@ urlpatterns = [
         "crypto/dh/get_public_key_by_address/",
         crypto_views.get_dh_public_key_by_address,
     ),
-    path("fennel/create_account/", fennel_views.create_account),
+    path("fennel/create_account/", fennel_views.create_account, name="create_account"),
     path(
         "onetrust/create_self_custodial_account/",
         onetrust_views.create_self_custodial_account,

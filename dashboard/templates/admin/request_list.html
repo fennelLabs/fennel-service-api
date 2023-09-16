@@ -1,0 +1,26 @@
+{% extends "admin/base.html" %}
+{% block content %}
+  <h1>Requests</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+        {% for request in requests %}
+            <tr>
+            <td>{{ request.user.username }}</td>
+            <td>
+                <a href="{% url 'admin:accept_request' request.id %}">Accept</a>
+            </td>
+            <td>
+                <a href="{% url 'admin:reject_request' request.id %}">Reject</a>
+            </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

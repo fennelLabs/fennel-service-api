@@ -1,0 +1,8 @@
+{% extends "auth/base.html" %} {% block content %} {% load crispy_forms_tags %}
+
+<div>
+Accessing the consensus layer failed. Please try again later, or contact us at info@fennellabs.com.
+</div>
+
+<a href="{% url 'dashboard:api_group_members' group_id %}">Return to Members List</a>
+{% endblock %}

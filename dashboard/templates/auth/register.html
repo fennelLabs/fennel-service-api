@@ -1,0 +1,10 @@
+{% extends "auth/base.html" %}
+{% block content %}
+{% load crispy_forms_tags %}
+<form action="{% url 'dashboard:register' %}" id="register_form"
+      method="post" name="register_form">
+    {% csrf_token %}
+    {{ form|crispy }}
+    <button type="submit">Register</button>
+</form>
+{% endblock %}

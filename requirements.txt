@@ -47,3 +47,4 @@ tomli==2.0.1
 urllib3==1.26.15
 validators==0.20.0
 whitenoise==6.5.0
+django-crispy-forms==1.14.0
