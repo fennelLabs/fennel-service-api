@@ -1,6 +1,8 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 
+from silk.profiling.profiler import silk_profile
+
 from dashboard.blockchain_helpers import (
     check_balance,
     create_wallet_with_userkeys,
@@ -15,6 +17,7 @@ from dashboard.forms import TransferTokenForm
 from dashboard.models import APIGroup, APIGroupJoinRequest, User, UserKeys
 
 
+@silk_profile(name="api_group_join_requests")
 @require_admin
 @require_authentication
 def api_group_join_requests(request, group_id=None):
@@ -25,6 +28,7 @@ def api_group_join_requests(request, group_id=None):
     return render(request, "admin/request_list.html", {"requests": join_requests})
 
 
+@silk_profile(name="accept_join_request")
 @require_admin
 @require_authentication
 def accept_join_request(request, group_id=None, request_id=None):
@@ -34,6 +38,7 @@ def accept_join_request(request, group_id=None, request_id=None):
     return redirect("dashboard:api_group_join_requests", group_id=group_id)
 
 
+@silk_profile(name="reject_join_request")
 @require_admin
 @require_authentication
 def reject_join_request(request, group_id=None, request_id=None):
@@ -43,6 +48,7 @@ def reject_join_request(request, group_id=None, request_id=None):
     return redirect("dashboard:api_group_join_requests", group_id=group_id)
 
 
+@silk_profile(name="api_group_members")
 @require_admin
 @require_authentication
 def api_group_members(request, group_id=None):
@@ -72,6 +78,7 @@ def api_group_members(request, group_id=None):
     )
 
 
+@silk_profile(name="create_wallet")
 @require_admin
 @require_authentication
 def create_wallet(request, group_id=None):
@@ -83,6 +90,7 @@ def create_wallet(request, group_id=None):
     return redirect("dashboard:api_group_members", group_id=group_id)
 
 
+@silk_profile(name="create_wallet_for_member")
 @require_admin
 @require_authentication
 def create_wallet_for_member(request, group_id=None, member_id=None):
@@ -95,6 +103,7 @@ def create_wallet_for_member(request, group_id=None, member_id=None):
     return redirect("dashboard:api_group_members", group_id=group_id)
 
 
+@silk_profile(name="transfer_tokens_to_member_post")
 def __tranfer_tokens_to_member_post(request, form, user_key, member, group_id):
     amount = form.cleaned_data.get("amount")
     balance = check_balance(user_key)
@@ -129,6 +138,7 @@ def __tranfer_tokens_to_member_post(request, form, user_key, member, group_id):
     )
 
 
+@silk_profile(name="transfer_tokens_to_member")
 @require_admin
 @require_authentication
 def transfer_tokens_to_member(request, group_id=None, member_id=None):
@@ -161,6 +171,7 @@ def transfer_tokens_to_member(request, group_id=None, member_id=None):
     )
 
 
+@silk_profile(name="confirm_transfer_tokens_to_member")
 @require_admin
 @require_authentication
 def confirm_transfer_tokens_to_member(request, group_id=None, member_id=None):
@@ -171,6 +182,7 @@ def confirm_transfer_tokens_to_member(request, group_id=None, member_id=None):
     return redirect("dashboard:api_group_members", group_id=group_id)
 
 
+@silk_profile(name="remove_group_member")
 @require_admin
 @require_authentication
 def remove_group_member(request, group_id=None, member_id=None):

@@ -4,11 +4,14 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from dashboard.decorators import require_authentication
 
+from silk.profiling.profiler import silk_profile
+
+from dashboard.decorators import require_authentication
 from dashboard.forms import LoginForm, RegistrationForm
 
 
+@silk_profile(name="redirect_authenticated_user")
 def redirect_authenticated_user(view_func):
     def wrapper(request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -18,6 +21,7 @@ def redirect_authenticated_user(view_func):
     return wrapper
 
 
+@silk_profile(name="registration_view")
 @redirect_authenticated_user
 def registration_view(request):
     if request.method == "POST":
@@ -30,6 +34,7 @@ def registration_view(request):
     return render(request, "auth/register.html", {"form": form})
 
 
+@silk_profile(name="login_view")
 @redirect_authenticated_user
 def login_view(request):
     if request.method == "POST":
@@ -47,12 +52,14 @@ def login_view(request):
     return render(request, "auth/login.html", {"form": form})
 
 
+@silk_profile(name="logout_view")
 @redirect_authenticated_user
 def logout_view(request):
     logout(request)
     return redirect(reverse("dashboard:login"))
 
 
+@silk_profile(name="change_password_view")
 @require_authentication
 def change_password_view(request):
     if request.method == "POST":

@@ -2,11 +2,14 @@ import os
 
 from django.contrib import messages
 
+from silk.profiling.profiler import silk_profile
+
 from dashboard.models import Transaction, UserKeys
 
 import requests
 
 
+@silk_profile(name="create_wallet_with_userkeys")
 def create_wallet_with_userkeys(request, keys: UserKeys) -> None:
     if keys.mnemonic is not None and keys.mnemonic != "":
         messages.error(
@@ -33,6 +36,7 @@ def create_wallet_with_userkeys(request, keys: UserKeys) -> None:
         )
 
 
+@silk_profile(name="check_balance")
 def check_balance(key: UserKeys) -> int:
     payload = {"mnemonic": key.mnemonic}
     response = requests.post(
@@ -47,6 +51,7 @@ def check_balance(key: UserKeys) -> int:
     return int(response.json()["balance"])
 
 
+@silk_profile(name="get_fee_for_transfer_token")
 def get_fee_for_transfer_token(recipient: str, amount: int, user_key: UserKeys) -> int:
     payload = {
         "mnemonic": user_key.mnemonic,
@@ -68,6 +73,7 @@ def get_fee_for_transfer_token(recipient: str, amount: int, user_key: UserKeys) 
     return int(response.json()["fee"])
 
 
+@silk_profile(name="transfer_token")
 def transfer_token(recipient: str, amount: int, user_key: UserKeys) -> None:
     payload = {
         "mnemonic": user_key.mnemonic,
