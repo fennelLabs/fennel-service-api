@@ -16,6 +16,14 @@ urlpatterns = [
     path("change-password/", auth_views.change_password_view, name="change_password"),
     # Admin dashboard views
     path(
+        "create_wallet/<int:group_id>/", admin_views.create_wallet, name="create_wallet"
+    ),
+    path(
+        "members/<int:group_id>/create_wallet/<int:member_id>/",
+        admin_views.create_wallet_for_member,
+        name="create_wallet_for_member",
+    ),
+    path(
         "join-requests/<int:group_id>/",
         admin_views.api_group_join_requests,
         name="api_group_join_requests",

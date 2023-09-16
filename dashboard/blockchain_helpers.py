@@ -1,8 +1,36 @@
 import os
 
+from django.contrib import messages
+
 from dashboard.models import Transaction, UserKeys
 
 import requests
+
+
+def create_wallet_with_userkeys(request, keys: UserKeys) -> None:
+    if keys.mnemonic is not None and keys.mnemonic != "":
+        messages.error(
+            request,
+            "Fennel wallet already exists.",
+        )
+        return
+    response = requests.get(
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/create_account",
+        timeout=5,
+    )
+    mnemonic = response.json()["mnemonic"]
+    keys.mnemonic = mnemonic
+    keys.save()
+    if response.status_code != 200:
+        messages.error(
+            request,
+            "Failed to create Fennel wallet.",
+        )
+    else:
+        messages.success(
+            request,
+            "Fennel wallet created.",
+        )
 
 
 def check_balance(key: UserKeys) -> int:

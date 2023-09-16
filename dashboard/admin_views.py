@@ -1,14 +1,15 @@
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib import messages
+
 from dashboard.blockchain_helpers import (
     check_balance,
+    create_wallet_with_userkeys,
     get_fee_for_transfer_token,
     transfer_token,
 )
-
 from dashboard.decorators import (
     require_admin,
     require_authentication,
-    require_mnemonic_created,
 )
 from dashboard.forms import TransferTokenForm
 from dashboard.models import APIGroup, APIGroupJoinRequest, User, UserKeys
@@ -18,10 +19,10 @@ from dashboard.models import APIGroup, APIGroupJoinRequest, User, UserKeys
 @require_authentication
 def api_group_join_requests(request, group_id=None):
     group = APIGroup.objects.get(id=group_id)
-    requests = APIGroupJoinRequest.objects.filter(
+    join_requests = APIGroupJoinRequest.objects.filter(
         rejected=False, accepted=False, api_group=group
     )
-    return render(request, "admin/request_list.html", {"requests": requests})
+    return render(request, "admin/request_list.html", {"requests": join_requests})
 
 
 @require_admin
@@ -47,61 +48,124 @@ def reject_join_request(request, group_id=None, request_id=None):
 def api_group_members(request, group_id=None):
     group = APIGroup.objects.get(id=group_id)
     members = group.user_list.all()
+
+    if (
+        UserKeys.objects.filter(user=request.user).exists()
+        and UserKeys.objects.get(user=request.user).mnemonic is not None
+    ):
+        account_created = True
+    else:
+        messages.error(
+            request,
+            "You must create a Fennel wallet to send tokens to your API Group members.",
+        )
+        account_created = False
+
     return render(
-        request, "admin/member_list.html", {"members": members, "group_id": group.id}
+        request,
+        "admin/member_list.html",
+        {
+            "members": members,
+            "group_id": group.id,
+            "account_created": account_created,
+        },
     )
 
 
-@require_mnemonic_created
+@require_admin
+@require_authentication
+def create_wallet(request, group_id=None):
+    if not UserKeys.objects.filter(user=request.user).exists():
+        keys = UserKeys.objects.create(user=request.user)
+    else:
+        keys = UserKeys.objects.get(user=request.user)
+    create_wallet_with_userkeys(request, keys)
+    return redirect("dashboard:api_group_members", group_id=group_id)
+
+
+@require_admin
+@require_authentication
+def create_wallet_for_member(request, group_id=None, member_id=None):
+    member = User.objects.get(id=member_id)
+    if not UserKeys.objects.filter(user=member).exists():
+        keys = UserKeys.objects.create(user=member)
+    else:
+        keys = UserKeys.objects.get(user=member)
+    create_wallet_with_userkeys(request, keys)
+    return redirect("dashboard:api_group_members", group_id=group_id)
+
+
+def __tranfer_tokens_to_member_post(request, form, user_key, member, group_id):
+    amount = form.cleaned_data.get("amount")
+    balance = check_balance(user_key)
+    fee = get_fee_for_transfer_token(member.address, amount, user_key)
+    if balance == -1:
+        messages.error(
+            request,
+            "There was an error checking your balance. Please try again later.",
+        )
+        return redirect("dashboard:api_group_members", group_id=group_id)
+    if fee == -1:
+        messages.error(
+            request,
+            "There was an error checking the fee for this transaction. Please try again later.",
+        )
+        return redirect("dashboard:api_group_members", group_id=group_id)
+    if balance < amount + fee:
+        messages.error(
+            request,
+            "You do not have enough tokens to complete this transaction.",
+        )
+        return redirect("dashboard:api_group_members", group_id=group_id)
+    return render(
+        request,
+        "admin/confirm_transfer_tokens.html",
+        {
+            "group_id": group_id,
+            "member_id": member.id,
+            "fee": fee,
+            "amount": amount,
+        },
+    )
+
+
 @require_admin
 @require_authentication
 def transfer_tokens_to_member(request, group_id=None, member_id=None):
-    group = APIGroup.objects.get(id=group_id)
-    member = UserKeys.objects.get(id=member_id)
-    user_key = UserKeys.objects.get(user=request.user)
+    member = get_object_or_404(UserKeys, user__pk=member_id)
+    if not member.mnemonic:
+        messages.error(
+            request,
+            "This member has not created a Fennel wallet yet.",
+        )
+        return redirect("dashboard:api_group_members", group_id=group_id)
+    user_key = get_object_or_404(UserKeys, user=request.user)
+    if not user_key.mnemonic:
+        messages.error(
+            request,
+            "You have not created a Fennel wallet yet.",
+        )
+        return redirect("dashboard:api_group_members", group_id=group_id)
     if request.method == "GET":
         form = TransferTokenForm()
     if request.method == "POST":
         form = TransferTokenForm(request.POST)
         if form.is_valid():
-            amount = form.cleaned_data.get("amount")
-            balance = check_balance(user_key)
-            fee = get_fee_for_transfer_token(member.address, amount, user_key)
-            if balance == -1 or fee == -1:
-                return render(
-                    request,
-                    "admin/failed_to_access_blockchain.html",
-                    {"group_id": group.id, "member_id": member.id},
-                )
-            if balance < amount + fee:
-                return render(
-                    request,
-                    "admin/insufficient_balance.html",
-                    {"group_id": group.id, "member_id": member.id},
-                )
-            return render(
-                request,
-                "admin/confirm_transfer_tokens.html",
-                {
-                    "group_id": group.id,
-                    "member_id": member.id,
-                    "fee": fee,
-                    "amount": amount,
-                },
+            return __tranfer_tokens_to_member_post(
+                request, form, user_key, member, group_id
             )
     return render(
         request,
         "admin/transfer_tokens.html",
-        {"group_id": group.id, "member_id": member.id, form: form},
+        {"group_id": group_id, "member_id": member.id, form: form},
     )
 
 
-@require_mnemonic_created
 @require_admin
 @require_authentication
 def confirm_transfer_tokens_to_member(request, group_id=None, member_id=None):
-    member = UserKeys.objects.get(id=member_id)
-    user_key = UserKeys.objects.get(user=request.user)
+    member = get_object_or_404(UserKeys, user__pk=member_id)
+    user_key = get_object_or_404(UserKeys, user=request.user)
     amount = request.POST.get("amount")
     transfer_token(member.address, amount, user_key)
     return redirect("dashboard:api_group_members", group_id=group_id)
@@ -111,6 +175,6 @@ def confirm_transfer_tokens_to_member(request, group_id=None, member_id=None):
 @require_authentication
 def remove_group_member(request, group_id=None, member_id=None):
     group = APIGroup.objects.get(id=group_id)
-    member = User.objects.get(id=member_id)
+    member = get_object_or_404(User, id=member_id)
     group.user_list.remove(member)
     return redirect("dashboard:api_group_members", group_id=group_id)
