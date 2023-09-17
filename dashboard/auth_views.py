@@ -53,8 +53,8 @@ def login_view(request):
 
 
 @silk_profile(name="logout_view")
-@redirect_authenticated_user
 def logout_view(request):
+    messages.get_messages(request).used = True
     logout(request)
     return redirect(reverse("dashboard:login"))
 
@@ -62,6 +62,7 @@ def logout_view(request):
 @silk_profile(name="change_password_view")
 @require_authentication
 def change_password_view(request):
+    messages.get_messages(request).used = True
     if request.method == "POST":
         form = PasswordChangeForm(request.user, request.POST)
         if form.is_valid():

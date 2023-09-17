@@ -1,11 +1,23 @@
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <title>Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    {% bootstrap_messages %}
   </head>
   <body>
-    {% if messages %} {% for message in messages %}
-    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-    {% endfor %} {% endif %} {% block content %}{% endblock %}
+    <div class="container">
+      <div class="row">
+        <div class="col-md-2"></div>
+          <div class="col-md-8">
+            {% block content %}
+            {% endblock %}
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

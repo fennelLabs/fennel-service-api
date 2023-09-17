@@ -5,7 +5,7 @@
       method="post" name="login_form">
     {% csrf_token %}
     {{ form|crispy }}
-    <button type="submit">Log in</button>
+    <button type="submit" class="btn btn-primary">Log in</button>
     <a href="{% url 'dashboard:register' %}">Register</a>
     <a href="{% url 'dashboard:password_reset' %}">Forgot password</a>
 </form>

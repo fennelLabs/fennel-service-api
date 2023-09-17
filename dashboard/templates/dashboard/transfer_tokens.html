@@ -1,4 +1,6 @@
-{% extends "auth/base.html" %} {% block content %} {% load crispy_forms_tags %}
+{% extends "dashboard/base.html" %}
+{% block content %}
+{% load crispy_forms_tags %}
 <form
   action="{% url 'dashboard:transfer_tokens_to_member' group_id member_id %}"
   id="transfer_token_form"

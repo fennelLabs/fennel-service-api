@@ -1,8 +1,8 @@
-{% extends "admin/base.html" %}
+{% extends "dashboard/base.html" %}
 {% load member_tags %}
 {% block content %}
   <h1>Members</h1>
-  <table>
+  <table class="table">
     <thead>
         <tr>
             <th>Username</th>
@@ -15,8 +15,8 @@
     <tbody>
         {% for member in members %}
             <tr>
-            <td>{{ member.user.username }}</td>
-            <td>{{ member.address }}</td>
+            <td>{{ member.username }}</td>
+            <td>{{ member|get_address }}</td>
             <td>{{ member|get_balance }}</td>
             <td>
                 {% if account_created %}

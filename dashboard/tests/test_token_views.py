@@ -64,7 +64,7 @@ class TestTokenViews(TestCase):
             ),
         )
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "admin/transfer_tokens.html")
+        self.assertTemplateUsed(response, "dashboard/transfer_tokens.html")
 
     def test_transfer_tokens_to_member_no_balance(self):
         self.client.login(username="testuser", password="testpass")

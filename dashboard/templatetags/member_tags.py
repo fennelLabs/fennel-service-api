@@ -17,3 +17,10 @@ def get_balance(member):
     if not UserKeys.objects.filter(user=member.id).exists():
         return 0
     return UserKeys.objects.get(user=member.id).balance
+
+
+@register.filter
+def get_address(member):
+    if not UserKeys.objects.filter(user=member.id).exists():
+        return None
+    return UserKeys.objects.get(user=member.id).address

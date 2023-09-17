@@ -31,7 +31,7 @@ class AdminViewsTests(TestCase):
             )
         )
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "admin/member_list.html")
+        self.assertTemplateUsed(response, "dashboard/member_list.html")
 
     def test_api_group_join_requests_view(self):
         self.client.login(username="testuser", password="testpass")
@@ -42,7 +42,7 @@ class AdminViewsTests(TestCase):
             )
         )
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "admin/request_list.html")
+        self.assertTemplateUsed(response, "dashboard/request_list.html")
 
     def test_accept_join_request_view(self):
         self.client.login(username="testuser", password="testpass")
@@ -114,7 +114,7 @@ class AdminViewsTests(TestCase):
             )
         )
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "admin/member_list.html")
+        self.assertTemplateUsed(response, "dashboard/member_list.html")
 
     def test_remove_group_member(self):
         self.client.login(username="testuser", password="testpass")

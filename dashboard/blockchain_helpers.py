@@ -23,6 +23,12 @@ def create_wallet_with_userkeys(request, keys: UserKeys) -> None:
     )
     mnemonic = response.json()["mnemonic"]
     keys.mnemonic = mnemonic
+    response = requests.post(
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_address",
+        data={"mnemonic": mnemonic},
+        timeout=5,
+    )
+    keys.address = response.json()["address"]
     keys.save()
     if response.status_code != 200:
         messages.error(

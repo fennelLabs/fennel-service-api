@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "knox",
     "django_nose",
     "silk",
+    "bootstrap5",
 ]
 
 MIDDLEWARE = [

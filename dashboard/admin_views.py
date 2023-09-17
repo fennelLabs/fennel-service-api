@@ -25,7 +25,11 @@ def api_group_join_requests(request, group_id=None):
     join_requests = APIGroupJoinRequest.objects.filter(
         rejected=False, accepted=False, api_group=group
     )
-    return render(request, "admin/request_list.html", {"requests": join_requests})
+    return render(
+        request,
+        "dashboard/request_list.html",
+        {"requests": join_requests, "group_id": group_id},
+    )
 
 
 @silk_profile(name="accept_join_request")
@@ -52,7 +56,8 @@ def reject_join_request(request, group_id=None, request_id=None):
 @require_admin
 @require_authentication
 def api_group_members(request, group_id=None):
-    group = APIGroup.objects.get(id=group_id)
+    messages.get_messages(request).used = True
+    group = get_object_or_404(APIGroup, id=group_id)
     members = group.user_list.all()
 
     if (
@@ -69,7 +74,7 @@ def api_group_members(request, group_id=None):
 
     return render(
         request,
-        "admin/member_list.html",
+        "dashboard/member_list.html",
         {
             "members": members,
             "group_id": group.id,
@@ -128,7 +133,7 @@ def __tranfer_tokens_to_member_post(request, form, user_key, member, group_id):
         return redirect("dashboard:api_group_members", group_id=group_id)
     return render(
         request,
-        "admin/confirm_transfer_tokens.html",
+        "dashboard/confirm_transfer_tokens.html",
         {
             "group_id": group_id,
             "member_id": member.id,
@@ -142,6 +147,7 @@ def __tranfer_tokens_to_member_post(request, form, user_key, member, group_id):
 @require_admin
 @require_authentication
 def transfer_tokens_to_member(request, group_id=None, member_id=None):
+    messages.get_messages(request).used = True
     member = get_object_or_404(UserKeys, user__pk=member_id)
     if not member.mnemonic:
         messages.error(
@@ -166,7 +172,7 @@ def transfer_tokens_to_member(request, group_id=None, member_id=None):
             )
     return render(
         request,
-        "admin/transfer_tokens.html",
+        "dashboard/transfer_tokens.html",
         {"group_id": group_id, "member_id": member.id, form: form},
     )
 
@@ -186,7 +192,26 @@ def confirm_transfer_tokens_to_member(request, group_id=None, member_id=None):
 @require_admin
 @require_authentication
 def remove_group_member(request, group_id=None, member_id=None):
+    messages.get_messages(request).used = True
     group = APIGroup.objects.get(id=group_id)
     member = get_object_or_404(User, id=member_id)
+    if not group.user_list.filter(id=member_id).exists():
+        messages.error(
+            request,
+            "This user is not a member of this API Group.",
+        )
+        return redirect("dashboard:api_group_members", group_id=group_id)
+    if group.admin_list.filter(id=member_id).exists():
+        messages.error(
+            request,
+            "You cannot remove an admin from an API Group.",
+        )
+        return redirect("dashboard:api_group_members", group_id=group_id)
+    if member == request.user:
+        messages.error(
+            request,
+            "You cannot remove yourself from an API Group.",
+        )
+        return redirect("dashboard:api_group_members", group_id=group_id)
     group.user_list.remove(member)
     return redirect("dashboard:api_group_members", group_id=group_id)

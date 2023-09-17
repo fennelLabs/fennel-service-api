@@ -61,6 +61,10 @@ class TestWalletViews(TestCase):
             UserKeys.objects.get(user=User.objects.get(username="testuser")).mnemonic
             is not None
         )
+        assert (
+            UserKeys.objects.get(user=User.objects.get(username="testuser")).address
+            is not None
+        )
 
     def test_create_wallet_for_member(self):
         self.client.login(username="testuser", password="testpass")
@@ -88,5 +92,9 @@ class TestWalletViews(TestCase):
         ).exists()
         assert (
             UserKeys.objects.get(user=User.objects.get(username="testuser2")).mnemonic
+            is not None
+        )
+        assert (
+            UserKeys.objects.get(user=User.objects.get(username="testuser2")).address
             is not None
         )

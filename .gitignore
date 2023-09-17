@@ -7,3 +7,4 @@ db.sqlite3
 static/
 *.prof
 .DS_Store
+.hintrc

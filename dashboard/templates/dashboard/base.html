@@ -1,11 +1,54 @@
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <title>Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {% load bootstrap5 %} {% bootstrap_css %} {% bootstrap_javascript %} 
+    {% bootstrap_messages %} {% load static %}
   </head>
   <body>
-    {% if messages %} {% for message in messages %}
-    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-    {% endfor %} {% endif %} {% block content %}{% endblock %}
+    <div class="container">
+      <nav class="navbar navbar-expand-lg navbar-light bg-light p-0">
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" width="100%" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a
+                class="nav-link p-3"
+                href="{% url 'dashboard:api_group_members' group_id %}"
+                >Home</a
+              >
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link p-3"
+                href="{% url 'dashboard:api_group_join_requests' group_id %}"
+                >Join Requests</a
+              >
+            </li>
+          </ul>
+        </div>
+        <a
+          class="nav-item mr-3 nav-link p-3"
+          href="{% url 'dashboard:logout' %}"
+          >Logout</a
+        >
+      </nav>
+
+      <div class="row">
+        <div class="col-md-2"></div>
+        <div class="col-md-8">{% block content %} {% endblock %}</div>
+      </div>
+    </div>
   </body>
 </html>

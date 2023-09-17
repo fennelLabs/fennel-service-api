@@ -1,4 +1,6 @@
-{% extends "auth/base.html" %} {% block content %} {% load crispy_forms_tags %}
+{% extends "dashboard/base.html" %}
+{% block content %}
+{% load crispy_forms_tags %}
 <form
   action="{% url 'dashboard:confirm_transfer_tokens_to_member' %}"
   id="confirm_transfer_token_form"
@@ -12,7 +14,7 @@
   <input type="hidden" name="group_id" value="{{ group_id }}" />
   <input type="hidden" name="member_id" value="{{ member_id }}" />
   <input type="hidden" name="amount" value="{{ amount }}" />
-  <button type="submit">Send</button>
-  <a href="{% url 'dashboard:api_group_members' group_id %}">Cancel</a>
+  <button class="btn-primary" type="submit">Send</button>
+  <a class="btn-primary" href="{% url 'dashboard:api_group_members' group_id %}">Cancel</a>
 </form>
 {% endblock %}

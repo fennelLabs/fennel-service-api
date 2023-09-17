@@ -30,6 +30,7 @@ def create_api_group(request):
         if group_name:
             group = APIGroup.objects.create(name=group_name)
             group.admin_list.add(request.user)
+            group.user_list.add(request.user)
             group.save()
             messages.success(request, f"Created API group {group.name}.")
             return redirect("dashboard:api_group_members", group_id=group.id)
