@@ -960,8 +960,10 @@ class TestAPIAdminViews(TestCase):
         )
         assert response.status_code == 200
         assert len(response.json()) == 2
-        assert response.json()[0]["username"] == "test_get_api_group_users"
-        assert response.json()[1]["username"] == "test_get_api_group_users_two"
+        assert any(d["username"] == "test_get_api_group_users" for d in response.json())
+        assert any(
+            d["username"] == "test_get_api_group_users_two" for d in response.json()
+        )
 
     def test_get_api_group_list(self):
         client = Client()

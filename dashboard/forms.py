@@ -96,3 +96,16 @@ class TransferTokenForm(forms.Form):
             raise forms.ValidationError("Amount must be greater than 0")
 
         return cleaned_data
+
+
+class CreateApiGroupForm(forms.Form):
+    group_name = forms.CharField(label="Group Name", max_length=100)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        group_name = cleaned_data.get("group_name")
+
+        if group_name is None:
+            raise forms.ValidationError("Group name is required")
+
+        return cleaned_data

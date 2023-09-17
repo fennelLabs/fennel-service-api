@@ -9,6 +9,7 @@ app_name = "dashboard"
 
 urlpatterns = [
     path("", views.index, name="index"),
+    path("create-api-group/", views.create_api_group, name="create_api_group"),
     # Custom auth views
     path("register/", auth_views.registration_view, name="register"),
     path("login/", auth_views.login_view, name="login"),
