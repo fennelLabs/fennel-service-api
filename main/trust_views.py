@@ -39,8 +39,9 @@ def get_fee_for_issue_trust(request):
         payload_size=0,
         fee=response.json()["fee"],
     )
-    response_json = response.json()
-    response_json["balance"] = check_balance(user_key)["balance"]
+    response_json = {}
+    response_json["fee"] = int(response.json()["fee"]) / 1000000000000
+    response_json["balance"] = int(check_balance(user_key)["balance"]) / 1000000000000
     return Response(response_json)
 
 
@@ -68,7 +69,7 @@ def issue_trust(request):
         timeout=5,
     )
     response_json = response.json()
-    response_json["balance"] = check_balance(user_key)["balance"]
+    response_json["balance"] = int(check_balance(user_key)["balance"]) / 1000000000000
     return Response(response_json)
 
 
@@ -92,8 +93,9 @@ def get_fee_for_remove_trust(request):
         payload_size=0,
         fee=response.json()["fee"],
     )
-    response_json = response.json()
-    response_json["balance"] = check_balance(user_key)["balance"]
+    response_json = {}
+    response_json["fee"] = int(response.json()["fee"]) / 1000000000000
+    response_json["balance"] = int(check_balance(user_key)["balance"]) / 1000000000000
     return Response(response_json)
 
 
@@ -121,7 +123,7 @@ def remove_trust(request):
         timeout=5,
     )
     response_json = response.json()
-    response_json["balance"] = check_balance(user_key)["balance"]
+    response_json["balance"] = int(check_balance(user_key)["balance"]) / 1000000000000
     return Response(response_json)
 
 
@@ -145,8 +147,9 @@ def get_fee_for_request_trust(request):
         payload_size=0,
         fee=response.json()["fee"],
     )
-    response_json = response.json()
-    response_json["balance"] = check_balance(user_key)["balance"]
+    response_json = {}
+    response_json["fee"] = int(response.json()["fee"]) / 1000000000000
+    response_json["balance"] = int(check_balance(user_key)["balance"]) / 1000000000000
     return Response(response_json)
 
 
@@ -172,7 +175,7 @@ def request_trust(request):
         timeout=5,
     )
     response_json = response.json()
-    response_json["balance"] = check_balance(user_key)["balance"]
+    response_json["balance"] = int(check_balance(user_key)["balance"]) / 1000000000000
     return Response(response_json)
 
 
@@ -196,8 +199,9 @@ def get_fee_for_cancel_trust_request(request):
         payload_size=0,
         fee=response.json()["fee"],
     )
-    response_json = response.json()
-    response_json["balance"] = check_balance(user_key)["balance"]
+    response_json = {}
+    response_json["fee"] = int(response.json()["fee"]) / 1000000000000
+    response_json["balance"] = int(check_balance(user_key)["balance"]) / 1000000000000
     return Response(response_json)
 
 
@@ -223,7 +227,7 @@ def cancel_trust_request(request):
         timeout=5,
     )
     response_json = response.json()
-    response_json["balance"] = check_balance(user_key)["balance"]
+    response_json["balance"] = int(check_balance(user_key)["balance"]) / 1000000000000
     return Response(response_json)
 
 
