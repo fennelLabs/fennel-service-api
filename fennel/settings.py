@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "django_nose",
     "silk",
     "bootstrap5",
+    "crispy_bootstrap5",
 ]
 
 MIDDLEWARE = [
@@ -265,3 +266,5 @@ SILKY_INTERCEPT_PERCENT = 50
 SILKY_MAX_RECORDED_REQUESTS = 10**3
 SILKY_MAX_RECORDED_REQUESTS_CHECK_PERCENT = 10
 SILKY_PYTHON_PROFILER_RESULT_PATH = os.path.join(BASE_DIR, "profile")
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"

@@ -1,6 +1,6 @@
 from django import forms
 
-from dashboard.models import User
+from dashboard.models import APIGroup, User
 
 
 class RegistrationForm(forms.Form):
@@ -107,5 +107,8 @@ class CreateApiGroupForm(forms.Form):
 
         if group_name is None:
             raise forms.ValidationError("Group name is required")
+
+        if APIGroup.objects.filter(name=group_name).exists():
+            raise forms.ValidationError("Group name already exists")
 
         return cleaned_data
