@@ -16,7 +16,9 @@ def has_wallet(member):
 def get_balance(member):
     if not UserKeys.objects.filter(user=member.id).exists():
         return 0
-    return UserKeys.objects.get(user=member.id).balance
+    if not UserKeys.objects.get(user=member.id).balance:
+        return 0
+    return int(UserKeys.objects.get(user=member.id).balance) / 1000000000000
 
 
 @register.filter

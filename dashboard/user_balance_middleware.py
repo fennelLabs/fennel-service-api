@@ -13,7 +13,8 @@ def user_balance_middleware(get_response):
                 )
                 if request.user.has_wallet:
                     request.user.balance = (
-                        UserKeys.objects.get(user=request.user.id).balance
+                        int(UserKeys.objects.get(user=request.user.id).balance)
+                        / 1000000000000
                         if UserKeys.objects.get(user=request.user.id).balance
                         else 0
                     )
