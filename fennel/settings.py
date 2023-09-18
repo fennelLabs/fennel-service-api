@@ -64,6 +64,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "silk.middleware.SilkyMiddleware",
+    "dashboard.user_balance_middleware.user_balance_middleware",
 ]
 
 ROOT_URLCONF = "fennel.urls"

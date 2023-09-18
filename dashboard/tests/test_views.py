@@ -82,3 +82,13 @@ class ViewsTests(TestCase):
         self.assertEqual(
             APIGroup.objects.first().admin_list.first().username, "testuser"
         )
+    def test_get_balance(self):
+        self.client.login(username="testuser", password="testpass")
+        response = self.client.get(reverse("dashboard:get_balance"))
+        self.assertRedirects(
+            response,
+            reverse("dashboard:index"),
+            status_code=302,
+            target_status_code=200,
+            fetch_redirect_response=True,
+        )

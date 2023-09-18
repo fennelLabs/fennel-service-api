@@ -1,3 +1,4 @@
+import os
 from django.shortcuts import redirect, render
 from django.contrib import messages
 
@@ -5,7 +6,9 @@ from silk.profiling.profiler import silk_profile
 
 from dashboard.decorators import require_authentication
 from dashboard.forms import CreateApiGroupForm
-from dashboard.models import APIGroup
+from dashboard.models import APIGroup, UserKeys
+
+import requests
 
 
 @silk_profile(name="index")
@@ -37,3 +40,26 @@ def create_api_group(request):
     else:
         form = CreateApiGroupForm()
     return render(request, "dashboard/index.html", {"form": form})
+
+
+@silk_profile(name="get_balance")
+@require_authentication
+def get_balance(request):
+    if not UserKeys.objects.filter(user=request.user).exists():
+        messages.error(request, "You do not have a wallet.")
+        return redirect("dashboard:index")
+    keys = UserKeys.objects.get(user=request.user)
+    response = requests.post(
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_account_balance",
+        data={"mnemonic": keys.mnemonic},
+        timeout=5,
+    )
+    if response.status_code != 200:
+        messages.error(
+            request,
+            "Subservice is not available. Try again later, or contact us at info@fennellabs.com.",
+        )
+        return redirect("dashboard:index")
+    keys.balance = response.json()["balance"]
+    keys.save()
+    return redirect("dashboard:index")
