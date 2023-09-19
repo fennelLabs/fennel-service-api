@@ -47,7 +47,7 @@ def record_signal_fee(payload: dict) -> (dict, bool):
             "error": "could not record transaction",
             "content": payload["content"],
             "content_length": len(payload["content"]),
-            "fee": int(response.json()["fee"]) / 1000000000000,
+            "fee": int(response.json()["fee"]),
         }, False
     return response.json(), True
 
@@ -81,8 +81,8 @@ def signal_send_helper(user_key: UserKeys, signal: Signal) -> (dict, bool):
             return (
                 {
                     "error": "insufficient balance",
-                    "balance": check_balance(user_key)["balance"] / 1000000000000,
-                    "fee": signal_fee_result["fee"] / 1000000000000,
+                    "balance": check_balance(user_key)["balance"],
+                    "fee": signal_fee_result["fee"],
                     "signal_id": signal.id,
                     "synced": False,
                     "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
@@ -100,8 +100,8 @@ def signal_send_helper(user_key: UserKeys, signal: Signal) -> (dict, bool):
             return (
                 {
                     "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
-                    "fee": signal_fee_result["fee"] / 1000000000000,
-                    "balance": check_balance(user_key)["balance"] / 1000000000000,
+                    "fee": signal_fee_result["fee"],
+                    "balance": check_balance(user_key)["balance"],
                     "signal_id": signal.id,
                     "synced": False,
                 },
@@ -111,7 +111,7 @@ def signal_send_helper(user_key: UserKeys, signal: Signal) -> (dict, bool):
         signal.tx_hash = response_json["hash"]
         signal.mempool_timestamp = datetime.datetime.now()
         signal.save()
-        response_json["balance"] = check_balance(user_key)["balance"] / 1000000000000
+        response_json["balance"] = check_balance(user_key)["balance"]
         response_json["signal_id"] = signal.id
         response_json["synced"] = True
         return response_json, True
@@ -119,8 +119,8 @@ def signal_send_helper(user_key: UserKeys, signal: Signal) -> (dict, bool):
         return (
             {
                 "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
-                "fee": signal_fee_result["fee"] / 1000000000000,
-                "balance": check_balance(user_key)["balance"] / 1000000000000,
+                "fee": signal_fee_result["fee"],
+                "balance": check_balance(user_key)["balance"],
                 "signal_id": signal.id,
                 "synced": False,
             },
@@ -182,7 +182,7 @@ def download_account_as_json(request):
 def get_account_balance(request):
     key = UserKeys.objects.filter(user=request.user).first()
     response = check_balance(key)
-    response["balance"] = int(response["balance"] / 1000000000000)
+    response["balance"] = int(response["balance"])
     return Response(response)
 
 
@@ -229,8 +229,8 @@ def get_fee_for_transfer_token(request):
         fee=response.json()["fee"],
     )
     response_json = response.json()
-    response_json["fee"] = response_json["fee"] / 1000000000000
-    response_json["balance"] = check_balance(user_key)["balance"] / 1000000000000
+    response_json["fee"] = response_json["fee"]
+    response_json["balance"] = check_balance(user_key)["balance"]
     return Response(response_json)
 
 
@@ -274,8 +274,8 @@ def get_fee_for_new_signal(request):
     try:
         response, success = record_signal_fee(payload)
         code = 400 if not success else 200
-        response["fee"] = response["fee"] / 1000000000000
-        response["balance"] = check_balance(user_key)["balance"] / 1000000000000
+        response["fee"] = response["fee"]
+        response["balance"] = check_balance(user_key)["balance"]
         return Response(response, status=code)
     except requests.HTTPError:
         return Response({"error": "could not get fee"})
@@ -316,8 +316,8 @@ def get_fee_for_sync_signal(request):
     }
     response, success = record_signal_fee(payload)
     code = 400 if not success else 200
-    response["fee"] = response["fee"] / 1000000000000
-    response["balance"] = check_balance(user_key)["balance"] / 1000000000000
+    response["fee"] = response["fee"]
+    response["balance"] = check_balance(user_key)["balance"]
     return Response(response, status=code)
 
 
