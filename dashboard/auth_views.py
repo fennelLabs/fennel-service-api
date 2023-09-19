@@ -21,7 +21,6 @@ def redirect_authenticated_user(view_func):
     return wrapper
 
 
-@silk_profile(name="registration_view")
 @redirect_authenticated_user
 def registration_view(request):
     if request.method == "POST":
