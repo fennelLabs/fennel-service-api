@@ -137,7 +137,7 @@ def __tranfer_tokens_to_member_post(request, form, user_key, member, group_id):
         {
             "group_id": group_id,
             "member_id": member.id,
-            "fee": fee,
+            "fee": round(fee / 1000000000000, 4),
             "amount": amount,
         },
     )

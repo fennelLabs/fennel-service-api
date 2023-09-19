@@ -54,7 +54,7 @@ def check_balance(key: UserKeys) -> int:
         return -1
     key.balance = response.json()["balance"]
     key.save()
-    return int(response.json()["balance"])
+    return int(response.json()["balance"]) / 1000000000000
 
 
 @silk_profile(name="get_fee_for_transfer_token")
@@ -76,7 +76,7 @@ def get_fee_for_transfer_token(recipient: str, amount: int, user_key: UserKeys) 
         payload_size=0,
         fee=response.json()["fee"],
     )
-    return int(response.json()["fee"])
+    return round(int(response.json()["fee"]) / 1000000000000, 4)
 
 
 @silk_profile(name="transfer_token")

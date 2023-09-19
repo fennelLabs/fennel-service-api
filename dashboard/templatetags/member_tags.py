@@ -18,7 +18,7 @@ def get_balance(member):
         return 0
     if not UserKeys.objects.get(user=member.id).balance:
         return 0
-    return int(UserKeys.objects.get(user=member.id).balance)
+    return round(int(UserKeys.objects.get(user=member.id).balance) / 1000000000000, 4)
 
 
 @register.filter
