@@ -11,7 +11,6 @@ from dashboard.decorators import require_authentication
 from dashboard.forms import LoginForm, RegistrationForm
 
 
-@silk_profile(name="redirect_authenticated_user")
 def redirect_authenticated_user(view_func):
     def wrapper(request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -21,6 +20,7 @@ def redirect_authenticated_user(view_func):
     return wrapper
 
 
+@silk_profile(name="registration_view")
 @redirect_authenticated_user
 def registration_view(request):
     if request.method == "POST":
