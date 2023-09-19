@@ -1,7 +1,7 @@
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from dashboard.models import APIGroup, User
+from dashboard.models import APIGroup, APIGroupJoinRequest, User
 
 
 class ViewsTests(TestCase):
@@ -120,3 +120,39 @@ class ViewsTests(TestCase):
             target_status_code=200,
             fetch_redirect_response=True,
         )
+
+    def test_get_send_join_request(self):
+        self.client.login(username="testuser", password="testpass")
+        response = self.client.get(reverse("dashboard:send_group_join_request"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "dashboard/index.html")
+
+    def test_post_send_join_request(self):
+        self.client.login(username="testuser", password="testpass")
+        APIGroup.objects.create(name="testgroup")
+        response = self.client.post(
+            reverse("dashboard:send_group_join_request"), {"group_name": "testgroup"}
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(
+            response,
+            reverse("dashboard:index"),
+            status_code=302,
+            target_status_code=200,
+            fetch_redirect_response=True,
+        )
+        self.assertEqual(APIGroup.objects.count(), 1)
+        self.assertEqual(APIGroup.objects.first().name, "testgroup")
+        self.assertEqual(APIGroupJoinRequest.objects.count(), 1)
+        self.assertEqual(
+            APIGroupJoinRequest.objects.first().api_group.name, "testgroup"
+        )
+        self.assertEqual(APIGroupJoinRequest.objects.first().user.username, "testuser")
+
+    def test_post_send_join_request_nonexistent_group(self):
+        self.client.login(username="testuser", password="testpass")
+        response = self.client.post(
+            reverse("dashboard:send_group_join_request"), {"group_name": "testgroup"}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "dashboard/index.html")

@@ -2,7 +2,8 @@
 {% block content %}
 {% load crispy_forms_tags %}
 Welcome to Fennel.
-<div>
+<div class="row">
+  <h1>Create Group</h1>
   <form
     action="{% url 'dashboard:create_api_group' %}"
     id="create_api_group"
@@ -12,6 +13,19 @@ Welcome to Fennel.
     {% csrf_token %}
     {{ form|crispy }}
     <button type="submit" class="btn btn-primary">Create</button>
+  </form>
+</div>
+<div class="row">
+  <h1>Request to Join Group</h1>
+  <form
+    action="{% url 'dashboard:send_group_join_request' %}"
+    id="send_group_join_request"
+    method="post"
+    name="send_group_join_request"
+  >
+    {% csrf_token %}
+    {{ join_request_form|crispy }}
+    <button type="submit" class="btn btn-primary">Send</button>
   </form>
 </div>
 {% endblock %}
