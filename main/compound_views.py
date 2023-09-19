@@ -17,6 +17,7 @@ from main.fennel_views import check_balance, record_signal_fee, signal_send_help
 from main.serializers import (
     AnnotatedWhiteflagSignalSerializer,
     ConfirmationRecordSerializer,
+    SignalTextSerializer,
     UserSerializer,
 )
 
@@ -54,13 +55,19 @@ def decode(signal: str) -> (dict, bool):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def encode_list(request):
-    signals = request.data.getlist("signals")
+    try:
+        signals = request.data.getlist("signals")
+    except AttributeError:
+        signals = request.data.get("signals")
     if signals is None:
         return Response({"message": "No signals given"}, status=400)
     processed = []
     for signal in signals:
-        valid_signal = signal.replace("'", '"')
-        signal_dict = json.loads(valid_signal)
+        if not isinstance(signal, dict):
+            valid_signal = signal.replace("'", '"')
+            signal_dict = json.loads(valid_signal)
+        else:
+            signal_dict = signal
         signal_text_encoded, signal_encode_success = whiteflag_encoder_helper(
             signal_dict
         )
@@ -257,7 +264,10 @@ def send_signal_with_annotations(request):
 @permission_classes([IsAuthenticated])
 @requires_mnemonic_created
 def get_fee_for_send_signal_list(request):
-    signals = request.data.getlist("signals")
+    serializer = SignalTextSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=400)
+    signals = serializer.data["signals"]
     if signals is None:
         return Response({"message": "No signals given"}, status=400)
     processed = []
@@ -303,7 +313,10 @@ def get_fee_for_send_signal_list(request):
 @permission_classes([IsAuthenticated])
 @requires_mnemonic_created
 def send_signal_list(request):
-    signals = request.data.getlist("signals")
+    serializer = SignalTextSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=400)
+    signals = serializer.data["signals"]
     if signals is None:
         return Response({"message": "No signals given"}, status=400)
     processed = []

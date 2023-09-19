@@ -62,8 +62,6 @@ class TestCompoundViews(TestCase):
         assert response.json()[0]["signal_text"]["version"] == "1"
         assert response.json()[0]["signal_text"]["encryptionIndicator"] == "0"
 
-        Signal.objects.all().delete()
-
     def test_decode_list_encrypted(self):
         client = Client()
         user_model = get_user_model()
@@ -94,8 +92,6 @@ class TestCompoundViews(TestCase):
         assert response.json()[0]["signal_text"]["prefix"] == "WF"
         assert response.json()[0]["signal_text"]["version"] == "1"
         assert response.json()[0]["signal_text"]["encryptionIndicator"] == "1"
-
-        Signal.objects.all().delete()
 
     def test_decode_long_signal_list(self):
         client = Client()
@@ -128,8 +124,6 @@ class TestCompoundViews(TestCase):
         )
         assert response.status_code == 200
         assert len(response.json()) == 100
-
-        Signal.objects.all().delete()
 
     def test_decode_list_with_non_whiteflag_signals(self):
         client = Client()
@@ -166,8 +160,6 @@ class TestCompoundViews(TestCase):
         assert response.status_code == 200
         assert len(response.json()) == 1
 
-        Signal.objects.all().delete()
-
     def test_decode_list_does_not_exist(self):
         client = Client()
         user_model = get_user_model()
@@ -190,8 +182,6 @@ class TestCompoundViews(TestCase):
         )
         assert response.status_code == 400
 
-        Signal.objects.all().delete()
-
     def test_decode_list_empty_input(self):
         client = Client()
         user_model = get_user_model()
@@ -213,8 +203,6 @@ class TestCompoundViews(TestCase):
             HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
         )
         assert response.status_code == 400
-
-        Signal.objects.all().delete()
 
     def test_decode_list_with_reference_messages_and_confirmations(self):
         client = Client()
@@ -309,8 +297,6 @@ class TestCompoundViews(TestCase):
         assert response.json()[1]["confirmations"][0]["signal"] == signal2.id
         assert response.json()[1]["confirmations"][0]["confirmer"] == user.id
 
-        Signal.objects.all().delete()
-
     def test_get_fee_for_send_signal_with_annotations(self):
         client = Client()
         user_model = get_user_model()
@@ -363,8 +349,6 @@ class TestCompoundViews(TestCase):
         assert response.json()["annotation_response"]["fee"] is not None
         assert response.json()["total_fee"] is not None
 
-        Signal.objects.all().delete()
-
     def test_send_signal_with_annotations(self):
         client = Client()
         user_model = get_user_model()
@@ -416,8 +400,6 @@ class TestCompoundViews(TestCase):
         assert response.json()["signal_id"] is not None
         assert response.json()["fee"] is not None
 
-        Signal.objects.all().delete()
-
     def test_encode_list(self):
         client = Client()
         user_model = get_user_model()
@@ -459,8 +441,6 @@ class TestCompoundViews(TestCase):
         assert response.status_code == 200
         assert len(response.json()) == 1
 
-        Signal.objects.all().delete()
-
     def test_get_fee_for_send_signal_list(self):
         client = Client()
         response = client.post(
@@ -500,8 +480,6 @@ class TestCompoundViews(TestCase):
             + response.json()["signals"][4]["fee"]
         )
 
-        Signal.objects.all().delete()
-
     def test_send_signal_list(self):
         client = Client()
         response = client.post(
@@ -532,5 +510,3 @@ class TestCompoundViews(TestCase):
         )
         assert response.status_code == 200
         assert len(response.json()) == 5
-
-        Signal.objects.all().delete()
