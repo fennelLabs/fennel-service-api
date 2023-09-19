@@ -5,8 +5,8 @@ from django.contrib import messages
 from silk.profiling.profiler import silk_profile
 
 from dashboard.decorators import require_authentication
-from dashboard.forms import CreateApiGroupForm
-from dashboard.models import APIGroup, UserKeys
+from dashboard.forms import CreateApiGroupForm, SendAPIGroupRequestForm
+from dashboard.models import APIGroup, APIGroupJoinRequest, UserKeys
 
 import requests
 
@@ -19,7 +19,39 @@ def index(request):
             "dashboard:api_group_members",
             group_id=request.user.api_group_admins.first().id,
         )
-    return render(request, "dashboard/index.html", {"form": CreateApiGroupForm()})
+    return render(
+        request,
+        "dashboard/index.html",
+        {"form": CreateApiGroupForm(), "join_request_form": SendAPIGroupRequestForm()},
+    )
+
+
+@silk_profile(name="send_group_join_request")
+@require_authentication
+def send_group_join_request(request):
+    if request.method == "POST":
+        join_form = SendAPIGroupRequestForm(request.POST)
+        if not join_form.is_valid():
+            return render(
+                request,
+                "dashboard/index.html",
+                {"form": CreateApiGroupForm(), "join_request_form": join_form},
+            )
+        group_name = join_form.cleaned_data.get("group_name")
+        if group_name:
+            group = APIGroup.objects.filter(name=group_name).first()
+            if group:
+                APIGroupJoinRequest.objects.create(api_group=group, user=request.user)
+                group.save()
+                messages.success(request, f"Sent join request to {group.name}.")
+                return redirect("dashboard:index")
+    else:
+        join_form = SendAPIGroupRequestForm()
+    return render(
+        request,
+        "dashboard/index.html",
+        {"form": CreateApiGroupForm(), "join_request_form": join_form},
+    )
 
 
 @silk_profile(name="create_api_group")
@@ -39,7 +71,11 @@ def create_api_group(request):
             return redirect("dashboard:api_group_members", group_id=group.id)
     else:
         form = CreateApiGroupForm()
-    return render(request, "dashboard/index.html", {"form": form})
+    return render(
+        request,
+        "dashboard/index.html",
+        {"form": form, "join_request_form": SendAPIGroupRequestForm()},
+    )
 
 
 @silk_profile(name="get_balance")

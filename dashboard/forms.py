@@ -112,3 +112,19 @@ class CreateApiGroupForm(forms.Form):
             raise forms.ValidationError("Group name already exists")
 
         return cleaned_data
+
+
+class SendAPIGroupRequestForm(forms.Form):
+    group_name = forms.CharField(label="Group Name", max_length=100)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        group_name = cleaned_data.get("group_name")
+
+        if group_name is None:
+            raise forms.ValidationError("Group name is required")
+
+        if not APIGroup.objects.filter(name=group_name).exists():
+            raise forms.ValidationError("Group name does not exist")
+
+        return cleaned_data

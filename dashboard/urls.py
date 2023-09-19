@@ -10,6 +10,11 @@ app_name = "dashboard"
 urlpatterns = [
     path("", views.index, name="index"),
     path("create-api-group/", views.create_api_group, name="create_api_group"),
+    path(
+        "send-group-join-request/",
+        views.send_group_join_request,
+        name="send_group_join_request",
+    ),
     path("get-balance/", views.get_balance, name="get_balance"),
     # Custom auth views
     path("register/", auth_views.registration_view, name="register"),
