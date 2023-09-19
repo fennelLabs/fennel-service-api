@@ -11,11 +11,14 @@ from rest_framework.decorators import (
 )
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+
+from silk.profiling.profiler import silk_profile
+
 from knox.auth import TokenAuthentication
 
 import requests
-from main.decorators import requires_mnemonic_created
 
+from main.decorators import requires_mnemonic_created
 from main.forms import SignalForm
 from main.models import (
     Signal,
@@ -26,6 +29,7 @@ from main.models import (
 from main.serializers import SignalSerializer, TransactionSerializer
 
 
+@silk_profile(name="record_signal_fee")
 def record_signal_fee(payload: dict) -> (dict, bool):
     response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_new_signal",
@@ -43,11 +47,12 @@ def record_signal_fee(payload: dict) -> (dict, bool):
             "error": "could not record transaction",
             "content": payload["content"],
             "content_length": len(payload["content"]),
-            "fee": response.json()["fee"],
+            "fee": int(response.json()["fee"]) / 1000000000000,
         }, False
     return response.json(), True
 
 
+@silk_profile(name="check_balance")
 def check_balance(key):
     try:
         payload = {"mnemonic": key.mnemonic}
@@ -58,11 +63,12 @@ def check_balance(key):
         )
         key.balance = response.json()["balance"]
         key.save()
-        return response.json()
+        return {"balance": int(key.balance)}
     except requests.HTTPError:
-        return {"balance": key.balance}
+        return {"balance": int(key.balance)}
 
 
+@silk_profile(name="signal_send_helper")
 def signal_send_helper(user_key: UserKeys, signal: Signal) -> (dict, bool):
     try:
         payload = {
@@ -75,8 +81,8 @@ def signal_send_helper(user_key: UserKeys, signal: Signal) -> (dict, bool):
             return (
                 {
                     "error": "insufficient balance",
-                    "balance": check_balance(user_key)["balance"],
-                    "fee": signal_fee_result["fee"],
+                    "balance": check_balance(user_key)["balance"] / 1000000000000,
+                    "fee": signal_fee_result["fee"] / 1000000000000,
                     "signal_id": signal.id,
                     "synced": False,
                     "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
@@ -94,7 +100,8 @@ def signal_send_helper(user_key: UserKeys, signal: Signal) -> (dict, bool):
             return (
                 {
                     "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
-                    "balance": check_balance(user_key)["balance"],
+                    "fee": signal_fee_result["fee"] / 1000000000000,
+                    "balance": check_balance(user_key)["balance"] / 1000000000000,
                     "signal_id": signal.id,
                     "synced": False,
                 },
@@ -104,7 +111,7 @@ def signal_send_helper(user_key: UserKeys, signal: Signal) -> (dict, bool):
         signal.tx_hash = response_json["hash"]
         signal.mempool_timestamp = datetime.datetime.now()
         signal.save()
-        response_json["balance"] = check_balance(user_key)["balance"]
+        response_json["balance"] = check_balance(user_key)["balance"] / 1000000000000
         response_json["signal_id"] = signal.id
         response_json["synced"] = True
         return response_json, True
@@ -112,7 +119,8 @@ def signal_send_helper(user_key: UserKeys, signal: Signal) -> (dict, bool):
         return (
             {
                 "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
-                "balance": check_balance(user_key)["balance"],
+                "fee": signal_fee_result["fee"] / 1000000000000,
+                "balance": check_balance(user_key)["balance"] / 1000000000000,
                 "signal_id": signal.id,
                 "synced": False,
             },
@@ -120,6 +128,7 @@ def signal_send_helper(user_key: UserKeys, signal: Signal) -> (dict, bool):
         )
 
 
+@silk_profile(name="create_account")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -146,6 +155,7 @@ def create_account(request):
     return Response(mnemonic == keys.mnemonic)
 
 
+@silk_profile(name="download_account_as_json")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -164,15 +174,19 @@ def download_account_as_json(request):
         return Response({"error": "could not get account json"})
 
 
+@silk_profile(name="get_account_balance")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 @requires_mnemonic_created
 def get_account_balance(request):
     key = UserKeys.objects.filter(user=request.user).first()
-    return Response(check_balance(key))
+    response = check_balance(key)
+    response["balance"] = int(response["balance"] / 1000000000000)
+    return Response(response)
 
 
+@silk_profile(name="get_address")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -192,6 +206,7 @@ def get_address(request):
     return Response(response.json())
 
 
+@silk_profile(name="get_fee_for_transfer_token")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -201,7 +216,7 @@ def get_fee_for_transfer_token(request):
     payload = {
         "mnemonic": user_key.mnemonic,
         "to": request.data["to"],
-        "amount": request.data["amount"],
+        "amount": request.data["amount"] * 1000000000000,
     }
     response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_transfer_token",
@@ -214,10 +229,12 @@ def get_fee_for_transfer_token(request):
         fee=response.json()["fee"],
     )
     response_json = response.json()
-    response_json["balance"] = check_balance(user_key)["balance"]
+    response_json["fee"] = response_json["fee"] / 1000000000000
+    response_json["balance"] = check_balance(user_key)["balance"] / 1000000000000
     return Response(response_json)
 
 
+@silk_profile(name="transfer_token")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -227,7 +244,7 @@ def transfer_token(request):
     payload = {
         "mnemonic": user_key.mnemonic,
         "to": request.data["to"],
-        "amount": request.data["amount"],
+        "amount": request.data["amount"] * 1000000000000,
     }
     response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/transfer_token",
@@ -239,6 +256,7 @@ def transfer_token(request):
     return Response(response_json)
 
 
+@silk_profile(name="get_fee_for_new_signal")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -256,12 +274,14 @@ def get_fee_for_new_signal(request):
     try:
         response, success = record_signal_fee(payload)
         code = 400 if not success else 200
-        response["balance"] = check_balance(user_key)["balance"]
+        response["fee"] = response["fee"] / 1000000000000
+        response["balance"] = check_balance(user_key)["balance"] / 1000000000000
         return Response(response, status=code)
     except requests.HTTPError:
         return Response({"error": "could not get fee"})
 
 
+@silk_profile(name="send_new_signal")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -281,6 +301,7 @@ def send_new_signal(request):
     )
 
 
+@silk_profile(name="get_fee_for_sync_signal")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -295,10 +316,12 @@ def get_fee_for_sync_signal(request):
     }
     response, success = record_signal_fee(payload)
     code = 400 if not success else 200
-    response["balance"] = check_balance(user_key)["balance"]
+    response["fee"] = response["fee"] / 1000000000000
+    response["balance"] = check_balance(user_key)["balance"] / 1000000000000
     return Response(response, status=code)
 
 
+@silk_profile(name="sync_signal")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -316,6 +339,7 @@ def sync_signal(request):
     )
 
 
+@silk_profile(name="confirm_signal")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -325,6 +349,7 @@ def confirm_signal(request):
     return Response({"status": "ok"})
 
 
+@silk_profile(name="get_signal_by_id")
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -334,6 +359,7 @@ def get_signal_by_id(request, signal_id):
     return Response(serializer.data)
 
 
+@silk_profile(name="get_signals")
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -346,6 +372,7 @@ def get_signals(request, count=None):
     return Response(serializer.data)
 
 
+@silk_profile(name="get_unsynced_signals")
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -355,6 +382,7 @@ def get_unsynced_signals(request):
     return Response(serializer.data)
 
 
+@silk_profile(name="get_fee_history")
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
