@@ -14,6 +14,7 @@ import requests
 
 from main.forms import DhDecryptWhiteflagMessageForm
 from main.models import UserKeys
+from main.whiteflag_helpers import whiteflag_decrypt_helper, whiteflag_encrypt_helper
 
 
 @api_view(["POST"])
@@ -31,7 +32,8 @@ def wf_is_this_encrypted(request):
 def generate_diffie_hellman_keypair(request):
     try:
         response = requests.post(
-            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/generate_encryption_channel"
+            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/generate_encryption_channel",
+            timeout=5,
         )
         UserKeys.objects.update_or_create(
             user=request.user,
@@ -74,6 +76,7 @@ def get_diffie_hellman_shared_secret(request):
         response = requests.post(
             f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/accept_encryption_channel",
             json={"secret": request.data["secret"], "public": request.data["public"]},
+            timeout=5,
         )
         return Response(
             {
@@ -96,6 +99,7 @@ def dh_encrypt_message(request):
                 "plaintext": request.data["message"],
                 "shared_secret": request.data["shared_secret"],
             },
+            timeout=5,
         )
         return Response({"success": "message encrypted", "encrypted": response.text})
     except requests.HTTPError:
@@ -113,6 +117,7 @@ def dh_decrypt_message(request):
                 "ciphertext": request.data["message"],
                 "shared_secret": request.data["shared_secret"],
             },
+            timeout=5,
         )
         return Response({"success": "message decrypted", "decrypted": response.text})
     except requests.HTTPError:
@@ -126,27 +131,10 @@ def dh_encrypt_whiteflag_message(request):
     form = DhDecryptWhiteflagMessageForm(request.data)
     if not form.is_valid():
         return Response({"error": dict(form.errors.items())})
-    try:
-        response = requests.post(
-            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/dh_encrypt",
-            json={
-                "plaintext": form.cleaned_data["message"][9:],
-                "shared_secret": form.cleaned_data["shared_secret"],
-            },
-        )
-        return Response(
-            {
-                "success": "message encrypted",
-                "encrypted": (
-                    form.cleaned_data["message"][0:7]
-                    + "1"
-                    + form.cleaned_data["message"][8:9]
-                    + response.text
-                ),
-            }
-        )
-    except requests.HTTPError:
-        return Response({"error": "message not encrypted"})
+    signal, success = whiteflag_encrypt_helper(form.cleaned_data)
+    if success:
+        return Response(signal, 200)
+    return Response(signal, 400)
 
 
 @api_view(["POST"])
@@ -156,22 +144,10 @@ def dh_decrypt_whiteflag_message(request):
     form = DhDecryptWhiteflagMessageForm(request.data)
     if not form.is_valid():
         return Response({"error": dict(form.errors.items())})
-    try:
-        response = requests.post(
-            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/dh_decrypt",
-            json={
-                "ciphertext": form.cleaned_data["message"][9:],
-                "shared_secret": form.cleaned_data["shared_secret"],
-            },
-        )
-        return Response(
-            {
-                "success": "message decrypted",
-                "decrypted": (form.cleaned_data["message"][0:9] + response.text),
-            }
-        )
-    except requests.HTTPError:
-        return Response({"error": "message not decrypted"})
+    signal, success = whiteflag_decrypt_helper(form.cleaned_data)
+    if success:
+        return Response(signal, 200)
+    return Response(signal, 400)
 
 
 @api_view(["POST"])

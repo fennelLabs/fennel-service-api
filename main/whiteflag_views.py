@@ -10,55 +10,7 @@ from django.http import Http404
 
 import requests
 
-
-def whiteflag_encoder_helper(payload: dict) -> (dict, bool):
-    datetime_field = payload.get("datetime", None)
-    if datetime_field is None:
-        datetime_field = payload.get("dateTime", None)
-    json_packet = {
-        "prefix": "WF",
-        "version": "1",
-        "encryptionIndicator": payload.get("encryptionIndicator", None),
-        "duressIndicator": payload.get("duressIndicator", None),
-        "messageCode": payload.get("messageCode", None),
-        "referenceIndicator": payload.get("referenceIndicator", None),
-        "referencedMessage": payload.get("referencedMessage", None),
-        "verificationMethod": payload.get("verificationMethod", None),
-        "verificationData": payload.get("verificationData", None),
-        "cryptoDataType": payload.get("cryptoDataType", None),
-        "cryptoData": payload.get("cryptoData", None),
-        "text": payload.get("text", None),
-        "resourceMethod": payload.get("resourceMethod", None),
-        "resourceData": payload.get("resourceData", None),
-        "pseudoMessageCode": payload.get("pseudoMessageCode", None),
-        "subjectCode": payload.get("subjectCode", None),
-        "datetime": datetime_field,
-        "duration": payload.get("duration", None),
-        "objectType": payload.get("objectType", None),
-        "objectLatitude": payload.get("objectLatitude", None),
-        "objectLongitude": payload.get("objectLongitude", None),
-        "objectSizeDim1": payload.get("objectSizeDim1", None),
-        "objectSizeDim2": payload.get("objectSizeDim2", None),
-        "objectOrientation": payload.get("objectOrientation", None),
-        "objectTypeQuant": payload.get("objectTypeQuant", None),
-    }
-    processed_payload = json.dumps({k: v for k, v in json_packet.items() if v})
-    response = requests.post(
-        f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_encode",
-        data=processed_payload,
-        timeout=5,
-    )
-    if response.status_code == 502:
-        return (
-            {
-                "error": "the whiteflag service is inaccessible",
-            },
-            False,
-        )
-    try:
-        return response.json(), True
-    except requests.JSONDecodeError:
-        return response.text, True
+from main.whiteflag_helpers import whiteflag_encoder_helper, decode
 
 
 @api_view(["GET"])
@@ -115,28 +67,16 @@ def whiteflag_discontinue_authentication(request):
 
 @api_view(["POST"])
 def whiteflag_encode(request):
-    result = whiteflag_encoder_helper(request.data)
-    if result[1]:
-        return Response(result[0], 200)
-    return Response(result[0], 400)
+    result, success = whiteflag_encoder_helper(request.data)
+    if success:
+        return Response(result, 200)
+    return Response(result, 400)
 
 
 @api_view(["POST"])
 def whiteflag_decode(request):
     payload = json.dumps(request.data["message"])
-    response = requests.post(
-        f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_decode",
-        data=payload,
-        timeout=5,
-    )
-    if response.status_code == 502:
-        return Response(
-            {
-                "error": "the whiteflag service is inaccessible",
-            },
-            status=400,
-        )
-    return Response(json.loads(response.json()))
+    return Response(decode(payload))
 
 
 @api_view(["POST"])
