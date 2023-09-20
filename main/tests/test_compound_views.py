@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from model_bakery import baker
 
 from main.models import Signal, UserKeys
-from main.compound_views import decode
+from main.whiteflag_helpers import decode
 
 
 class TestCompoundViews(TestCase):

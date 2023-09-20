@@ -1,4 +1,3 @@
-import os
 import json
 
 from rest_framework.decorators import (
@@ -24,31 +23,8 @@ from main.serializers import (
 from main.forms import SignalForm
 from main.models import ConfirmationRecord, Signal, UserKeys
 from main.serializers import SignalSerializer
-from main.whiteflag_views import whiteflag_encoder_helper
-
-
-def decode(signal: str) -> (dict, bool):
-    if signal[0:2] != "57":
-        return ({"error": "not a whiteflag signal"}, False)
-    if signal[7] == "1":
-        return (
-            {
-                "prefix": "WF",
-                "version": "1",
-                "encryptionIndicator": "1",
-                "signal_body": signal[8:],
-            },
-            True,
-        )
-    signal = json.dumps(signal)
-    response = requests.post(
-        f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_decode",
-        data=signal,
-        timeout=5,
-    )
-    if response.status_code != 200:
-        return ({"error": "could not decode signal"}, False)
-    return (json.loads(response.json()), True)
+from main.whiteflag_helpers import decode
+from main.whiteflag_helpers import whiteflag_encoder_helper
 
 
 @api_view(["POST"])
