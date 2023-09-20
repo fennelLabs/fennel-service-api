@@ -26,6 +26,11 @@ urlpatterns = [
         "create_wallet/<int:group_id>/", admin_views.create_wallet, name="create_wallet"
     ),
     path(
+        "generate-group-encryption-keys/<int:group_id>/",
+        admin_views.generate_group_encryption_keys,
+        name="generate_group_encryption_keys",
+    ),
+    path(
         "members/<int:group_id>/create_wallet/<int:member_id>/",
         admin_views.create_wallet_for_member,
         name="create_wallet_for_member",
