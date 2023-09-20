@@ -144,3 +144,50 @@ class AdminViewsTests(TestCase):
         )
         group = APIGroup.objects.get(name="testgroup")
         assert User.objects.get(username="testuser2") not in group.user_list.all()
+
+    def test_generate_group_encryption_keys(self):
+        self.client.login(username="testuser", password="testpass")
+        response = self.client.get(
+            reverse(
+                "dashboard:generate_group_encryption_keys",
+                kwargs={"group_id": APIGroup.objects.get(name="testgroup").id},
+            )
+        )
+        self.assertRedirects(
+            response,
+            reverse(
+                "dashboard:api_group_members",
+                kwargs={"group_id": APIGroup.objects.get(name="testgroup").id},
+            ),
+            status_code=302,
+            target_status_code=200,
+            fetch_redirect_response=True,
+        )
+        assert (
+            APIGroup.objects.get(name="testgroup").public_diffie_hellman_key is not None
+        )
+
+    def test_generate_group_encryption_keys_with_existing_keys(self):
+        self.client.login(username="testuser", password="testpass")
+        group = APIGroup.objects.get(name="testgroup")
+        group.public_diffie_hellman_key = "test"
+        group.save()
+        response = self.client.get(
+            reverse(
+                "dashboard:generate_group_encryption_keys",
+                kwargs={"group_id": APIGroup.objects.get(name="testgroup").id},
+            )
+        )
+        self.assertRedirects(
+            response,
+            reverse(
+                "dashboard:api_group_members",
+                kwargs={"group_id": APIGroup.objects.get(name="testgroup").id},
+            ),
+            status_code=302,
+            target_status_code=200,
+            fetch_redirect_response=True,
+        )
+        assert (
+            APIGroup.objects.get(name="testgroup").public_diffie_hellman_key == "test"
+        )

@@ -1,5 +1,7 @@
+import os
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
+import requests
 
 from silk.profiling.profiler import silk_profile
 
@@ -214,4 +216,26 @@ def remove_group_member(request, group_id=None, member_id=None):
         )
         return redirect("dashboard:api_group_members", group_id=group_id)
     group.user_list.remove(member)
+    return redirect("dashboard:api_group_members", group_id=group_id)
+
+
+@silk_profile(name="generate_group_encryption_keys")
+@require_admin
+@require_authentication
+def generate_group_encryption_keys(request, group_id=None):
+    messages.get_messages(request).used = True
+    group = get_object_or_404(APIGroup, id=group_id)
+    if group.public_diffie_hellman_key:
+        messages.error(
+            request,
+            "This API Group already has encryption keys.",
+        )
+        return redirect("dashboard:api_group_members", group_id=group_id)
+    response = requests.post(
+        f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/generate_encryption_channel",
+        timeout=5,
+    )
+    group.public_diffie_hellman_key = response.json()["secret"]
+    group.private_diffie_hellman_key = response.json()["public"]
+    group.save()
     return redirect("dashboard:api_group_members", group_id=group_id)
