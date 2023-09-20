@@ -1,6 +1,8 @@
 import os
 import datetime
+
 from django.db import DataError
+from django.db.models import Q
 
 from django.shortcuts import get_object_or_404
 
@@ -364,10 +366,12 @@ def get_signal_by_id(request, signal_id):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def get_signals(request, count=None):
+    groups = request.user.api_group_users.all()
+    queryset = Signal.objects.filter(Q(viewers=None) | Q(viewers__in=groups)).order_by(
+        "-timestamp"
+    )
     if count is not None:
-        queryset = Signal.objects.all().order_by("-timestamp")[:count]
-    else:
-        queryset = Signal.objects.all().order_by("-timestamp")
+        queryset = queryset[:count]
     serializer = SignalSerializer(queryset, many=True)
     return Response(serializer.data)
 

@@ -54,6 +54,9 @@ class Signal(models.Model):
     )
     synced = models.BooleanField(default=False)
     references = models.ManyToManyField("self")
+    viewers = models.ManyToManyField(
+        "APIGroup", related_name="viewable_signals", blank=True
+    )
 
     def __str__(self):
         return str(self.signal_text)
