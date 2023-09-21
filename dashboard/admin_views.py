@@ -1,9 +1,10 @@
 import os
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
-import requests
 
 from silk.profiling.profiler import silk_profile
+
+import requests
 
 from dashboard.blockchain_helpers import (
     check_balance,

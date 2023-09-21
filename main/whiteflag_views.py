@@ -18,6 +18,7 @@ from django.http import Http404
 from knox.auth import TokenAuthentication
 
 import requests
+from main.forms import WhiteflagDecodeForm
 from main.models import APIGroup
 
 from main.whiteflag_helpers import (
@@ -105,7 +106,10 @@ def whiteflag_generate_shared_secret_key(request, group_id=None):
 @silk_profile(name="whiteflag_decode")
 @api_view(["POST"])
 def whiteflag_decode(request):
-    payload = json.dumps(request.data["message"])
+    form = WhiteflagDecodeForm(request.POST)
+    if not form.is_valid():
+        return Response({"error": form.errors.items()})
+    payload = json.dumps(form.cleaned_data["message"])
     return Response(decode(payload))
 
 

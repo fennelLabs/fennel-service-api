@@ -47,3 +47,11 @@ class PrivateMessageForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.fields["receiver"].widget.attrs.update({"class": "form-control"})
         self.fields["message"].widget.attrs.update({"class": "form-control"})
+
+
+class WhiteflagDecodeForm(forms.Form):
+    message = forms.CharField(label="Message", max_length=1024)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["message"].widget.attrs.update({"class": "form-control"})
