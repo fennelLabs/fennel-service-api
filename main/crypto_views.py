@@ -14,7 +14,11 @@ import requests
 
 from main.forms import DhDecryptWhiteflagMessageForm
 from main.models import UserKeys
-from main.whiteflag_helpers import whiteflag_decrypt_helper, whiteflag_encrypt_helper
+from main.whiteflag_helpers import (
+    generate_diffie_hellman_keys,
+    whiteflag_decrypt_helper,
+    whiteflag_encrypt_helper,
+)
 
 
 @api_view(["POST"])
@@ -30,25 +34,14 @@ def wf_is_this_encrypted(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def generate_diffie_hellman_keypair(request):
-    try:
-        response = requests.post(
-            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/generate_encryption_channel",
-            timeout=5,
-        )
+    keys_dict = generate_diffie_hellman_keys()
+    if keys_dict["success"]:
         UserKeys.objects.update_or_create(
             user=request.user,
-            public_diffie_hellman_key=response.json()["secret"],
-            private_diffie_hellman_key=response.json()["public"],
+            public_diffie_hellman_key=keys_dict["secret_key"],
+            private_diffie_hellman_key=keys_dict["public_key"],
         )
-        return Response(
-            {
-                "success": "keypair created",
-                "public_key": response.json()["public"],
-                "secret_key": response.json()["secret"],
-            }
-        )
-    except requests.HTTPError:
-        return Response({"error": "keypair not created"})
+    return Response(keys_dict)
 
 
 @api_view(["POST"])

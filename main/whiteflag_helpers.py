@@ -3,6 +3,43 @@ import os
 
 import requests
 
+from main.models import APIGroup
+
+
+def generate_diffie_hellman_keys() -> dict:
+    try:
+        response = requests.post(
+            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/generate_encryption_channel",
+            timeout=5,
+        )
+        return {
+            "success": True,
+            "public_key": response.json()["public"],
+            "secret_key": response.json()["secret"],
+        }
+    except requests.HTTPError:
+        return {
+            "error": "keypair not created",
+            "success": False,
+            "public_key": None,
+            "secret_key": None,
+        }
+
+
+def generate_shared_secret(our_group: APIGroup, their_group: APIGroup) -> (str, bool):
+    try:
+        response = requests.post(
+            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/dh_generate_shared_secret",
+            json={
+                "secret": our_group.private_diffie_hellman_key,
+                "public": their_group.public_diffie_hellman_key,
+            },
+            timeout=5,
+        )
+        return response.text, True
+    except requests.HTTPError:
+        return ({"error": "shared secret not generated"}), False
+
 
 def whiteflag_encrypt_helper(payload: dict) -> (str, bool):
     try:
