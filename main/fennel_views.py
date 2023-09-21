@@ -218,7 +218,7 @@ def get_fee_for_transfer_token(request):
     payload = {
         "mnemonic": user_key.mnemonic,
         "to": request.data["to"],
-        "amount": request.data["amount"] * 1000000000000,
+        "amount": request.data["amount"],
     }
     response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_transfer_token",
@@ -246,7 +246,7 @@ def transfer_token(request):
     payload = {
         "mnemonic": user_key.mnemonic,
         "to": request.data["to"],
-        "amount": request.data["amount"] * 1000000000000,
+        "amount": request.data["amount"],
     }
     response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/transfer_token",
