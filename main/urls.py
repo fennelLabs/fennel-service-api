@@ -63,6 +63,10 @@ urlpatterns = [
     path("whiteflag/encode/", whiteflag_views.whiteflag_encode),
     path("whiteflag/decode/", whiteflag_views.whiteflag_decode),
     path(
+        "whiteflag/generate_encryption_key/<int:group_id>/",
+        whiteflag_views.whiteflag_generate_shared_secret_key,
+    ),
+    path(
         "whiteflag/generate_shared_token/",
         whiteflag_views.whiteflag_generate_shared_token,
     ),
