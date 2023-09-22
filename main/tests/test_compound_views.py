@@ -497,11 +497,11 @@ class TestCompoundViews(TestCase):
             HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
         )
         signals_list = [
-            "Test.",
-            "Test.",
-            "Test.",
-            "Test.",
-            "Test.",
+            {"signal": "Test."},
+            {"signal": "Test."},
+            {"signal": "Test."},
+            {"signal": "Test."},
+            {"signal": "Test."},
         ]
         response = client.post(
             "/v1/fennel/send_signal_list/",

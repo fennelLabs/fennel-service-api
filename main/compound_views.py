@@ -10,6 +10,8 @@ from rest_framework.permissions import IsAuthenticated
 
 from knox.auth import TokenAuthentication
 
+from silk.profiling.profiler import silk_profile
+
 import requests
 from main.decorators import requires_mnemonic_created
 from main.fennel_views import check_balance, record_signal_fee, signal_send_helper
@@ -194,6 +196,8 @@ def send_signal_with_annotations(request):
         signal_text=signal_text_encoded,
         sender=request.user,
     )
+    if recipient_group:
+        signal.viewers.add(recipient_group)
     signal_sent_response, signal_success = signal_send_helper(
         UserKeys.objects.get(user=request.user), signal
     )
@@ -218,6 +222,8 @@ def send_signal_with_annotations(request):
         signal_text=annotation_text_encoded,
         sender=request.user,
     )
+    if recipient_group:
+        annotation.viewers.add(recipient_group)
     signal.references.add(annotation)
     signal.save()
     if signal_success:
@@ -295,6 +301,7 @@ def get_fee_for_send_signal_list(request):
     )
 
 
+@silk_profile(name="send_signal_list")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -308,7 +315,18 @@ def send_signal_list(request):
         return Response({"message": "No signals given"}, status=400)
     processed = []
     for signal in signals:
-        form = SignalForm({"signal": signal})
+        if not isinstance(signal, dict):
+            # Python dictionaries have single-quotes, JSON has double-quotes.
+            # This makes sure that regardless of how the request was sent to us,
+            # we can parse it as JSON.
+            signal = signal.replace("'", '"')
+            signal = json.loads(signal)
+        form = SignalForm(
+            {
+                "signal": signal["signal"],
+                "recipient_group": signal.get("recipient_group", None),
+            }
+        )
         if not form.is_valid():
             processed.append(
                 {

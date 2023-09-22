@@ -23,6 +23,7 @@ import requests
 from main.decorators import requires_mnemonic_created
 from main.forms import SignalForm
 from main.models import (
+    APIGroup,
     Signal,
     Transaction,
     UserKeys,
@@ -296,6 +297,10 @@ def send_new_signal(request):
     signal = Signal.objects.create(
         signal_text=form.cleaned_data["signal"], sender=request.user
     )
+    if form.cleaned_data["recipient_group"]:
+        signal.recipient_group.add(
+            APIGroup.objects.get(name=form.cleaned_data["recipient_group"])
+        )
     result, success = signal_send_helper(user_key, signal)
     return Response(
         result,

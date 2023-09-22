@@ -2,11 +2,14 @@ import json
 import os
 from typing import Optional
 
+from silk.profiling.profiler import silk_profile
+
 import requests
 
 from main.models import APIGroup
 
 
+@silk_profile(name="generate_diffie_hellman_keys")
 def generate_diffie_hellman_keys() -> dict:
     try:
         response = requests.post(
@@ -27,6 +30,7 @@ def generate_diffie_hellman_keys() -> dict:
         }
 
 
+@silk_profile(name="generate_shared_secret")
 def generate_shared_secret(our_group: APIGroup, their_group: APIGroup) -> (str, bool):
     try:
         response = requests.post(
@@ -44,6 +48,7 @@ def generate_shared_secret(our_group: APIGroup, their_group: APIGroup) -> (str, 
         return ({"error": "shared secret not generated"}), False
 
 
+@silk_profile(name="whiteflag_encrypt_helper")
 def whiteflag_encrypt_helper(message: str, shared_secret: str) -> (str, bool):
     try:
         response = requests.post(
@@ -59,6 +64,7 @@ def whiteflag_encrypt_helper(message: str, shared_secret: str) -> (str, bool):
         return "message not encrypted", False
 
 
+@silk_profile(name="whiteflag_decrypt_helper")
 def whiteflag_decrypt_helper(message: str, shared_secret: str) -> (str, bool):
     try:
         response = requests.post(
@@ -76,6 +82,7 @@ def whiteflag_decrypt_helper(message: str, shared_secret: str) -> (str, bool):
         return "message not decrypted", False
 
 
+@silk_profile(name="whiteflag_encoder_helper")
 def whiteflag_encoder_helper(
     payload: dict,
     sender_group: Optional[APIGroup] = None,
@@ -137,6 +144,7 @@ def whiteflag_encoder_helper(
         return response.text, True
 
 
+@silk_profile(name="whiteflag_decoder_helper")
 def decode(
     signal: str,
     sender_group: Optional[APIGroup] = None,

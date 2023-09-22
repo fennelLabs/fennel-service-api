@@ -136,7 +136,7 @@ class AnnotatedWhiteflagSignalSerializer(serializers.Serializer):
 
 
 class SignalTextSerializer(serializers.Serializer):
-    signals = serializers.ListField(child=serializers.CharField())
+    signals = serializers.ListField(child=serializers.JSONField())
 
 
 class EncodeListSerializer(serializers.Serializer):
