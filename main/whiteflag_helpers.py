@@ -42,29 +42,19 @@ def generate_shared_secret(our_group: APIGroup, their_group: APIGroup) -> (str, 
         return ({"error": "shared secret not generated"}), False
 
 
-def whiteflag_encrypt_helper(payload: dict) -> (str, bool):
+def whiteflag_encrypt_helper(message: str, shared_secret: str) -> (str, bool):
     try:
         response = requests.post(
             f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/dh_encrypt",
             json={
-                "plaintext": payload["message"][9:],
-                "shared_secret": payload["shared_secret"],
+                "plaintext": message[9:],
+                "shared_secret": shared_secret,
             },
             timeout=5,
         )
-        return (
-            {
-                "success": "message encrypted",
-                "encrypted": (
-                    payload["message"][0:7]
-                    + "1"
-                    + payload["message"][8:9]
-                    + response.text
-                ),
-            }
-        ), True
+        return (message[0:7] + "1" + message[8:9] + response.text), True
     except requests.HTTPError:
-        return ({"error": "message not encrypted"}), False
+        return "message not encrypted", False
 
 
 def whiteflag_decrypt_helper(message: str, shared_secret: str) -> (str, bool):
@@ -77,17 +67,16 @@ def whiteflag_decrypt_helper(message: str, shared_secret: str) -> (str, bool):
             },
             timeout=5,
         )
-        return (
-            {
-                "success": True,
-                "decrypted": (message[0:9] + response.text),
-            }
-        ), True
+        return (message[0:9] + response.text), True
     except requests.HTTPError:
-        return ({"error": "message not decrypted"}), False
+        return "message not decrypted", False
 
 
-def whiteflag_encoder_helper(payload: dict) -> (dict, bool):
+def whiteflag_encoder_helper(
+    payload: dict,
+    sender_group: Optional[APIGroup] = None,
+    recipient_group: Optional[APIGroup] = None,
+) -> (dict, bool):
     datetime_field = payload.get("datetime", None)
     if datetime_field is None:
         datetime_field = payload.get("dateTime", None)
@@ -131,6 +120,13 @@ def whiteflag_encoder_helper(payload: dict) -> (dict, bool):
             },
             False,
         )
+    if json_packet["encryptionIndicator"] == "1":
+        shared_key, shared_secret_success = generate_shared_secret(
+            sender_group, recipient_group
+        )
+        if not shared_secret_success:
+            return shared_key, False
+        return whiteflag_encrypt_helper(response, shared_key)
     try:
         return response.json(), True
     except requests.JSONDecodeError:

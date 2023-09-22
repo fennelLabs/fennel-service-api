@@ -16,12 +16,13 @@ from main.fennel_views import check_balance, record_signal_fee, signal_send_help
 from main.serializers import (
     AnnotatedWhiteflagSignalSerializer,
     ConfirmationRecordSerializer,
+    EncodeListSerializer,
     SignalTextSerializer,
     UserSerializer,
 )
 
 from main.forms import SignalForm
-from main.models import ConfirmationRecord, Signal, UserKeys
+from main.models import APIGroup, ConfirmationRecord, Signal, UserKeys
 from main.serializers import SignalSerializer
 from main.whiteflag_helpers import decode
 from main.whiteflag_helpers import whiteflag_encoder_helper
@@ -31,12 +32,12 @@ from main.whiteflag_helpers import whiteflag_encoder_helper
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def encode_list(request):
-    try:
-        signals = request.data.getlist("signals")
-    except AttributeError:
-        signals = request.data.get("signals")
-    if signals is None:
-        return Response({"message": "No signals given"}, status=400)
+    serializer = EncodeListSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=400)
+    signals = serializer.data["signals"]
+    sender_group = request.user.api_group_users.first()
+    recipient_group = serializer.data.get("recipient_group", None)
     processed = []
     for signal in signals:
         if not isinstance(signal, dict):
@@ -45,7 +46,7 @@ def encode_list(request):
         else:
             signal_dict = signal
         signal_text_encoded, signal_encode_success = whiteflag_encoder_helper(
-            signal_dict
+            signal_dict, sender_group, recipient_group
         )
         processed.append(
             {
@@ -173,8 +174,15 @@ def send_signal_with_annotations(request):
     serializer = AnnotatedWhiteflagSignalSerializer(data=request.data)
     if not serializer.is_valid():
         return Response(serializer.errors, status=400)
+    sender_group = None
+    recipient_group = None
+    if serializer.validated_data.get("recipient_group", None):
+        sender_group = request.user.api_group_users.first()
+        recipient_group = APIGroup.objects.get(
+            name=serializer.validated_data["recipient_group"]
+        )
     signal_text_encoded, signal_encode_success = whiteflag_encoder_helper(
-        serializer.validated_data["signal_body"]
+        serializer.validated_data["signal_body"], sender_group, recipient_group
     )
     if not signal_encode_success:
         return Response(
@@ -198,7 +206,7 @@ def send_signal_with_annotations(request):
         "referencedMessage": signal.tx_hash,
     }
     annotation_text_encoded, annotation_encode_success = whiteflag_encoder_helper(
-        annotations_signal
+        annotations_signal, sender_group, recipient_group
     )
     if not annotation_encode_success:
         return Response(

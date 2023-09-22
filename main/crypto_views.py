@@ -12,7 +12,7 @@ from knox.auth import TokenAuthentication
 
 import requests
 
-from main.forms import DhDecryptWhiteflagMessageForm
+from main.forms import DhDecryptWhiteflagMessageForm, DhEncryptWhiteflagMessageForm
 from main.models import UserKeys
 from main.whiteflag_helpers import (
     generate_diffie_hellman_keys,
@@ -121,12 +121,19 @@ def dh_decrypt_message(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def dh_encrypt_whiteflag_message(request):
-    form = DhDecryptWhiteflagMessageForm(request.data)
+    form = DhEncryptWhiteflagMessageForm(request.data)
     if not form.is_valid():
         return Response({"error": dict(form.errors.items())})
-    signal, success = whiteflag_encrypt_helper(form.cleaned_data)
+    signal, success = whiteflag_encrypt_helper(
+        form.cleaned_data["message"], form.cleaned_data["shared_secret"]
+    )
     if success:
-        return Response(signal, 200)
+        return Response(
+            {
+                "encrypted": signal,
+            },
+            200,
+        )
     return Response(signal, 400)
 
 
@@ -141,7 +148,12 @@ def dh_decrypt_whiteflag_message(request):
         form.cleaned_data["message"], form.cleaned_data["shared_secret"]
     )
     if success:
-        return Response(signal, 200)
+        return Response(
+            {
+                "decrypted": signal,
+            },
+            200,
+        )
     return Response(signal, 400)
 
 
