@@ -1,5 +1,6 @@
 import json
 import os
+from typing import Optional
 
 import requests
 
@@ -66,20 +67,20 @@ def whiteflag_encrypt_helper(payload: dict) -> (str, bool):
         return ({"error": "message not encrypted"}), False
 
 
-def whiteflag_decrypt_helper(payload: dict) -> (str, bool):
+def whiteflag_decrypt_helper(message: str, shared_secret: str) -> (str, bool):
     try:
         response = requests.post(
             f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/dh_decrypt",
             json={
-                "ciphertext": payload["message"][9:],
-                "shared_secret": payload["shared_secret"],
+                "ciphertext": message[9:],
+                "shared_secret": shared_secret,
             },
             timeout=5,
         )
         return (
             {
-                "success": "message decrypted",
-                "decrypted": (payload["message"][0:9] + response.text),
+                "success": True,
+                "decrypted": (message[0:9] + response.text),
             }
         ), True
     except requests.HTTPError:
@@ -136,19 +137,30 @@ def whiteflag_encoder_helper(payload: dict) -> (dict, bool):
         return response.text, True
 
 
-def decode(signal: str) -> (dict, bool):
+def decode(
+    signal: str,
+    sender_group: Optional[APIGroup] = None,
+    recipient_group: Optional[APIGroup] = None,
+) -> (dict, bool):
     if signal[0:2] != "57":
         return ({"error": "not a whiteflag signal"}, False)
     if signal[7] == "1":
-        return (
-            {
-                "prefix": "WF",
-                "version": "1",
-                "encryptionIndicator": "1",
-                "signal_body": signal[8:],
-            },
-            True,
-        )
+        if sender_group is None or recipient_group is None:
+            return (
+                {
+                    "prefix": "WF",
+                    "version": "1",
+                    "encryptionIndicator": "1",
+                    "signal_body": signal[8:],
+                },
+                True,
+            )
+        shared_key, success = generate_shared_secret(sender_group, recipient_group)
+        if not success:
+            return shared_key, False
+        signal, decrypt_success = whiteflag_decrypt_helper(signal, shared_key)
+        if not decrypt_success:
+            return signal, False
     signal = json.dumps(signal)
     response = requests.post(
         f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_decode",

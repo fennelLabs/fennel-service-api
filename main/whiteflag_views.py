@@ -110,7 +110,13 @@ def whiteflag_decode(request):
     if not form.is_valid():
         return Response({"error": form.errors.items()})
     payload = json.dumps(form.cleaned_data["message"])
-    return Response(decode(payload))
+    sender_group = (
+        APIGroup.objects.get(name=form.cleaned_data["sender_group"])
+        if form.cleaned_data["sender_group"]
+        else None
+    )
+    recipient_group = request.user.api_group_users.first()
+    return Response(decode(payload, sender_group, recipient_group))
 
 
 @api_view(["POST"])

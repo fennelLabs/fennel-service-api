@@ -137,7 +137,9 @@ def dh_decrypt_whiteflag_message(request):
     form = DhDecryptWhiteflagMessageForm(request.data)
     if not form.is_valid():
         return Response({"error": dict(form.errors.items())})
-    signal, success = whiteflag_decrypt_helper(form.cleaned_data)
+    signal, success = whiteflag_decrypt_helper(
+        form.cleaned_data["message"], form.cleaned_data["shared_secret"]
+    )
     if success:
         return Response(signal, 200)
     return Response(signal, 400)

@@ -78,7 +78,11 @@ def decode_list(request):
         return Response({"message": "No signals found for the given list"}, status=400)
     response_json = []
     for signal in signals_list:
-        signal_body, success = decode(signal.signal_text)
+        signal_body, success = decode(
+            signal.signal_text,
+            signal.sender.api_group_users.first(),
+            request.user.api_group_users.first(),
+        )
         if signal_body["encryptionIndicator"] != "1":
             signal.references.set(
                 Signal.objects.filter(tx_hash=signal_body["referencedMessage"])
