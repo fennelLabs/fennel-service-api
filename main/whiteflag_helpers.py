@@ -1,55 +1,93 @@
 import json
 import os
+from typing import Optional
+
+from silk.profiling.profiler import silk_profile
 
 import requests
 
+from main.models import APIGroup
 
-def whiteflag_encrypt_helper(payload: dict) -> (str, bool):
+
+@silk_profile(name="generate_diffie_hellman_keys")
+def generate_diffie_hellman_keys() -> dict:
+    try:
+        response = requests.post(
+            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/generate_encryption_channel",
+            timeout=5,
+        )
+        return {
+            "success": True,
+            "public_key": response.json()["public"],
+            "secret_key": response.json()["secret"],
+        }
+    except requests.HTTPError:
+        return {
+            "error": "keypair not created",
+            "success": False,
+            "public_key": None,
+            "secret_key": None,
+        }
+
+
+@silk_profile(name="generate_shared_secret")
+def generate_shared_secret(our_group: APIGroup, their_group: APIGroup) -> (str, bool):
+    try:
+        response = requests.post(
+            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/accept_encryption_channel",
+            json={
+                "secret": our_group.private_diffie_hellman_key,
+                "public": their_group.public_diffie_hellman_key,
+            },
+            timeout=5,
+        )
+        if response.status_code != 200:
+            return ({"error": "shared secret not generated"}), False
+        return response.json()["shared_secret"], True
+    except requests.HTTPError:
+        return ({"error": "shared secret not generated"}), False
+
+
+@silk_profile(name="whiteflag_encrypt_helper")
+def whiteflag_encrypt_helper(message: str, shared_secret: str) -> (str, bool):
     try:
         response = requests.post(
             f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/dh_encrypt",
             json={
-                "plaintext": payload["message"][9:],
-                "shared_secret": payload["shared_secret"],
+                "plaintext": message[9:],
+                "shared_secret": shared_secret,
             },
             timeout=5,
         )
-        return (
-            {
-                "success": "message encrypted",
-                "encrypted": (
-                    payload["message"][0:7]
-                    + "1"
-                    + payload["message"][8:9]
-                    + response.text
-                ),
-            }
-        ), True
+        return (message[0:7] + "1" + message[8:9] + response.text), True
     except requests.HTTPError:
-        return ({"error": "message not encrypted"}), False
+        return "message not encrypted", False
 
 
-def whiteflag_decrypt_helper(payload: dict) -> (str, bool):
+@silk_profile(name="whiteflag_decrypt_helper")
+def whiteflag_decrypt_helper(message: str, shared_secret: str) -> (str, bool):
     try:
         response = requests.post(
             f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/dh_decrypt",
             json={
-                "ciphertext": payload["message"][9:],
-                "shared_secret": payload["shared_secret"],
+                "ciphertext": message[9:],
+                "shared_secret": shared_secret,
             },
             timeout=5,
         )
-        return (
-            {
-                "success": "message decrypted",
-                "decrypted": (payload["message"][0:9] + response.text),
-            }
-        ), True
+        if response.status_code != 200:
+            return "message not decrypted", False
+        return (message[0:9] + response.text), True
     except requests.HTTPError:
-        return ({"error": "message not decrypted"}), False
+        return "message not decrypted", False
 
 
-def whiteflag_encoder_helper(payload: dict) -> (dict, bool):
+@silk_profile(name="whiteflag_encoder_helper")
+def whiteflag_encoder_helper(
+    payload: dict,
+    sender_group: Optional[APIGroup] = None,
+    recipient_group: Optional[APIGroup] = None,
+) -> (dict, bool):
     datetime_field = payload.get("datetime", None)
     if datetime_field is None:
         datetime_field = payload.get("dateTime", None)
@@ -93,25 +131,44 @@ def whiteflag_encoder_helper(payload: dict) -> (dict, bool):
             },
             False,
         )
+    if json_packet["encryptionIndicator"] == "1":
+        shared_key, shared_secret_success = generate_shared_secret(
+            sender_group, recipient_group
+        )
+        if not shared_secret_success:
+            return shared_key, False
+        return whiteflag_encrypt_helper(response.text, shared_key)
     try:
         return response.json(), True
     except requests.JSONDecodeError:
         return response.text, True
 
 
-def decode(signal: str) -> (dict, bool):
+@silk_profile(name="whiteflag_decoder_helper")
+def decode(
+    signal: str,
+    sender_group: Optional[APIGroup] = None,
+    recipient_group: Optional[APIGroup] = None,
+) -> (dict, bool):
     if signal[0:2] != "57":
         return ({"error": "not a whiteflag signal"}, False)
     if signal[7] == "1":
-        return (
-            {
-                "prefix": "WF",
-                "version": "1",
-                "encryptionIndicator": "1",
-                "signal_body": signal[8:],
-            },
-            True,
-        )
+        if sender_group is None or recipient_group is None:
+            return (
+                {
+                    "prefix": "WF",
+                    "version": "1",
+                    "encryptionIndicator": "1",
+                    "signal_body": signal[8:],
+                },
+                True,
+            )
+        shared_key, success = generate_shared_secret(sender_group, recipient_group)
+        if not success:
+            return shared_key, False
+        signal, decrypt_success = whiteflag_decrypt_helper(signal, shared_key)
+        if not decrypt_success:
+            return signal, False
     signal = json.dumps(signal)
     response = requests.post(
         f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_decode",

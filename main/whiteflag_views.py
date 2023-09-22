@@ -3,14 +3,29 @@ import uuid
 import hashlib
 import os
 
-from rest_framework.decorators import api_view
+from rest_framework.decorators import (
+    api_view,
+    authentication_classes,
+    permission_classes,
+)
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+
+from silk.profiling.profiler import silk_profile
 
 from django.http import Http404
 
-import requests
+from knox.auth import TokenAuthentication
 
-from main.whiteflag_helpers import whiteflag_encoder_helper, decode
+import requests
+from main.forms import WhiteflagDecodeForm
+from main.models import APIGroup
+
+from main.whiteflag_helpers import (
+    generate_shared_secret,
+    whiteflag_encoder_helper,
+    decode,
+)
 
 
 @api_view(["GET"])
@@ -73,10 +88,35 @@ def whiteflag_encode(request):
     return Response(result, 400)
 
 
+@silk_profile(name="whiteflag_generate_shared_secret_key")
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def whiteflag_generate_shared_secret_key(request, group_id=None):
+    if group_id is None:
+        return Response({"error": "group_id is required"})
+    our_group = request.user.api_group_users.first()
+    their_group = APIGroup.objects.get(id=group_id)
+    shared_secret, success = generate_shared_secret(our_group, their_group)
+    if success:
+        return Response({"success": True, "shared_secret": shared_secret})
+    return Response({"success": False, "error": "shared secret not generated"})
+
+
+@silk_profile(name="whiteflag_decode")
 @api_view(["POST"])
 def whiteflag_decode(request):
-    payload = json.dumps(request.data["message"])
-    return Response(decode(payload))
+    form = WhiteflagDecodeForm(request.POST)
+    if not form.is_valid():
+        return Response({"error": form.errors.items()})
+    payload = json.dumps(form.cleaned_data["message"])
+    sender_group = (
+        APIGroup.objects.get(name=form.cleaned_data["sender_group"])
+        if form.cleaned_data["sender_group"]
+        else None
+    )
+    recipient_group = request.user.api_group_users.first()
+    return Response(decode(payload, sender_group, recipient_group))
 
 
 @api_view(["POST"])

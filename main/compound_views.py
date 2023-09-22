@@ -10,18 +10,22 @@ from rest_framework.permissions import IsAuthenticated
 
 from knox.auth import TokenAuthentication
 
+from silk.profiling.profiler import silk_profile
+
 import requests
 from main.decorators import requires_mnemonic_created
 from main.fennel_views import check_balance, record_signal_fee, signal_send_helper
 from main.serializers import (
     AnnotatedWhiteflagSignalSerializer,
     ConfirmationRecordSerializer,
+    DecodeListSerializer,
+    EncodeListSerializer,
     SignalTextSerializer,
     UserSerializer,
 )
 
 from main.forms import SignalForm
-from main.models import ConfirmationRecord, Signal, UserKeys
+from main.models import APIGroup, ConfirmationRecord, Signal, UserKeys
 from main.serializers import SignalSerializer
 from main.whiteflag_helpers import decode
 from main.whiteflag_helpers import whiteflag_encoder_helper
@@ -31,12 +35,12 @@ from main.whiteflag_helpers import whiteflag_encoder_helper
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def encode_list(request):
-    try:
-        signals = request.data.getlist("signals")
-    except AttributeError:
-        signals = request.data.get("signals")
-    if signals is None:
-        return Response({"message": "No signals given"}, status=400)
+    serializer = EncodeListSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=400)
+    signals = serializer.data["signals"]
+    sender_group = request.user.api_group_users.first()
+    recipient_group = serializer.data.get("recipient_group", None)
     processed = []
     for signal in signals:
         if not isinstance(signal, dict):
@@ -45,7 +49,7 @@ def encode_list(request):
         else:
             signal_dict = signal
         signal_text_encoded, signal_encode_success = whiteflag_encoder_helper(
-            signal_dict
+            signal_dict, sender_group, recipient_group
         )
         processed.append(
             {
@@ -64,12 +68,10 @@ def encode_list(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def decode_list(request):
-    try:
-        signals = request.data.getlist("signals")
-    except AttributeError:
-        signals = request.data.get("signals")
-    if signals is None:
-        return Response({"message": "No signals given"}, status=400)
+    serializer = DecodeListSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=400)
+    signals = serializer.data["signals"]
     signals_list = Signal.objects.filter(
         pk__in=signals,
         signal_text__startswith="574631",
@@ -78,7 +80,11 @@ def decode_list(request):
         return Response({"message": "No signals found for the given list"}, status=400)
     response_json = []
     for signal in signals_list:
-        signal_body, success = decode(signal.signal_text)
+        signal_body, success = decode(
+            signal.signal_text,
+            signal.sender.api_group_users.first(),
+            request.user.api_group_users.first(),
+        )
         if signal_body["encryptionIndicator"] != "1":
             signal.references.set(
                 Signal.objects.filter(tx_hash=signal_body["referencedMessage"])
@@ -169,8 +175,15 @@ def send_signal_with_annotations(request):
     serializer = AnnotatedWhiteflagSignalSerializer(data=request.data)
     if not serializer.is_valid():
         return Response(serializer.errors, status=400)
+    sender_group = None
+    recipient_group = None
+    if serializer.validated_data.get("recipient_group", None):
+        sender_group = request.user.api_group_users.first()
+        recipient_group = APIGroup.objects.get(
+            name=serializer.validated_data["recipient_group"]
+        )
     signal_text_encoded, signal_encode_success = whiteflag_encoder_helper(
-        serializer.validated_data["signal_body"]
+        serializer.validated_data["signal_body"], sender_group, recipient_group
     )
     if not signal_encode_success:
         return Response(
@@ -183,6 +196,8 @@ def send_signal_with_annotations(request):
         signal_text=signal_text_encoded,
         sender=request.user,
     )
+    if recipient_group:
+        signal.viewers.add(recipient_group)
     signal_sent_response, signal_success = signal_send_helper(
         UserKeys.objects.get(user=request.user), signal
     )
@@ -194,7 +209,7 @@ def send_signal_with_annotations(request):
         "referencedMessage": signal.tx_hash,
     }
     annotation_text_encoded, annotation_encode_success = whiteflag_encoder_helper(
-        annotations_signal
+        annotations_signal, sender_group, recipient_group
     )
     if not annotation_encode_success:
         return Response(
@@ -207,6 +222,8 @@ def send_signal_with_annotations(request):
         signal_text=annotation_text_encoded,
         sender=request.user,
     )
+    if recipient_group:
+        annotation.viewers.add(recipient_group)
     signal.references.add(annotation)
     signal.save()
     if signal_success:
@@ -284,6 +301,7 @@ def get_fee_for_send_signal_list(request):
     )
 
 
+@silk_profile(name="send_signal_list")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -297,7 +315,18 @@ def send_signal_list(request):
         return Response({"message": "No signals given"}, status=400)
     processed = []
     for signal in signals:
-        form = SignalForm({"signal": signal})
+        if not isinstance(signal, dict):
+            # Python dictionaries have single-quotes, JSON has double-quotes.
+            # This makes sure that regardless of how the request was sent to us,
+            # we can parse it as JSON.
+            signal = signal.replace("'", '"')
+            signal = json.loads(signal)
+        form = SignalForm(
+            {
+                "signal": signal["signal"],
+                "recipient_group": signal.get("recipient_group", None),
+            }
+        )
         if not form.is_valid():
             processed.append(
                 {

@@ -11,7 +11,6 @@ from main.fennel_views import (
 class TestFennelViews(TestCase):
     def test_create_account(self):
         client = Client()
-        user_model = get_user_model()
         auth_response = client.post(
             "/v1/auth/register/",
             {
@@ -38,7 +37,6 @@ class TestFennelViews(TestCase):
         for _ in range(100):
             baker.make("main.Transaction")
         client = Client()
-        user_model = get_user_model()
         response = client.post(
             "/v1/auth/register/",
             {
@@ -61,7 +59,6 @@ class TestFennelViews(TestCase):
         for _ in range(100):
             baker.make("main.Transaction")
         client = Client()
-        user_model = get_user_model()
         response = client.post(
             "/v1/auth/register/",
             {
@@ -423,7 +420,6 @@ class TestFennelViews(TestCase):
 
     def test_get_address_no_error_when_userkeys_is_none(self):
         client = Client()
-        user_model = get_user_model()
         response = client.post(
             "/v1/auth/register/",
             {
@@ -475,7 +471,6 @@ class TestFennelViews(TestCase):
 
     def test_get_account_balance(self):
         client = Client()
-        user_model = get_user_model()
         auth_response = client.post(
             "/v1/auth/register/",
             {
@@ -500,7 +495,6 @@ class TestFennelViews(TestCase):
 
     def test_send_new_signal_no_balance(self):
         client = Client()
-        user_model = get_user_model()
         auth_response = client.post(
             "/v1/auth/register/",
             {
