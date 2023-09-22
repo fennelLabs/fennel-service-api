@@ -30,14 +30,16 @@ def generate_diffie_hellman_keys() -> dict:
 def generate_shared_secret(our_group: APIGroup, their_group: APIGroup) -> (str, bool):
     try:
         response = requests.post(
-            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/dh_generate_shared_secret",
+            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/accept_encryption_channel",
             json={
                 "secret": our_group.private_diffie_hellman_key,
                 "public": their_group.public_diffie_hellman_key,
             },
             timeout=5,
         )
-        return response.text, True
+        if response.status_code != 200:
+            return ({"error": "shared secret not generated"}), False
+        return response.json()["shared_secret"], True
     except requests.HTTPError:
         return ({"error": "shared secret not generated"}), False
 
@@ -67,6 +69,8 @@ def whiteflag_decrypt_helper(message: str, shared_secret: str) -> (str, bool):
             },
             timeout=5,
         )
+        if response.status_code != 200:
+            return "message not decrypted", False
         return (message[0:9] + response.text), True
     except requests.HTTPError:
         return "message not decrypted", False
@@ -126,7 +130,7 @@ def whiteflag_encoder_helper(
         )
         if not shared_secret_success:
             return shared_key, False
-        return whiteflag_encrypt_helper(response, shared_key)
+        return whiteflag_encrypt_helper(response.text, shared_key)
     try:
         return response.json(), True
     except requests.JSONDecodeError:

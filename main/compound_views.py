@@ -16,6 +16,7 @@ from main.fennel_views import check_balance, record_signal_fee, signal_send_help
 from main.serializers import (
     AnnotatedWhiteflagSignalSerializer,
     ConfirmationRecordSerializer,
+    DecodeListSerializer,
     EncodeListSerializer,
     SignalTextSerializer,
     UserSerializer,
@@ -65,12 +66,10 @@ def encode_list(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def decode_list(request):
-    try:
-        signals = request.data.getlist("signals")
-    except AttributeError:
-        signals = request.data.get("signals")
-    if signals is None:
-        return Response({"message": "No signals given"}, status=400)
+    serializer = DecodeListSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=400)
+    signals = serializer.data["signals"]
     signals_list = Signal.objects.filter(
         pk__in=signals,
         signal_text__startswith="574631",

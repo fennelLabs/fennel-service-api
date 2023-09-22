@@ -142,3 +142,7 @@ class SignalTextSerializer(serializers.Serializer):
 class EncodeListSerializer(serializers.Serializer):
     signals = serializers.ListField(child=serializers.JSONField())
     recipient_group = serializers.CharField(required=False)
+
+
+class DecodeListSerializer(serializers.Serializer):
+    signals = serializers.ListField(child=serializers.IntegerField())
