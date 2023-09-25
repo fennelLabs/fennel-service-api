@@ -244,7 +244,8 @@ Host: {{hostname}}:{{port}}
 Content-Type: application/json
 
 {
-    "message": "5746313020a00000000000000000000000000000000000000000000000000000000000000000b43a3a38399d1797b7b933b0b734b9b0ba34b7b71734b73a17bbb434ba32b33630b380"
+    "message": "5746313020a00000000000000000000000000000000000000000000000000000000000000000b43a3a38399d1797b7b933b0b734b9b0ba34b7b71734b73a17bbb434ba32b33630b380",
+    "sender_group": "test_group"
 }
 
 ###
@@ -483,7 +484,8 @@ Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1
 Content-Type: application/json
 
 {
-    "signal": "This is a test message"
+    "signal": "This is a test message",
+    "recipient_group": "test_group"
 }
 
 ###
