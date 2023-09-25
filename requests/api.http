@@ -622,7 +622,8 @@ Authorization: Token <token>
             "objectSizeDim2": "3210",
             "objectOrientation": "042"
         }
-    ]
+    ],
+    "recipient_group": "test_group"
 }
 
 ###
@@ -687,4 +688,5 @@ Authorization: Token <token>
             "objectOrientation": "000",
     },
     "annotations": {"test": "test"},
+    "recipient_group": "test_group"
 }
