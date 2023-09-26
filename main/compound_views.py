@@ -82,13 +82,12 @@ def decode_list(request):
     for signal in signals_list:
         signal_body, success = decode(
             signal.signal_text,
-            signal.sender.api_group_users.first(),
+            signal.sender.api_group_users.first() if signal.sender else None,
             request.user.api_group_users.first(),
         )
-        if signal_body["encryptionIndicator"] != "1":
-            signal.references.set(
-                Signal.objects.filter(tx_hash=signal_body["referencedMessage"])
-            )
+        signal.references.set(
+            Signal.objects.filter(tx_hash=signal_body.get("referencedMessage", None))
+        )
         signal.save()
         response_json.append(
             {
