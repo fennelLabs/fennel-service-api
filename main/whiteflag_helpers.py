@@ -131,6 +131,12 @@ def whiteflag_encoder_helper(
             },
             False,
         )
+    try:
+        return_value = response.json()
+    except requests.JSONDecodeError:
+        return_value = response.text
+    if response.status_code != 200:
+        return ({"error": return_value}, False)
     if json_packet["encryptionIndicator"] == "1":
         shared_key, shared_secret_success = generate_shared_secret(
             sender_group, recipient_group
@@ -138,10 +144,7 @@ def whiteflag_encoder_helper(
         if not shared_secret_success:
             return shared_key, False
         return whiteflag_encrypt_helper(response.text, shared_key)
-    try:
-        return response.json(), True
-    except requests.JSONDecodeError:
-        return response.text, True
+    return (return_value, True)
 
 
 @silk_profile(name="whiteflag_decoder_helper")

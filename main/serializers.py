@@ -131,7 +131,7 @@ class APIGroupJoinRequestSerializer(serializers.Serializer):
 
 class AnnotatedWhiteflagSignalSerializer(serializers.Serializer):
     signal_body = serializers.JSONField()
-    annotations = serializers.JSONField()
+    annotations = serializers.CharField()
     recipient_group = serializers.CharField(required=False)
 
 

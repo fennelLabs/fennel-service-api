@@ -123,9 +123,14 @@ def get_fee_for_send_signal_with_annotations(request):
         return Response(serializer.errors, status=400)
     mnemonic = user_key.mnemonic
     signal_body = serializer.validated_data["signal_body"]
-    annotations = serializer.validated_data["annotations"]
     signal_text_encoded = whiteflag_encoder_helper(signal_body)
-    annotation_text_encoded = whiteflag_encoder_helper(annotations)
+    annotations_signal = {
+        "messageCode": "F",
+        "text": serializer.validated_data["annotations"],
+        "referenceIndicator": "3",
+        "referencedMessage": "0000000000000000000000000000000000000000000000000000000000000000",
+    }
+    annotation_text_encoded = whiteflag_encoder_helper(annotations_signal)
     payload = {
         "mnemonic": mnemonic,
         "content": signal_text_encoded,
@@ -187,7 +192,7 @@ def send_signal_with_annotations(request):
     if not signal_encode_success:
         return Response(
             {
-                "message": "could not encode signal",
+                "message": signal_text_encoded,
             },
             status=400,
         )
@@ -213,7 +218,7 @@ def send_signal_with_annotations(request):
     if not annotation_encode_success:
         return Response(
             {
-                "message": "could not encode annotation",
+                "message": annotation_text_encoded,
             },
             status=400,
         )
