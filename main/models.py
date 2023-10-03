@@ -58,7 +58,9 @@ class Signal(models.Model):
         blank=True,
     )
     synced = models.BooleanField(default=False)
-    references = models.ManyToManyField("self")
+    references = models.ManyToManyField(
+        "self", symmetrical=False, related_name="referenced_by", blank=True
+    )
     viewers = models.ManyToManyField(
         "APIGroup", related_name="viewable_signals", blank=True
     )
