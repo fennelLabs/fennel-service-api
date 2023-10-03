@@ -231,8 +231,8 @@ def send_signal_with_annotations(request):
     )
     if recipient_group:
         annotation.viewers.add(recipient_group)
-    signal.references.add(annotation)
-    signal.save()
+    annotation.references.add(signal)
+    annotation.save()
     if signal_success:
         annotation_sent_response, annotation_success = signal_send_helper(
             UserKeys.objects.get(user=request.user), annotation
