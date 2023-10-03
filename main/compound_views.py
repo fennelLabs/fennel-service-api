@@ -99,6 +99,9 @@ def decode_list(request):
                 "sender": UserSerializer(signal.sender).data,
                 "synced": signal.synced,
                 "references": SignalSerializer(signal.references, many=True).data,
+                "referenced_by": SignalSerializer(
+                    signal.referenced_by.all(), many=True
+                ).data,
                 "confirmations": ConfirmationRecordSerializer(
                     ConfirmationRecord.objects.filter(signal=signal), many=True
                 ).data,
