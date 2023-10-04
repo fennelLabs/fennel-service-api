@@ -397,8 +397,6 @@ class TestCompoundViews(TestCase):
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         assert response.status_code == 400
-        assert response.json()["signal_id"] is not None
-        assert response.json()["fee"] is not None
 
     def test_encode_list(self):
         client = Client()

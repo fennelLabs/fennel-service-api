@@ -637,15 +637,17 @@ Content-Type: application/json
 Authorization: Token 8254a8d30b94abf2cbb170c8d67d4aa3e41f941b36a5edafe97a9a74f42acf6c
 
 {
-    "signals": [3]
+    "signals": [4]
 }
 
 ###
 # @name Whiteflag - Get Fee for Send Signal with Annotations
+# @no-cookie-jar
 POST /v1/whiteflag/get_fee_for_send_signal_with_annotations/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token <token>
+
 {
     "signal_body": {
             "encryptionIndicator": "0",
@@ -661,9 +663,37 @@ Authorization: Token <token>
             "objectLongitude": "-120.03830",
             "objectSizeDim1": "0000",
             "objectSizeDim2": "0000",
-            "objectOrientation": "000",
+            "objectOrientation": "000"
     },
-    "annotations": {"test": "test"},
+    "annotations": "{\"test\": \"test\"}"
+}
+
+###
+# @name Whiteflag - Send Signal with Annotations
+# @no-cookie-jar
+POST /v1/whiteflag/send_signal_with_annotations/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+Authorization: Token <token>
+
+{
+    "signal_body": {
+            "encryptionIndicator": "0",
+            "duressIndicator": "0",
+            "messageCode": "I",
+            "referenceIndicator": "4",
+            "referencedMessage": "0000000000000000000000000000000000000000000000000000000000000000",
+            "subjectCode": "52",
+            "dateTime": "2023-09-01T09:37:09Z",
+            "duration": "P00D00H00M",
+            "objectType": "22",
+            "objectLatitude": "+39.09144",
+            "objectLongitude": "-120.03830",
+            "objectSizeDim1": "0000",
+            "objectSizeDim2": "0000",
+            "objectOrientation": "000"
+    },
+    "annotations": "{\"test\": \"test\"}"
 }
 
 ###
@@ -687,8 +717,8 @@ Authorization: Token <token>
             "objectLongitude": "-120.03830",
             "objectSizeDim1": "0000",
             "objectSizeDim2": "0000",
-            "objectOrientation": "000",
+            "objectOrientation": "000"
     },
-    "annotations": {"test": "test"},
+    "annotations": "{\"test\": \"test\"}",
     "recipient_group": "test_group"
 }

@@ -137,14 +137,33 @@ def whiteflag_encoder_helper(
         return_value = response.text
     if response.status_code != 200:
         return ({"error": return_value}, False)
+    if not response.json()["success"]:
+        return ({"error": return_value["error"]}, False)
     if json_packet["encryptionIndicator"] == "1":
         shared_key, shared_secret_success = generate_shared_secret(
             sender_group, recipient_group
         )
         if not shared_secret_success:
             return shared_key, False
-        return whiteflag_encrypt_helper(response.text, shared_key)
-    return (return_value, True)
+        return whiteflag_encrypt_helper(return_value["encoded"], shared_key)
+    return (return_value["encoded"], True)
+
+
+def send_decode_final_request(signal: str) -> (dict, bool):
+    try:
+        response = requests.post(
+            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_decode",
+            data=signal,
+            timeout=5,
+        )
+    except requests.exceptions.ConnectionError:
+        return ({"error": "could not decode signal"}, False)
+    if response.status_code != 200:
+        return ({"error": "could not decode signal"}, False)
+    return (
+        json.loads(response.json()["decoded"]),
+        response.json()["success"],
+    )
 
 
 @silk_profile(name="whiteflag_decoder_helper")
@@ -172,12 +191,4 @@ def decode(
         signal, decrypt_success = whiteflag_decrypt_helper(signal, shared_key)
         if not decrypt_success:
             return signal, False
-    signal = json.dumps(signal)
-    response = requests.post(
-        f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_decode",
-        data=signal,
-        timeout=5,
-    )
-    if response.status_code != 200:
-        return ({"error": "could not decode signal"}, False)
-    return (json.loads(response.json()), True)
+    return send_decode_final_request(json.dumps(signal))

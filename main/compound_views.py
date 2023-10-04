@@ -186,17 +186,25 @@ def send_signal_with_annotations(request):
     recipient_group = None
     if serializer.validated_data.get("recipient_group", None):
         sender_group = request.user.api_group_users.first()
-        recipient_group = APIGroup.objects.get(
+        if APIGroup.objects.filter(
             name=serializer.validated_data["recipient_group"]
-        )
+        ).exists():
+            recipient_group = APIGroup.objects.get(
+                name=serializer.validated_data["recipient_group"]
+            )
+        else:
+            return Response(
+                {
+                    "message": "specified recipient group does not exist",
+                },
+                status=400,
+            )
     signal_text_encoded, signal_encode_success = whiteflag_encoder_helper(
         serializer.validated_data["signal_body"], sender_group, recipient_group
     )
     if not signal_encode_success:
         return Response(
-            {
-                "message": signal_text_encoded,
-            },
+            signal_text_encoded,
             status=400,
         )
     signal = Signal.objects.create(
@@ -220,9 +228,7 @@ def send_signal_with_annotations(request):
     )
     if not annotation_encode_success:
         return Response(
-            {
-                "message": annotation_text_encoded,
-            },
+            annotation_text_encoded,
             status=400,
         )
     annotation = Signal.objects.create(
@@ -233,16 +239,13 @@ def send_signal_with_annotations(request):
         annotation.viewers.add(recipient_group)
     annotation.references.add(signal)
     annotation.save()
+    annotation_sent_response = None
+    annotation_success = False
     if signal_success:
         annotation_sent_response, annotation_success = signal_send_helper(
             UserKeys.objects.get(user=request.user), annotation
         )
-    if not signal_success:
-        return Response(
-            signal_sent_response,
-            status=400,
-        )
-    if not annotation_success:
+    if not annotation_success or not signal_success:
         return Response(
             {
                 "signal_response": signal_sent_response,
