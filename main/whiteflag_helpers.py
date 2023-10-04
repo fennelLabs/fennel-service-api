@@ -76,10 +76,10 @@ def whiteflag_decrypt_helper(message: str, shared_secret: str) -> (str, bool):
             timeout=5,
         )
         if response.status_code != 200:
-            return "message not decrypted", False
+            return {"error": "message not decrypted"}, False
         return (message[0:9] + response.text), True
     except requests.HTTPError:
-        return "message not decrypted", False
+        return {"error": "message not decrypted"}, False
 
 
 @silk_profile(name="whiteflag_encoder_helper")
