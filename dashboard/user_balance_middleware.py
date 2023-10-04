@@ -7,6 +7,9 @@ def user_balance_middleware(get_response):
             request.user.has_wallet = False
             request.user.balance = 0
             request.user.address = None
+            request.user.api_group_name = None
+            if request.user.api_group_users.exists():
+                request.user.api_group_name = request.user.api_group_users.first().name
             if UserKeys.objects.filter(user=request.user.id).exists():
                 request.user.has_wallet = (
                     UserKeys.objects.get(user=request.user.id).mnemonic is not None
