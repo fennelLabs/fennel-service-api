@@ -36,6 +36,11 @@
                 >Join Requests</a
               >
             </li>
+            {% if user.api_group_name %}
+            <li class="nav-item">
+              <div class="nav-link p-3">API Group: {{ user.api_group_name }}</div>
+            </li>
+            {% endif %}
             {% if user.has_wallet %}
             <li class="nav-item">
               <div
