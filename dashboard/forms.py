@@ -115,7 +115,13 @@ class CreateApiGroupForm(forms.Form):
 
 
 class SendAPIGroupRequestForm(forms.Form):
-    group_name = forms.CharField(label="Group Name", max_length=100)
+    group_name = forms.ModelChoiceField(
+        label="Group Name",
+        queryset=APIGroup.objects.all(),
+        to_field_name="name",
+        required=True,
+        widget=forms.Select(attrs={"class": "form-control"}),
+    )
 
     def clean(self):
         cleaned_data = super().clean()
