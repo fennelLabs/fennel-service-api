@@ -1,4 +1,5 @@
 import json
+import logging
 
 from rest_framework.decorators import (
     api_view,
@@ -85,10 +86,15 @@ def decode_list(request):
             signal.sender.api_group_users.first() if signal.sender else None,
             request.user.api_group_users.first(),
         )
-        signal.references.set(
-            Signal.objects.filter(tx_hash=signal_body.get("referencedMessage", None))
-        )
-        signal.save()
+        logging.debug(signal)
+        logging.debug(signal_body)
+        if success:
+            signal.references.set(
+                Signal.objects.filter(
+                    tx_hash=signal_body.get("referencedMessage", None)
+                )
+            )
+            signal.save()
         response_json.append(
             {
                 "id": signal.id,
