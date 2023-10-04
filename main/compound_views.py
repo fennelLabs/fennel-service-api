@@ -1,5 +1,4 @@
 import json
-import logging
 
 from rest_framework.decorators import (
     api_view,
@@ -86,8 +85,6 @@ def decode_list(request):
             signal.sender.api_group_users.first() if signal.sender else None,
             request.user.api_group_users.first(),
         )
-        logging.debug(signal)
-        logging.debug(signal_body)
         if success:
             signal.references.set(
                 Signal.objects.filter(
@@ -104,9 +101,13 @@ def decode_list(request):
                 "signal_text": signal_body if success else signal.signal_text,
                 "sender": UserSerializer(signal.sender).data,
                 "synced": signal.synced,
-                "references": SignalSerializer(signal.references, many=True).data,
+                "references": SignalSerializer(
+                    signal.references.filter(signal_text__startswith="574631"),
+                    many=True,
+                ).data,
                 "referenced_by": SignalSerializer(
-                    signal.referenced_by.all(), many=True
+                    signal.referenced_by.filter(signal_text__startswith="574631"),
+                    many=True,
                 ).data,
                 "confirmations": ConfirmationRecordSerializer(
                     ConfirmationRecord.objects.filter(signal=signal), many=True
