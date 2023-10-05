@@ -17,17 +17,14 @@ from main.decorators import requires_mnemonic_created
 from main.fennel_views import check_balance, record_signal_fee, signal_send_helper
 from main.serializers import (
     AnnotatedWhiteflagSignalSerializer,
-    ConfirmationRecordSerializer,
     DecodeListSerializer,
     EncodeListSerializer,
     SignalTextSerializer,
-    UserSerializer,
 )
 
 from main.forms import SignalForm
-from main.models import APIGroup, ConfirmationRecord, Signal, UserKeys
-from main.serializers import SignalSerializer
-from main.whiteflag_helpers import decode
+from main.models import APIGroup, Signal, UserKeys
+from main.signal_processors import process_decoding_signal
 from main.whiteflag_helpers import whiteflag_encoder_helper
 
 
@@ -80,42 +77,7 @@ def decode_list(request):
         return Response({"message": "No signals found for the given list"}, status=400)
     response_json = []
     for signal in signals_list:
-        signal_body, success = decode(
-            signal.signal_text,
-            signal.sender.api_group_users.first() if signal.sender else None,
-            request.user.api_group_users.first(),
-        )
-        if success:
-            signal.references.set(
-                Signal.objects.filter(
-                    tx_hash=signal_body.get("referencedMessage", None)
-                )
-            )
-            signal.save()
-        response_json.append(
-            {
-                "id": signal.id,
-                "tx_hash": signal.tx_hash,
-                "timestamp": signal.timestamp,
-                "mempool_timestamp": signal.mempool_timestamp,
-                "signal_text": signal_body if success else signal.signal_text,
-                "sender": UserSerializer(signal.sender).data,
-                "synced": signal.synced,
-                "references": SignalSerializer(
-                    signal.references.filter(signal_text__startswith="574631"),
-                    many=True,
-                ).data,
-                "referenced_by": SignalSerializer(
-                    signal.referenced_by.filter(signal_text__startswith="574631"),
-                    many=True,
-                ).data,
-                "confirmations": ConfirmationRecordSerializer(
-                    ConfirmationRecord.objects.filter(signal=signal), many=True
-                ).data,
-                "decoded": success,
-                "error": signal_body["error"] if not success else None,
-            }
-        )
+        response_json.append(process_decoding_signal(request.user, signal))
     return Response(
         response_json,
         status=200,
