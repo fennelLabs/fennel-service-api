@@ -1,14 +1,32 @@
 from django.test import Client
 from django.test import TestCase
-from django.contrib.auth import get_user_model
+
+from model_bakery import baker
 
 from main.models import APIGroup
 
 
 class TestAPIGroupViews(TestCase):
+    def test_get_group_list(self):
+        client = Client()
+        auth_response = client.post(
+            "/v1/auth/register/",
+            {
+                "username": "test_generate_apigroup_keypair",
+                "password": "testpassword",
+                "email": "test_generate_apigroup_keypair@test.com",
+            },
+        )
+        token = auth_response.json()["token"]
+        baker.make("main.APIGroup", _quantity=10)
+        response = client.get(
+            "/v1/group/get_list/", HTTP_AUTHORIZATION=f"Token {token}"
+        )
+        assert response.status_code == 200
+        assert len(response.json()) == 10
+
     def test_generate_apigroup_keypair(self):
         client = Client()
-        user_model = get_user_model()
         auth_response = client.post(
             "/v1/auth/register/",
             {
@@ -63,7 +81,6 @@ class TestAPIGroupViews(TestCase):
 
     def test_get_apigroup_keypair(self):
         client = Client()
-        user_model = get_user_model()
         auth_response = client.post(
             "/v1/auth/register/",
             {
@@ -125,7 +142,6 @@ class TestAPIGroupViews(TestCase):
 
     def test_get_apigroup_keypair_none_created(self):
         client = Client()
-        user_model = get_user_model()
         auth_response = client.post(
             "/v1/auth/register/",
             {
