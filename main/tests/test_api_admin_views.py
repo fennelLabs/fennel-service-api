@@ -990,7 +990,7 @@ class TestAPIAdminViews(TestCase):
         )
         assert response.status_code == 200
         response = client.get(
-            "/v1/group/get_list/",
+            "/v1/group/fennel_admin/get_list/",
             HTTP_AUTHORIZATION=f"Token {token}",
         )
         assert response.status_code == 200

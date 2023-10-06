@@ -114,6 +114,12 @@ class SignalSerializer(serializers.ModelSerializer):
         ]
 
 
+class PublicAPIGroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = APIGroup
+        fields = ["id", "name", "public_diffie_hellman_key"]
+
+
 class APIGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = APIGroup

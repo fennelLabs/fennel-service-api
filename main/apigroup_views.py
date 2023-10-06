@@ -10,10 +10,20 @@ from rest_framework.response import Response
 
 from knox.auth import TokenAuthentication
 
+import requests
+
 from main.decorators import apigroup_admin_only, subject_to_api_limit
 from main.models import APIGroup
+from main.serializers import PublicAPIGroupSerializer
 
-import requests
+
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_group_list(request):
+    return Response(
+        PublicAPIGroupSerializer(APIGroup.objects.all(), many=True).data, status=200
+    )
 
 
 @api_view(["POST"])
