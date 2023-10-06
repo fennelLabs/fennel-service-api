@@ -97,7 +97,6 @@ class TestWhiteflagViews(TestCase):
 
     def whiteflag_announce_public_key(self):
         client = Client()
-        user_model = get_user_model()
         auth_response = client.post(
             "/v1/auth/register/",
             {

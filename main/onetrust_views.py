@@ -39,7 +39,8 @@ def create_self_custodial_account(request):
     else:
         keys = UserKeys.objects.create(user=request.user)
     response = requests.get(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/create_account"
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/create_account",
+        timeout=5,
     )
     mnemonic = response.json()["mnemonic"]
     public_key = response.json()["publicKey"]
@@ -95,6 +96,7 @@ def download_self_custodial_account_as_json(request):
         response = requests.post(
             f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/download_account_as_json",
             data=payload,
+            timeout=5,
         )
         return Response(response.json())
     except requests.HTTPError:
@@ -109,6 +111,8 @@ def download_self_custodial_account_as_json(request):
 def get_self_custodial_account_address(request):
     payload = {"mnemonic": request.data["mnemonic"]}
     response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_address", data=payload
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_address",
+        data=payload,
+        timeout=5,
     )
     return Response(response.json())

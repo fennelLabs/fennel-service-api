@@ -53,8 +53,10 @@ function check() {
   clear && \
    black . && \
    run_tests && \
-   pylint main --disable=E1101,W0613,R0903,C0301,C0114,C0115,C0116,R0801 && \
-   pylint dashboard --disable=E1101,W0613,R0903,C0301,C0114,C0115,C0116,R0801
+   pylint main --disable=E1101,W0613,R0903,C0301,C0114,C0115,C0116,R0801,E203 && \
+   pylint dashboard --disable=E1101,W0613,R0903,C0301,C0114,C0115,C0116,R0801,E203 && \
+   flake8 main --count --extend-ignore E1101,W0613,R0903,C0301,C0114,C0115,C0116,R0801,E203 --exclude ./main/migrations,./main/tests --max-complexity=10 --max-line-length=127 --statistics
+   flake8 dashboard --count --extend-ignore E1101,W0613,R0903,C0301,C0114,C0115,C0116,R0801,E203 --exclude ./dashboard/migrations,./dashboard/tests --max-complexity=10 --max-line-length=127 --statistics
 }
 
 function gunicorn_run() {
