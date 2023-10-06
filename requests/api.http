@@ -108,6 +108,12 @@ Authorization: Token <token>
     "api_group_name": "test"
 }
 
+###
+# @name Get API Group List
+# @no-cookie-jar
+GET /v1/group/get_list/
+Host: {{hostname}}:{{port}}
+Authorization: Token <token>
 
 ###
 # @name Add User to API Group
