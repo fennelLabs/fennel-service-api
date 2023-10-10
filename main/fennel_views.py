@@ -298,7 +298,7 @@ def send_new_signal(request):
         signal_text=form.cleaned_data["signal"], sender=request.user
     )
     if form.cleaned_data["recipient_group"]:
-        signal.recipient_group.add(
+        signal.viewers.add(
             APIGroup.objects.get(name=form.cleaned_data["recipient_group"])
         )
     result, success = signal_send_helper(user_key, signal)
