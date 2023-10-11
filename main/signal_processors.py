@@ -30,6 +30,10 @@ def process_decoding_signal(user, signal):
             signal_text__startswith="574631"
         )
     ]
+    sender_group = None
+    if signal.sender:
+        if signal.sender.api_group_users.first():
+            sender_group = signal.sender.api_group_users.first().api_group
     return {
         "id": signal.id,
         "tx_hash": signal.tx_hash,
@@ -37,6 +41,7 @@ def process_decoding_signal(user, signal):
         "mempool_timestamp": signal.mempool_timestamp,
         "signal_text": signal_body if success else signal.signal_text,
         "sender": UserSerializer(signal.sender).data,
+        "sender_group": sender_group,
         "synced": signal.synced,
         "references": references,
         "confirmations": ConfirmationRecordSerializer(
