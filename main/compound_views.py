@@ -172,8 +172,11 @@ def send_signal_with_annotations(request):
         serializer.validated_data["signal_body"], sender_group, recipient_group
     )
     if not signal_encode_success:
+        signal_text_encoded["step"] = "signal_encode"
         return Response(
-            signal_text_encoded,
+            {
+                "signal_response": signal_text_encoded,
+            },
             status=400,
         )
     signal = Signal.objects.create(
@@ -197,7 +200,10 @@ def send_signal_with_annotations(request):
     )
     if not annotation_encode_success:
         return Response(
-            annotation_text_encoded,
+            {
+                "signal_response": signal_sent_response,
+                "annotation_response": annotation_text_encoded,
+            },
             status=400,
         )
     annotation = Signal.objects.create(
