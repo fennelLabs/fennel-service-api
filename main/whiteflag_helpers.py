@@ -82,6 +82,34 @@ def whiteflag_decrypt_helper(message: str, shared_secret: str) -> (str, bool):
         return {"error": "message not decrypted"}, False
 
 
+def create_whiteflag_encoder_response(
+    json_packet, response, sender_group, recipient_group
+):
+    if response.status_code == 502:
+        return (
+            {
+                "error": "the whiteflag service is inaccessible",
+            },
+            False,
+        )
+    try:
+        return_value = response.json()
+    except requests.JSONDecodeError:
+        return_value = response.text
+    if response.status_code != 200:
+        return ({"error": return_value}, False)
+    if not response.json()["success"]:
+        return ({"error": return_value["error"]}, False)
+    if json_packet["encryptionIndicator"] == "1":
+        shared_key, shared_secret_success = generate_shared_secret(
+            sender_group, recipient_group
+        )
+        if not shared_secret_success:
+            return shared_key, False
+        return whiteflag_encrypt_helper(return_value["encoded"], shared_key)
+    return (return_value["encoded"], True)
+
+
 @silk_profile(name="whiteflag_encoder_helper")
 def whiteflag_encoder_helper(
     payload: dict,
@@ -129,29 +157,9 @@ def whiteflag_encoder_helper(
         data=processed_payload,
         timeout=5,
     )
-    if response.status_code == 502:
-        return (
-            {
-                "error": "the whiteflag service is inaccessible",
-            },
-            False,
-        )
-    try:
-        return_value = response.json()
-    except requests.JSONDecodeError:
-        return_value = response.text
-    if response.status_code != 200:
-        return ({"error": return_value}, False)
-    if not response.json()["success"]:
-        return ({"error": return_value["error"]}, False)
-    if json_packet["encryptionIndicator"] == "1":
-        shared_key, shared_secret_success = generate_shared_secret(
-            sender_group, recipient_group
-        )
-        if not shared_secret_success:
-            return shared_key, False
-        return whiteflag_encrypt_helper(return_value["encoded"], shared_key)
-    return (return_value["encoded"], True)
+    return create_whiteflag_encoder_response(
+        json_packet, response, sender_group, recipient_group
+    )
 
 
 def send_decode_final_request(signal: str) -> (dict, bool):
