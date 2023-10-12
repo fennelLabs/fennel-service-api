@@ -189,7 +189,6 @@ def send_signal_with_annotations(request):
         UserKeys.objects.get(user=request.user), signal
     )
     signal = Signal.objects.get(pk=signal.id)
-    print(signal.tx_hash)
     annotations_signal = {
         "prefix": "WF",
         "version": "1",
