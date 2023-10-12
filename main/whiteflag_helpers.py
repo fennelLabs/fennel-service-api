@@ -82,6 +82,34 @@ def whiteflag_decrypt_helper(message: str, shared_secret: str) -> (str, bool):
         return {"error": "message not decrypted"}, False
 
 
+def create_whiteflag_encoder_response(
+    json_packet, response, sender_group, recipient_group
+):
+    if response.status_code == 502:
+        return (
+            {
+                "error": "the whiteflag service is inaccessible",
+            },
+            False,
+        )
+    try:
+        return_value = response.json()
+    except requests.JSONDecodeError:
+        return_value = response.text
+    if response.status_code != 200:
+        return ({"error": return_value}, False)
+    if not response.json()["success"]:
+        return ({"error": return_value["error"]}, False)
+    if json_packet["encryptionIndicator"] == "1":
+        shared_key, shared_secret_success = generate_shared_secret(
+            sender_group, recipient_group
+        )
+        if not shared_secret_success:
+            return shared_key, False
+        return whiteflag_encrypt_helper(return_value["encoded"], shared_key)
+    return (return_value["encoded"], True)
+
+
 @silk_profile(name="whiteflag_encoder_helper")
 def whiteflag_encoder_helper(
     payload: dict,
@@ -91,10 +119,15 @@ def whiteflag_encoder_helper(
     datetime_field = payload.get("datetime", None)
     if datetime_field is None:
         datetime_field = payload.get("dateTime", None)
+    encryption_indicator = payload.get("encryptionIndicator", None)
+    if sender_group and recipient_group:
+        encryption_indicator = "1"
+    if payload.get("text", None):
+        payload["text"] = payload["text"].encode("utf-8").hex()
     json_packet = {
         "prefix": "WF",
         "version": "1",
-        "encryptionIndicator": payload.get("encryptionIndicator", None),
+        "encryptionIndicator": encryption_indicator,
         "duressIndicator": payload.get("duressIndicator", None),
         "messageCode": payload.get("messageCode", None),
         "referenceIndicator": payload.get("referenceIndicator", None),
@@ -124,29 +157,9 @@ def whiteflag_encoder_helper(
         data=processed_payload,
         timeout=5,
     )
-    if response.status_code == 502:
-        return (
-            {
-                "error": "the whiteflag service is inaccessible",
-            },
-            False,
-        )
-    try:
-        return_value = response.json()
-    except requests.JSONDecodeError:
-        return_value = response.text
-    if response.status_code != 200:
-        return ({"error": return_value}, False)
-    if not response.json()["success"]:
-        return ({"error": return_value["error"]}, False)
-    if json_packet["encryptionIndicator"] == "1":
-        shared_key, shared_secret_success = generate_shared_secret(
-            sender_group, recipient_group
-        )
-        if not shared_secret_success:
-            return shared_key, False
-        return whiteflag_encrypt_helper(return_value["encoded"], shared_key)
-    return (return_value["encoded"], True)
+    return create_whiteflag_encoder_response(
+        json_packet, response, sender_group, recipient_group
+    )
 
 
 def send_decode_final_request(signal: str) -> (dict, bool):
@@ -160,8 +173,11 @@ def send_decode_final_request(signal: str) -> (dict, bool):
         return ({"error": "could not decode signal"}, False)
     if response.status_code != 200:
         return ({"error": "could not decode signal"}, False)
+    decoded = json.loads(response.json()["decoded"])
+    if decoded.get("text", None):
+        decoded["text"] = bytes.fromhex(decoded["text"]).decode("utf-8")
     return (
-        json.loads(response.json()["decoded"]),
+        decoded,
         response.json()["success"],
     )
 

@@ -102,6 +102,7 @@ def signal_send_helper(user_key: UserKeys, signal: Signal) -> (dict, bool):
         if "hash" not in response_json:
             return (
                 {
+                    "error": "hash couldn't be retrieved from the chain",
                     "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
                     "fee": signal_fee_result["fee"],
                     "balance": check_balance(user_key)["balance"],
@@ -111,7 +112,7 @@ def signal_send_helper(user_key: UserKeys, signal: Signal) -> (dict, bool):
                 False,
             )
         signal.synced = True
-        signal.tx_hash = response_json["hash"]
+        signal.tx_hash = response_json["hash"][2:]
         signal.mempool_timestamp = datetime.datetime.now()
         signal.save()
         response_json["balance"] = check_balance(user_key)["balance"]
@@ -121,6 +122,7 @@ def signal_send_helper(user_key: UserKeys, signal: Signal) -> (dict, bool):
     except requests.HTTPError:
         return (
             {
+                "error": "subservice was unavailable",
                 "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
                 "fee": signal_fee_result["fee"],
                 "balance": check_balance(user_key)["balance"],
