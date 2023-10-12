@@ -1,6 +1,9 @@
 from django.test import Client, TestCase
-from main.models import APIGroup
+from django.contrib.auth import get_user_model
+
+from main.models import APIGroup, Signal
 from main.whiteflag_helpers import whiteflag_encoder_helper
+from main.signal_processors import process_decoding_signal
 
 
 class TestProductionIssues(TestCase):
@@ -63,3 +66,21 @@ class TestProductionIssues(TestCase):
             annotations_signal, None, None
         )
         assert annotation_encode_success
+
+    def test_decode_list_crash_from_api_group(self):
+        user_model = get_user_model()
+        user = user_model.objects.create_user(
+            username="test",
+            password="test",
+            email="test@test.com",
+        )
+        user.save()
+        api_group = APIGroup.objects.create(
+            name="test",
+        )
+        api_group.user_list.add(user)
+        signal = Signal.objects.create(
+            signal_text="5746313024a000000000000000000000000000000000000000000000000000000000000000029101188080188a2000000115460461600ae2caa00000000000",
+            sender=user,
+        )
+        process_decoding_signal(user, signal)

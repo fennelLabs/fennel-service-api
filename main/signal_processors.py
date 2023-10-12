@@ -33,7 +33,7 @@ def process_decoding_signal(user, signal):
     sender_group = None
     if signal.sender:
         if signal.sender.api_group_users.first():
-            sender_group = signal.sender.api_group_users.first().api_group
+            sender_group = signal.sender.api_group_users.first().name
     return {
         "id": signal.id,
         "tx_hash": signal.tx_hash,
