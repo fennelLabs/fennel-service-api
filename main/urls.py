@@ -182,6 +182,10 @@ urlpatterns = [
     path("fennel/get_signal_by_id/<int:signal_id>/", fennel_views.get_signal_by_id),
     path("fennel/get_signals/", fennel_views.get_signals),
     path("fennel/get_signals/<int:count>/", fennel_views.get_signals),
+    path(
+        "fennel/get_signals_in_range/<int:start_index>/<int:end_index>/",
+        fennel_views.get_signals_in_range,
+    ),
     path("fennel/get_unsynced_signals/", fennel_views.get_unsynced_signals),
     path("fennel/get_fee_history/", fennel_views.get_fee_history),
     path("fennel/get_fee_history/<int:count>/", fennel_views.get_fee_history),

@@ -383,6 +383,20 @@ def get_signals(request, count=None):
     return Response(serializer.data)
 
 
+@silk_profile(name="get_signals_in_range")
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_signals_in_range(request, start_index=None, end_index=None):
+    groups = request.user.api_group_users.all()
+    queryset = Signal.objects.filter(
+        (Q(viewers=None) | Q(viewers__in=groups))
+        & Q(pk__range=(start_index, end_index))
+    ).order_by("-timestamp")
+    serializer = SignalSerializer(queryset, many=True)
+    return Response(serializer.data)
+
+
 @silk_profile(name="get_unsynced_signals")
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
