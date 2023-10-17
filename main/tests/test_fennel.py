@@ -268,6 +268,33 @@ class TestFennelViews(TestCase):
         assert len(response.json()) == 10
         Signal.objects.all().delete()
 
+    def test_get_signals_in_range(self):
+        client = Client()
+        user_model = get_user_model()
+        response = client.post(
+            "/v1/auth/register/",
+            {
+                "username": "signals_count_test",
+                "password": "signals_count_test",
+                "email": "signals_count_test@test.com",
+            },
+        )
+        assert response.status_code == 200
+        assert response.json()["token"] is not None
+        user = user_model.objects.get(username="signals_count_test")
+        UserKeys.objects.update_or_create(
+            user=user,
+            address="test",
+        )
+        for _ in range(100):
+            baker.make("main.Signal", sender=user)
+        response = client.get(
+            "/v1/fennel/get_signals_in_range/1/10/",
+            HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
+        )
+        assert response.status_code == 200
+        assert len(response.json()) == 10
+
     def test_get_unsynced_signals(self):
         client = Client()
         user_model = get_user_model()

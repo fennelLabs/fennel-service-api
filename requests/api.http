@@ -579,6 +579,13 @@ Host: {{hostname}}:{{port}}
 Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
 
 ###
+# @name Fennel - Get Signal in ID Range
+# @no-cookie-jar
+GET /v1/fennel/get_signals_in_range/1/10/
+Host: {{hostname}}:{{port}}
+Authorization: Token <token>
+
+###
 # @name Fennel - Get Unsynced Signals
 # @description Get all signals which failed to sync to Fennel Network.
 # @no-cookie-jar
