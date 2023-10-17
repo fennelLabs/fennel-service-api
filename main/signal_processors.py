@@ -34,12 +34,16 @@ def process_decoding_signal(user, signal):
     if signal.sender:
         if signal.sender.api_group_users.first():
             sender_group = signal.sender.api_group_users.first().name
+    if signal_body:
+        signal.signal_body = signal_body
+        signal.save()
     return {
         "id": signal.id,
         "tx_hash": signal.tx_hash,
         "timestamp": signal.timestamp,
         "mempool_timestamp": signal.mempool_timestamp,
-        "signal_text": signal_body if success else signal.signal_text,
+        "signal_text": signal.signal_text,
+        "signal_body": signal_body if success else None,
         "sender": UserSerializer(signal.sender).data,
         "sender_group": sender_group,
         "synced": signal.synced,

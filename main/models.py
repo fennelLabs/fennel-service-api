@@ -48,6 +48,7 @@ class Transaction(models.Model):
 class Signal(models.Model):
     tx_hash = models.CharField(max_length=1024, unique=True, null=True, blank=True)
     signal_text = models.CharField(max_length=1024)
+    signal_body = models.CharField(max_length=4096, null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     mempool_timestamp = models.DateTimeField(auto_now_add=False, null=True, blank=True)
     sender = models.ForeignKey(
