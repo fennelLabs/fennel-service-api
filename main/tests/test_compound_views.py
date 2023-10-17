@@ -58,9 +58,9 @@ class TestCompoundViews(TestCase):
         )
         assert response.status_code == 200
         assert response.json()[0]["id"] == signal.id
-        assert response.json()[0]["signal_text"]["prefix"] == "WF"
-        assert response.json()[0]["signal_text"]["version"] == "1"
-        assert response.json()[0]["signal_text"]["encryptionIndicator"] == "0"
+        assert response.json()[0]["signal_body"]["prefix"] == "WF"
+        assert response.json()[0]["signal_body"]["version"] == "1"
+        assert response.json()[0]["signal_body"]["encryptionIndicator"] == "0"
 
     def test_decode_list_encrypted(self):
         client = Client()
@@ -89,9 +89,9 @@ class TestCompoundViews(TestCase):
         )
         assert response.status_code == 200
         assert response.json()[0]["id"] == signal.id
-        assert response.json()[0]["signal_text"]["prefix"] == "WF"
-        assert response.json()[0]["signal_text"]["version"] == "1"
-        assert response.json()[0]["signal_text"]["encryptionIndicator"] == "1"
+        assert response.json()[0]["signal_body"]["prefix"] == "WF"
+        assert response.json()[0]["signal_body"]["version"] == "1"
+        assert response.json()[0]["signal_body"]["encryptionIndicator"] == "1"
 
     def test_decode_long_signal_list(self):
         client = Client()
