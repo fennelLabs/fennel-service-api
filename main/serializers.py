@@ -135,6 +135,11 @@ class APIGroupJoinRequestSerializer(serializers.Serializer):
         fields = "__all__"
 
 
+class EncodeAndSendSignalSerializer(serializers.Serializer):
+    signal_body = serializers.JSONField()
+    recipient_group = serializers.CharField(required=False)
+
+
 class AnnotatedWhiteflagSignalSerializer(serializers.Serializer):
     signal_body = serializers.JSONField()
     annotations = serializers.CharField()

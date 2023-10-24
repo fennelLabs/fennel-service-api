@@ -88,6 +88,14 @@ urlpatterns = [
         compound_views.get_fee_for_send_signal_with_annotations,
     ),
     path(
+        "whiteflag/get_fee_for_encode_and_send_signal/",
+        compound_views.get_fee_for_encode_and_send_signal,
+    ),
+    path(
+        "whiteflag/encode_and_send_signal/",
+        compound_views.encode_and_send_signal,
+    ),
+    path(
         "whiteflag/send_signal_with_annotations/",
         compound_views.send_signal_with_annotations,
     ),
