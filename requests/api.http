@@ -710,6 +710,62 @@ Authorization: Token <token>
 }
 
 ###
+# @name Whiteflag - Get Fee for Encode and Send Signal
+# @no-cookie-jar
+POST /v1/whiteflag/get_fee_for_encode_and_send_signal/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+Authorization: Token <token>
+
+{
+    "signal_body": {
+            "encryptionIndicator": "0",
+            "duressIndicator": "0",
+            "messageCode": "I",
+            "referenceIndicator": "4",
+            "referencedMessage": "0000000000000000000000000000000000000000000000000000000000000000",
+            "subjectCode": "52",
+            "dateTime": "2023-09-01T09:37:09Z",
+            "duration": "P00D00H00M",
+            "objectType": "22",
+            "objectLatitude": "+39.09144",
+            "objectLongitude": "-120.03830",
+            "objectSizeDim1": "0000",
+            "objectSizeDim2": "0000",
+            "objectOrientation": "000"
+    },
+    "recipient_group": "test_group"
+}
+
+###
+# @name Whiteflag - Encode and Send Signal
+# @no-cookie-jar
+POST /v1/whiteflag/encode_and_send_signal/
+Host: {{hostname}}:{{port}}
+Content-Type: application/json
+Authorization: Token <token>
+
+{
+    "signal_body": {
+            "encryptionIndicator": "0",
+            "duressIndicator": "0",
+            "messageCode": "I",
+            "referenceIndicator": "4",
+            "referencedMessage": "0000000000000000000000000000000000000000000000000000000000000000",
+            "subjectCode": "52",
+            "dateTime": "2023-09-01T09:37:09Z",
+            "duration": "P00D00H00M",
+            "objectType": "22",
+            "objectLatitude": "+39.09144",
+            "objectLongitude": "-120.03830",
+            "objectSizeDim1": "0000",
+            "objectSizeDim2": "0000",
+            "objectOrientation": "000"
+    },
+    "recipient_group": "test_group"
+}
+
+###
 # @name Whiteflag - Send Signal with Annotations
 POST /v1/whiteflag/send_signal_with_annotations/
 Host: {{hostname}}:{{port}}

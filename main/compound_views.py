@@ -18,6 +18,7 @@ from main.fennel_views import check_balance, record_signal_fee, signal_send_help
 from main.serializers import (
     AnnotatedWhiteflagSignalSerializer,
     DecodeListSerializer,
+    EncodeAndSendSignalSerializer,
     EncodeListSerializer,
     SignalTextSerializer,
 )
@@ -26,6 +27,103 @@ from main.forms import SignalForm
 from main.models import APIGroup, Signal, UserKeys
 from main.signal_processors import process_decoding_signal
 from main.whiteflag_helpers import whiteflag_encoder_helper
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+@requires_mnemonic_created
+def get_fee_for_encode_and_send_signal(request):
+    user_key = UserKeys.objects.get(user=request.user)
+    serializer = EncodeAndSendSignalSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=400)
+    mnemonic = user_key.mnemonic
+    signal_body = serializer.validated_data["signal_body"]
+    signal_text_encoded = whiteflag_encoder_helper(signal_body)
+    payload = {
+        "mnemonic": mnemonic,
+        "content": signal_text_encoded,
+    }
+    try:
+        response, success = record_signal_fee(payload)
+        balance = check_balance(user_key)["balance"]
+        if not success:
+            return Response(
+                {
+                    "signal_response": response,
+                    "balance": balance,
+                },
+                status=400,
+            )
+        return Response(
+            {
+                "signal_response": response,
+                "balance": balance,
+            },
+            status=200,
+        )
+    except requests.HTTPError:
+        return Response(
+            {
+                "message": "could not get fees",
+            },
+            status=400,
+        )
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+@requires_mnemonic_created
+def encode_and_send_signal(request):
+    serializer = EncodeAndSendSignalSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=400)
+    sender_group = None
+    recipient_group = None
+    if serializer.validated_data.get("recipient_group", None):
+        sender_group = request.user.api_group_users.first()
+        if APIGroup.objects.filter(
+            name=serializer.validated_data["recipient_group"]
+        ).exists():
+            recipient_group = APIGroup.objects.get(
+                name=serializer.validated_data["recipient_group"]
+            )
+        else:
+            return Response(
+                {
+                    "message": "specified recipient group does not exist",
+                },
+                status=400,
+            )
+    signal_text_encoded, signal_encode_success = whiteflag_encoder_helper(
+        serializer.validated_data["signal_body"], sender_group, recipient_group
+    )
+    if not signal_encode_success:
+        signal_text_encoded["step"] = "signal_encode"
+        return Response(
+            signal_text_encoded,
+            status=400,
+        )
+    signal = Signal.objects.create(
+        signal_text=signal_text_encoded,
+        sender=request.user,
+    )
+    if recipient_group:
+        signal.viewers.add(recipient_group)
+    signal_sent_response, signal_success = signal_send_helper(
+        UserKeys.objects.get(user=request.user), signal
+    )
+    if not signal_success:
+        return Response(
+            signal_sent_response,
+            status=400,
+        )
+    return Response(
+        signal_sent_response,
+        status=200,
+    )
 
 
 @api_view(["POST"])
