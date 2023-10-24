@@ -10,7 +10,7 @@ from main.whiteflag_helpers import decode
 
 
 @silk_profile(name="process_decoding_signal")
-def process_decoding_signal(user, signal):
+def process_decoding_signal(user, signal, depth=0):
     signal_body, success = decode(
         signal.signal_text,
         signal.sender.api_group_users.first() if signal.sender else None,
@@ -24,12 +24,16 @@ def process_decoding_signal(user, signal):
                 )
             )
             signal.save()
-    references = [
-        process_decoding_signal(user, reference_signal)
-        for reference_signal in signal.references.filter(
-            signal_text__startswith="574631"
-        )
-    ]
+    references = (
+        [
+            process_decoding_signal(user, reference_signal, depth=depth + 1)
+            for reference_signal in signal.references.filter(
+                signal_text__startswith="574631"
+            )
+        ]
+        if depth < 25
+        else []
+    )
     sender_group = None
     if signal.sender:
         if signal.sender.api_group_users.first():
