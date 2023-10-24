@@ -175,7 +175,7 @@ def decode_list(request):
         return Response({"message": "No signals found for the given list"}, status=400)
     response_json = []
     for signal in signals_list:
-        response_json.append(process_decoding_signal(request.user, signal))
+        response_json.append(process_decoding_signal(request.user, signal, depth=0))
     return Response(
         response_json,
         status=200,
