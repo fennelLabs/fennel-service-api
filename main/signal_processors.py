@@ -1,3 +1,6 @@
+import ast
+import json
+
 from silk.profiling.profiler import silk_profile
 
 from main.serializers import (
@@ -11,11 +14,21 @@ from main.whiteflag_helpers import decode
 
 @silk_profile(name="process_decoding_signal")
 def process_decoding_signal(user, signal, depth=0):
-    signal_body, success = decode(
-        signal.signal_text,
-        signal.sender.api_group_users.first() if signal.sender else None,
-        user.api_group_users.first(),
-    )
+    if not signal.signal_body:
+        signal_body, success = decode(
+            signal.signal_text,
+            signal.sender.api_group_users.first() if signal.sender else None,
+            user.api_group_users.first(),
+        )
+        updated = True
+    else:
+        try:
+            signal_body = json.loads(signal.signal_body)
+            updated = False
+        except json.decoder.JSONDecodeError:
+            signal_body = ast.literal_eval(signal.signal_body)
+            updated = True
+        success = True
     if success:
         if signal_body.get("referencedMessage", None):
             signal.references.set(
@@ -38,8 +51,8 @@ def process_decoding_signal(user, signal, depth=0):
     if signal.sender:
         if signal.sender.api_group_users.first():
             sender_group = signal.sender.api_group_users.first().name
-    if signal_body:
-        signal.signal_body = signal_body
+    if signal_body and updated:
+        signal.signal_body = json.dumps(signal_body)
         signal.save()
     return {
         "id": signal.id,
