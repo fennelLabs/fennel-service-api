@@ -17,7 +17,7 @@
             <tr>
             <td>{{ member.username }}</td>
             <td>{{ member|get_address }}</td>
-            <td>{{ member|get_balance }} FNL</td>
+            <td><a href="{% url 'dashboard:get_balance_for_member' group_id member.id %}">{{ member|get_balance }}</a> FNL</td>
             <td>
                 {% if account_created %}
                 {% if member|has_wallet %}

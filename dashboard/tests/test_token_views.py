@@ -100,3 +100,37 @@ class TestTokenViews(TestCase):
             str(messages[-1]),
             "You do not have enough tokens to complete this transaction.",
         )
+
+    def test_get_balance_for_member(self):
+        self.client.login(username="testuser", password="testpass")
+        response = self.client.get(
+            reverse(
+                "dashboard:create_wallet",
+                kwargs={"group_id": APIGroup.objects.get(name="testgroup").id},
+            ),
+        )
+        response = self.client.post(
+            reverse(
+                "dashboard:create_wallet_for_member",
+                kwargs={
+                    "group_id": APIGroup.objects.get(name="testgroup").id,
+                    "member_id": User.objects.get(username="testuser2").id,
+                },
+            ),
+        )
+        response = self.client.get(
+            reverse(
+                "dashboard:get_balance_for_member",
+                kwargs={
+                    "group_id": APIGroup.objects.get(name="testgroup").id,
+                    "member_id": User.objects.get(username="testuser2").id,
+                },
+            ),
+        )
+        self.assertRedirects(
+            response,
+            reverse(
+                "dashboard:api_group_members",
+                kwargs={"group_id": APIGroup.objects.get(name="testgroup").id},
+            ),
+        )
