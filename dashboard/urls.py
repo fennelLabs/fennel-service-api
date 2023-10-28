@@ -16,6 +16,11 @@ urlpatterns = [
         name="send_group_join_request",
     ),
     path("get-balance/", views.get_balance, name="get_balance"),
+    path(
+        "get-balance-for-member/group/<int:group_id>/member/<int:member_id>/",
+        views.get_balance_for_member,
+        name="get_balance_for_member",
+    ),
     # Custom auth views
     path("register/", auth_views.registration_view, name="register"),
     path("login/", auth_views.login_view, name="login"),

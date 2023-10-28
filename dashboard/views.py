@@ -99,3 +99,26 @@ def get_balance(request):
     keys.balance = response.json()["balance"]
     keys.save()
     return redirect("dashboard:index")
+
+
+@silk_profile(name="get_balance_for_member")
+@require_authentication
+def get_balance_for_member(request, group_id, member_id):
+    if not UserKeys.objects.filter(user__pk=member_id).exists():
+        messages.error(request, "That user does not have a wallet.")
+        return redirect("dashboard:api_group_members", group_id=group_id)
+    keys = UserKeys.objects.get(user=request.user)
+    response = requests.post(
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_account_balance",
+        data={"mnemonic": keys.mnemonic},
+        timeout=5,
+    )
+    if response.status_code != 200:
+        messages.error(
+            request,
+            "Subservice is not available. Try again later, or contact us at info@fennellabs.com.",
+        )
+        return redirect("dashboard:api_group_members", group_id=group_id)
+    keys.balance = response.json()["balance"]
+    keys.save()
+    return redirect("dashboard:api_group_members", group_id=group_id)
