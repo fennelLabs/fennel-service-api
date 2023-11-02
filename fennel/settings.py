@@ -256,11 +256,21 @@ LOGGING = {
     },
 }
 
+
+def silk_permissions(user):
+    return user.is_superuser
+
+
+def silk_intercept(request):
+    return "healthcheck" not in request.path
+
+
 SILKY_PYTHON_PROFILER = True
 SILKY_PYTHON_PROFILER_BINARY = True
 SILKY_AUTHENTICATION = True
 # noinspection PyPep8
-SILKY_PERMISSIONS = lambda user: user.is_superuser
+SILKY_PERMISSIONS = silk_permissions
+SILKY_INTERCEPT_FUNC = silk_intercept
 SILKY_MAX_RESPONSE_BODY_SIZE = 1024
 SILKY_META = True
 SILKY_INTERCEPT_PERCENT = 50
