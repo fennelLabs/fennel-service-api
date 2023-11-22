@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+from datetime import timedelta
 import os
 from pathlib import Path
 
@@ -279,3 +280,7 @@ SILKY_MAX_RECORDED_REQUESTS_CHECK_PERCENT = 10
 SILKY_PYTHON_PROFILER_RESULT_PATH = os.path.join(BASE_DIR, "profile")
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+REST_KNOX = {
+    "TOKEN_TTL": timedelta(hours=10),
+}
