@@ -64,7 +64,7 @@ function gunicorn_run() {
 }
 
 function setup() {
-  python manage.py createadmin
+  python3 manage.py createadmin
 }
 
 mkdir -p profile

@@ -195,6 +195,10 @@ def get_fee_for_send_signal_with_annotations(request):
     signal_body = serializer.validated_data["signal_body"]
     signal_text_encoded = whiteflag_encoder_helper(signal_body)
     annotations_signal = {
+        "prefix": "WF",
+        "version": "1",
+        "encryptionIndicator": "0",
+        "duressIndicator": "0",
         "messageCode": "F",
         "text": serializer.validated_data["annotations"],
         "referenceIndicator": "3",

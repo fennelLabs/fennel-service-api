@@ -85,6 +85,54 @@ class TestWhiteflagHelpers(TestCase):
         assert response.data["success"]
         assert response.data["shared_secret"] is not None
 
+    def test_encode_free_text_whiteflag_message_partial(self):
+        message = {
+            "prefix": "WF",
+            "version": "1",
+            "encryptionIndicator": "0",
+            "duressIndicator": "0",
+            "messageCode": "F",
+            "text": "Test Message",
+            "referenceIndicator": "3",
+            "referencedMessage": "0000000000000000000000000000000000000000000000000000000000000000",
+        }
+        encoded_message, success = whiteflag_encoder_helper(message)
+        assert success
+        assert encoded_message is not None
+
+    def test_encode_free_text_whiteflag_message_string(self):
+        message = {
+            "prefix": "WF",
+            "version": "1",
+            "encryptionIndicator": "0",
+            "duressIndicator": "1",
+            "messageCode": "F",
+            "text": 'This is a test.',
+            "referenceIndicator": "3",
+            "referencedMessage": "0000000000000000000000000000000000000000000000000000000000000000",
+        }
+        encoded_message, success = whiteflag_encoder_helper(message)
+        assert success
+        assert encoded_message is not None
+
+    def test_encode_free_text_whiteflag_message(self):
+        message = {
+            "prefix": "WF",
+            "version": "1",
+            "encryptionIndicator": "0",
+            "duressIndicator": "1",
+            "messageCode": "F",
+            "text": '{"test": "test"}',
+            "referenceIndicator": "3",
+            "referencedMessage": "0000000000000000000000000000000000000000000000000000000000000000",
+        }
+        encoded_message, success = whiteflag_encoder_helper(message)
+        assert success
+        assert encoded_message is not None
+        decoded_message, success = decode(encoded_message)
+        assert success
+        assert decoded_message is not None
+
     def test_decode_encrypted_whiteflag_message(self):
         keys_dict_one = generate_diffie_hellman_keys()
         keys_dict_two = generate_diffie_hellman_keys()

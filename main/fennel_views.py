@@ -69,6 +69,10 @@ def check_balance(key):
         return {"balance": int(key.balance)}
     except requests.HTTPError:
         return {"balance": int(key.balance)}
+    except TimeoutError:
+        return {"balance": int(key.balance)}
+    except requests.exceptions.ReadTimeout:
+        return {"balance": int(key.balance)}
 
 
 @silk_profile(name="signal_send_helper")

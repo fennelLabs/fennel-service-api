@@ -286,8 +286,8 @@ class TestFennelViews(TestCase):
             user=user,
             address="test",
         )
-        for _ in range(100):
-            baker.make("main.Signal", sender=user)
+        for i in range(100):
+            baker.make("main.Signal", pk=i, sender=user)
         response = client.get(
             "/v1/fennel/get_signals_in_range/1/10/",
             HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',

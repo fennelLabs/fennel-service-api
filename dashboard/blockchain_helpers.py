@@ -45,11 +45,14 @@ def create_wallet_with_userkeys(request, keys: UserKeys) -> None:
 @silk_profile(name="check_balance")
 def check_balance(key: UserKeys) -> int:
     payload = {"mnemonic": key.mnemonic}
-    response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_account_balance",
-        data=payload,
-        timeout=5,
-    )
+    try:
+        response = requests.post(
+            f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_account_balance",
+            data=payload,
+            timeout=5,
+        )
+    except requests.exceptions.ReadTimeout:
+        return -1
     if response.status_code != 200:
         return -1
     key.balance = response.json()["balance"]
@@ -64,11 +67,14 @@ def get_fee_for_transfer_token(recipient: str, amount: int, user_key: UserKeys) 
         "to": recipient,
         "amount": amount,
     }
-    response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_transfer_token",
-        data=payload,
-        timeout=5,
-    )
+    try:
+        response = requests.post(
+            f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_transfer_token",
+            data=payload,
+            timeout=5,
+        )
+    except requests.exceptions.ReadTimeout:
+        return -1
     if response.status_code != 200:
         return -1
     Transaction.objects.create(

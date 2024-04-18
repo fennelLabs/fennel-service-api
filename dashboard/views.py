@@ -108,11 +108,18 @@ def get_balance_for_member(request, group_id, member_id):
         messages.error(request, "That user does not have a wallet.")
         return redirect("dashboard:api_group_members", group_id=group_id)
     keys = UserKeys.objects.get(user=request.user)
-    response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_account_balance",
-        data={"mnemonic": keys.mnemonic},
-        timeout=5,
-    )
+    try:
+        response = requests.post(
+            f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_account_balance",
+            data={"mnemonic": keys.mnemonic},
+            timeout=5,
+        )
+    except requests.exceptions.ReadTimeout:
+        messages.error(
+            request,
+            "Subservice is not available. Try again later, or contact us at info@fennellabs.com.",
+        )
+        return redirect("dashboard:api_group_members", group_id=group_id)
     if response.status_code != 200:
         messages.error(
             request,
