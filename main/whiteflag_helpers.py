@@ -124,7 +124,6 @@ def whiteflag_encoder_helper(
         encryption_indicator = "1"
     if payload.get("text", None):
         payload["text"] = payload["text"].encode("utf-8").hex()
-        print(payload["text"])
     json_packet = {
         "prefix": "WF",
         "version": "1",
@@ -155,7 +154,6 @@ def whiteflag_encoder_helper(
     if payload.get("referencedMessage", None) is None:
         json_packet["referencedMessage"] = "0000000000000000000000000000000000000000000000000000000000000000"
     processed_payload = json.dumps({k: v for k, v in json_packet.items() if v})
-    print(processed_payload)
     response = requests.post(
         f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_encode",
         data=processed_payload,
