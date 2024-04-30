@@ -1,4 +1,4 @@
-FROM amd64/ubuntu:latest
+FROM amd64/ubuntu:jammy
 
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update -y && \
@@ -6,10 +6,13 @@ RUN DEBIAN_FRONTEND=noninteractive \
     apt-get install -y tzdata && \
     dpkg-reconfigure --frontend noninteractive tzdata && \
     apt-get install unzip curl python3 python3-pip \
-                    python3-dev libssl-dev \
-                    virtualenv libpq-dev -y && \
+                    python3-dev libssl-dev python3-venv \
+                    virtualenv libpq-dev libffi-dev -y && \
     apt-get upgrade -y
 
+RUN python3 -m venv /opt/venv
+ENV VIRTUAL_ENV /opt/venv
+ENV PATH /opt/venv/bin:$PATH  
 COPY requirements.txt /opt/app/requirements.txt
 RUN mkdir /opt/app/static
 RUN mkdir /opt/app/mediafiles

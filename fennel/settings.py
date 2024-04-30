@@ -28,9 +28,23 @@ DEBUG = True if os.environ.get("DEBUG") == "True" else False
 
 ALLOWED_HOSTS = ["localhost", "192.168.1.186", "34.148.9.195", "api.fennellabs.com"]
 
-CORS_ORIGIN_WHITELIST = ["http://localhost:3000", "http://127.0.0.1:3000"]
+CORS_ORIGIN_WHITELIST = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://localhost:8081",
+    "http://api:1234",
+    "http://localhost:8080",
+    "http://localhost:1234",
+]
 
-CSRF_TRUSTED_ORIGINS = ["http://localhost:3000", "https://api.fennellabs.com"]
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "https://api.fennellabs.com",
+    "http://api:1234",
+    "http://localhost:8081",
+    "http://localhost:8080",
+    "http://localhost:1234",
+]
 
 # Application definition
 

@@ -107,7 +107,7 @@ class TestWhiteflagHelpers(TestCase):
             "encryptionIndicator": "0",
             "duressIndicator": "1",
             "messageCode": "F",
-            "text": 'This is a test.',
+            "text": "This is a test.",
             "referenceIndicator": "3",
             "referencedMessage": "0000000000000000000000000000000000000000000000000000000000000000",
         }
