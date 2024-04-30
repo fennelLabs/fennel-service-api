@@ -31,7 +31,7 @@ ALLOWED_HOSTS = ["localhost", "192.168.1.186", "34.148.9.195", "api.fennellabs.c
 CORS_ORIGIN_WHITELIST = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://localhost:8081",
+    "http://localhost:8081",
     "http://api:1234",
     "http://localhost:8080",
     "http://localhost:1234",
