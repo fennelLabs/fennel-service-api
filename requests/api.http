@@ -7,31 +7,31 @@
 ###
 # @name Get Version
 # @no-cookie-jar
-GET /v1/get_version/
+GET /api/v1/get_version/
 Host: {{hostname}}:{{port}}
 
 ###
 # @name Health Check
 # @no-cookie-jar
-GET /v1/healthcheck/
+GET /api/v1/healthcheck/
 Host: {{hostname}}:{{port}}
 
 ###
 # @name Whiteflag Healthcheck
 # @no-cookie-jar
-GET /v1/whiteflag/healthcheck/
+GET /api/v1/whiteflag/healthcheck/
 Host: {{hostname}}:{{port}}
 
 ###
 # @name Fennel Healthcheck
 # @no-cookie-jar
-GET /v1/fennel/healthcheck/
+GET /api/v1/fennel/healthcheck/
 Host: {{hostname}}:{{port}}
 
 ###
 # @name Register
 # @no-cookie-jar
-POST /v1/auth/register/
+POST /api/v1/auth/register/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 
@@ -44,7 +44,7 @@ Content-Type: application/json
 ###
 # @name Login
 # @no-cookie-jar
-POST /v1/auth/login/
+POST /api/v1/auth/login/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 
@@ -56,14 +56,14 @@ Content-Type: application/json
 ###
 # @name Logout
 # @no-cookie-jar
-POST /v1/auth/logout/
+POST /api/v1/auth/logout/
 Host: {{hostname}}:{{port}}
 Authorization: Token <token>
 
 ###
 # @name Change Password
 # @no-cookie-jar
-POST /v1/auth/change_password/
+POST /api/v1/auth/change_password/
 Host: {{hostname}}:{{port}}
 Authorization: Token <token>
 
@@ -75,7 +75,7 @@ Authorization: Token <token>
 ###
 # @name Reset Password
 # @no-cookie-jar
-POST /v1/auth/reset_password/
+POST /api/v1/auth/reset_password/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 
@@ -86,7 +86,7 @@ Content-Type: application/json
 ###
 # @name Reset Password Confirm
 # @no-cookie-jar
-POST /v1/auth/reset_password_confirm/
+POST /api/v1/auth/reset_password_confirm/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 
@@ -99,7 +99,7 @@ Content-Type: application/json
 ###
 # @name Create API Group
 # @no-cookie-jar
-POST /v1/group/create/
+POST /api/v1/group/create/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token <token>
@@ -111,14 +111,14 @@ Authorization: Token <token>
 ###
 # @name Get API Group List
 # @no-cookie-jar
-GET /v1/group/get_list/
+GET /api/v1/group/get_list/
 Host: {{hostname}}:{{port}}
 Authorization: Token <token>
 
 ###
 # @name Add User to API Group
 # @no-cookie-jar
-POST /v1/group/add_user/
+POST /api/v1/group/add_user/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token <token>
@@ -131,7 +131,7 @@ Authorization: Token <token>
 ###
 # @name Remove User from API Group
 # @no-cookie-jar
-POST /v1/group/remove_user/
+POST /api/v1/group/remove_user/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token <token>
@@ -144,7 +144,7 @@ Authorization: Token <token>
 ###
 # @name Add Admin to API Group
 # @no-cookie-jar
-POST /v1/group/add_admin/
+POST /api/v1/group/add_admin/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token <token>
@@ -157,7 +157,7 @@ Authorization: Token <token>
 ###
 # @name Remove Admin from API Group
 # @no-cookie-jar
-POST /v1/group/remove_admin/
+POST /api/v1/group/remove_admin/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token <token>
@@ -170,7 +170,7 @@ Authorization: Token <token>
 ###
 # @name Get Accounts Billable Count
 # @no-cookie-jar
-POST /v1/group/get_accounts_billable_count/
+POST /api/v1/group/get_accounts_billable_count/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token <token>
@@ -182,7 +182,7 @@ Authorization: Token <token>
 ###
 # @name Get API Group Request Count
 # @no-cookie-jar
-POST /v1/group/get_api_group_request_count/
+POST /api/v1/group/get_api_group_request_count/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token <token>
@@ -194,7 +194,7 @@ Authorization: Token <token>
 ###
 # @name Whiteflag - Authenticate
 # @no-cookie-jar
-POST /v1/whiteflag/authenticate/
+POST /api/v1/whiteflag/authenticate/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 
@@ -206,7 +206,7 @@ Content-Type: application/json
 ###
 # @name Whiteflag - Discontinue Authentication
 # @no-cookie-jar
-POST /v1/whiteflag/discontinue_authentication/
+POST /api/v1/whiteflag/discontinue_authentication/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 
@@ -219,7 +219,7 @@ Content-Type: application/json
 ###
 # @name Whiteflag - Encode
 # @no-cookie-jar
-POST /v1/whiteflag/encode/
+POST /api/v1/whiteflag/encode/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 
@@ -245,7 +245,7 @@ Content-Type: application/json
 ###
 # @name Whiteflag - Decode
 # @no-cookie-jar
-POST /v1/whiteflag/decode/
+POST /api/v1/whiteflag/decode/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 
@@ -257,14 +257,14 @@ Content-Type: application/json
 ###
 # @name Whiteflag Generate Shared Token
 # @no-cookie-jar
-GET /v1/whiteflag/generate_shared_token/
+GET /api/v1/whiteflag/generate_shared_token/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 
 ###
 # @name Whiteflag - Generate Public Token
 # @no-cookie-jar
-POST /v1/whiteflag/generate_public_token/
+POST /api/v1/whiteflag/generate_public_token/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 
@@ -276,7 +276,7 @@ Content-Type: application/json
 ###
 # @name Crypto - Generate Diffie-Hellman Keypair
 # @no-cookie-jar
-POST /v1/crypto/dh/generate_keypair/
+POST /api/v1/crypto/dh/generate_keypair/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token 9512982d2a0d9030b8be56c6f80a4b1d48b3d332766b759bde305573828a829e
@@ -284,14 +284,14 @@ Authorization: Token 9512982d2a0d9030b8be56c6f80a4b1d48b3d332766b759bde305573828
 ###
 # @name Crypto - Get My Keypair
 # @no-cookie-jar
-POST /v1/crypto/dh/get_my_keypair/
+POST /api/v1/crypto/dh/get_my_keypair/
 Content-Type: application/json
 Authorization: Token <token>
 
 ###
 # @name Crypto - Get Diffie-Hellman Shared Secret
 # @no-cookie-jar
-POST /v1/crypto/dh/get_shared_secret/
+POST /api/v1/crypto/dh/get_shared_secret/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token ac1224a5a82d588ad1ea79d81c58cae3ac9c2f5acf116b30374fe9728602e73f
@@ -304,7 +304,7 @@ Authorization: Token ac1224a5a82d588ad1ea79d81c58cae3ac9c2f5acf116b30374fe972860
 ###
 # @name Crypto - DH Encrypt Whiteflag Message
 # @no-cookie-jar
-POST /v1/crypto/dh/whiteflag/encrypt_message/
+POST /api/v1/crypto/dh/whiteflag/encrypt_message/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token ac1224a5a82d588ad1ea79d81c58cae3ac9c2f5acf116b30374fe9728602e73f
@@ -317,7 +317,7 @@ Authorization: Token ac1224a5a82d588ad1ea79d81c58cae3ac9c2f5acf116b30374fe972860
 ###
 # @name Crypto - DH Decrypt Whiteflag Message
 # @no-cookie-jar
-POST /v1/crypto/dh/whiteflag/decrypt_message/
+POST /api/v1/crypto/dh/whiteflag/decrypt_message/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token ac1224a5a82d588ad1ea79d81c58cae3ac9c2f5acf116b30374fe9728602e73f
@@ -330,7 +330,7 @@ Authorization: Token ac1224a5a82d588ad1ea79d81c58cae3ac9c2f5acf116b30374fe972860
 ###
 # @name Crypto - Get DH Public Key by Username
 # @no-cookie-jar
-POST /v1/crypto/dh/get_public_key_by_username/
+POST /api/v1/crypto/dh/get_public_key_by_username/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token <token>
@@ -342,7 +342,7 @@ Authorization: Token <token>
 ###
 # @name Crypto - Get Public Key by Address
 # @no-cookie-jar
-POST /v1/crypto/dh/get_public_key_by_address/
+POST /api/v1/crypto/dh/get_public_key_by_address/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token <token>
@@ -354,7 +354,7 @@ Authorization: Token <token>
 ###
 # @name Crypto - Check if Encrypted
 # @no-cookie-jar
-POST /v1/crypto/dh/whiteflag/is_this_encrypted/
+POST /api/v1/crypto/dh/whiteflag/is_this_encrypted/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: <token>
@@ -366,21 +366,21 @@ Authorization: <token>
 ###
 # @name Fennel - Create Account
 # @no-cookie-jar
-POST /v1/fennel/create_account/
+POST /api/v1/fennel/create_account/
 Host: {{hostname}}:{{port}}
 Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
 
 ###
 # @name Fennel - Download Account As JSON
 # @no-cookie-jar
-POST /v1/fennel/download_account_as_json/
+POST /api/v1/fennel/download_account_as_json/
 Host: {{hostname}}:{{port}}
 Authorization: Token <token>
 
 ###
 # @name Fennel - Create Self Custodial Account
 # @no-cookie-jar
-POST /v1/fennel/create_self_custodial_account/
+POST /api/v1/fennel/create_self_custodial_account/
 Host: {{hostname}}:{{port}}
 Authorization: Token c1fdf33d948a726102a447de1d9bcd09970337308263d6bf2fe6b26281d8bab2
 
@@ -392,7 +392,7 @@ Authorization: Token c1fdf33d948a726102a447de1d9bcd09970337308263d6bf2fe6b26281d
 ###
 # @name Fennel - Reconstruct Self Custodial Account
 # @no-cookie-jar
-POST /v1/fennel/reconstruct_self_custodial_account/
+POST /api/v1/fennel/reconstruct_self_custodial_account/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token c1fdf33d948a726102a447de1d9bcd09970337308263d6bf2fe6b26281d8bab2
@@ -406,7 +406,7 @@ Authorization: Token c1fdf33d948a726102a447de1d9bcd09970337308263d6bf2fe6b26281d
 ###
 # @name Fennel - Get Self Custodial Account Address
 # @no-cookie-jar
-POST /v1/fennel/get_self_custodial_account_address/
+POST /api/v1/fennel/get_self_custodial_account_address/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token <token>
@@ -418,7 +418,7 @@ Authorization: Token <token>
 ###
 # @name Fennel - Download Self Custodial Account As JSON
 # @no-cookie-jar
-POST /v1/fennel/download_self_custodial_account_as_json/
+POST /api/v1/fennel/download_self_custodial_account_as_json/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token c1fdf33d948a726102a447de1d9bcd09970337308263d6bf2fe6b26281d8bab2
@@ -432,21 +432,21 @@ Authorization: Token c1fdf33d948a726102a447de1d9bcd09970337308263d6bf2fe6b26281d
 ###
 # @name Fennel - Get Account Balance
 # @no-cookie-jar
-POST /v1/fennel/get_account_balance/
+POST /api/v1/fennel/get_account_balance/
 Host: {{hostname}}:{{port}}
 Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
 
 ###
 # @name Fennel - Get Address
 # @no-cookie-jar
-POST /v1/fennel/get_address/
+POST /api/v1/fennel/get_address/
 Host: {{hostname}}:{{port}}
 Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
 
 ###
 # @name Get Fee For Transfer Token
 # @no-cookie-jar
-POST /v1/fennel/get_fee_for_transfer_token/
+POST /api/v1/fennel/get_fee_for_transfer_token/
 Host: {{hostname}}:{{port}}
 Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
 Content-Type: application/json
@@ -459,7 +459,7 @@ Content-Type: application/json
 ###
 # @name Get Fee For Transfer Token
 # @no-cookie-jar
-POST /v1/fennel/transfer_token/
+POST /api/v1/fennel/transfer_token/
 Host: {{hostname}}:{{port}}
 Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
 Content-Type: application/json
@@ -472,7 +472,7 @@ Content-Type: application/json
 ###
 # @name Fennel - Get Fee for New Signal
 # @no-cookie-jar
-POST /v1/fennel/get_fee_for_new_signal/
+POST /api/v1/fennel/get_fee_for_new_signal/
 Host: {{hostname}}:{{port}}
 Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
 Content-Type: application/json
@@ -484,7 +484,7 @@ Content-Type: application/json
 ###
 # @name Fennel - Send New Signal
 # @no-cookie-jar
-POST /v1/fennel/send_new_signal/
+POST /api/v1/fennel/send_new_signal/
 Host: {{hostname}}:{{port}}
 Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
 Content-Type: application/json
@@ -497,7 +497,7 @@ Content-Type: application/json
 ###
 # @name Fennel - Get Fee for Send Signal List
 # @no-cookie-jar
-POST /v1/fennel/get_fee_for_send_signal_list/
+POST /api/v1/fennel/get_fee_for_send_signal_list/
 Host: {{hostname}}:{{port}}
 Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
 Content-Type: application/json
@@ -509,7 +509,7 @@ Content-Type: application/json
 ###
 # @name Fennel - Send Signal List
 # @no-cookie-jar
-POST /v1/fennel/send_signal_list/
+POST /api/v1/fennel/send_signal_list/
 Host: {{hostname}}:{{port}}
 Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
 Content-Type: application/json
@@ -522,7 +522,7 @@ Content-Type: application/json
 # @name Fennel - Get Fee for Sync Signal
 # @description Get the fee for sending a given signal which previously failed to sync to Fennel Network.
 # @no-cookie-jar
-POST /v1/fennel/get_fee_for_sync_signal/
+POST /api/v1/fennel/get_fee_for_sync_signal/
 Host: {{hostname}}:{{port}}
 Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
 Content-Type: application/json
@@ -535,7 +535,7 @@ Content-Type: application/json
 # @name Fennel - Sync Signal
 # @description Send a previously failed signal to Fennel Network.
 # @no-cookie-jar
-POST /v1/fennel/sync_signal/
+POST /api/v1/fennel/sync_signal/
 Host: {{hostname}}:{{port}}
 Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
 Content-Type: application/json
@@ -548,7 +548,7 @@ Content-Type: application/json
 # @name Fennel - Confirm Signal
 # @description Confirm a signal has been seen by a user.
 # @no-cookie-jar
-POST /v1/fennel/confirm_signal/
+POST /api/v1/fennel/confirm_signal/
 Host: {{hostname}}:{{port}}
 Authorization: Token <token>
 Content-Type: application/json
@@ -560,28 +560,28 @@ Content-Type: application/json
 ###
 # @name Fennel - Get Signal by ID
 # @no-cookie-jar
-GET /v1/fennel/get_signal_by_id/0/
+GET /api/v1/fennel/get_signal_by_id/0/
 HOST: {{hostname}}:{{port}}
 Authorization: Token <token>
 
 ###
 # @name Fennel - Get Signals
 # @no-cookie-jar
-GET /v1/fennel/get_signals/
+GET /api/v1/fennel/get_signals/
 Host: {{hostname}}:{{port}}
 Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
 
 ###
 # @name Fennel - Get Latest 5 Signals
 # @no-cookie-jar
-GET /v1/fennel/get_signals/5/
+GET /api/v1/fennel/get_signals/5/
 Host: {{hostname}}:{{port}}
 Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
 
 ###
 # @name Fennel - Get Signal in ID Range
 # @no-cookie-jar
-GET /v1/fennel/get_signals_in_range/1/10/
+GET /api/v1/fennel/get_signals_in_range/1/10/
 Host: {{hostname}}:{{port}}
 Authorization: Token <token>
 
@@ -589,7 +589,7 @@ Authorization: Token <token>
 # @name Fennel - Get Unsynced Signals
 # @description Get all signals which failed to sync to Fennel Network.
 # @no-cookie-jar
-GET /v1/fennel/get_unsynced_signals/
+GET /api/v1/fennel/get_unsynced_signals/
 Host: {{hostname}}:{{port}}
 Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
 
@@ -597,7 +597,7 @@ Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1
 # @name Fennel - Get Fee History
 # @description Retrieves historical fees from the chain.
 # @no-cookie-jar
-GET /v1/fennel/get_fee_history/
+GET /api/v1/fennel/get_fee_history/
 Host: {{hostname}}:{{port}}
 Authorization: Token <token>
 
@@ -605,14 +605,14 @@ Authorization: Token <token>
 # @name Fennel - Get Fee History with Count
 # @description Retrieves historical fees from the chain for a certain number of transactions.
 # @no-cookie-jar
-GET /v1/fennel/get_fee_history/5/
+GET /api/v1/fennel/get_fee_history/5/
 Host: {{hostname}}:{{port}}
 Authorization: Token <token>
 
 ###
 # @name Whiteflag - Encode List
 # @no-cookie-jar
-POST /v1/whiteflag/encode_list/
+POST /api/v1/whiteflag/encode_list/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token <token>
@@ -644,7 +644,7 @@ Authorization: Token <token>
 ###
 # @name Whiteflag - Decode List
 # @no-cookie-jar
-POST /v1/whiteflag/decode_list/
+POST /api/v1/whiteflag/decode_list/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token 8254a8d30b94abf2cbb170c8d67d4aa3e41f941b36a5edafe97a9a74f42acf6c
@@ -656,7 +656,7 @@ Authorization: Token 8254a8d30b94abf2cbb170c8d67d4aa3e41f941b36a5edafe97a9a74f42
 ###
 # @name Whiteflag - Get Fee for Send Signal with Annotations
 # @no-cookie-jar
-POST /v1/whiteflag/get_fee_for_send_signal_with_annotations/
+POST /api/v1/whiteflag/get_fee_for_send_signal_with_annotations/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token <token>
@@ -684,7 +684,7 @@ Authorization: Token <token>
 ###
 # @name Whiteflag - Send Signal with Annotations
 # @no-cookie-jar
-POST /v1/whiteflag/send_signal_with_annotations/
+POST /api/v1/whiteflag/send_signal_with_annotations/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token <token>
@@ -712,7 +712,7 @@ Authorization: Token <token>
 ###
 # @name Whiteflag - Get Fee for Encode and Send Signal
 # @no-cookie-jar
-POST /v1/whiteflag/get_fee_for_encode_and_send_signal/
+POST /api/v1/whiteflag/get_fee_for_encode_and_send_signal/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token <token>
@@ -740,7 +740,7 @@ Authorization: Token <token>
 ###
 # @name Whiteflag - Encode and Send Signal
 # @no-cookie-jar
-POST /v1/whiteflag/encode_and_send_signal/
+POST /api/v1/whiteflag/encode_and_send_signal/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token <token>
@@ -767,7 +767,7 @@ Authorization: Token <token>
 
 ###
 # @name Whiteflag - Send Signal with Annotations
-POST /v1/whiteflag/send_signal_with_annotations/
+POST /api/v1/whiteflag/send_signal_with_annotations/
 Host: {{hostname}}:{{port}}
 Content-Type: application/json
 Authorization: Token <token>

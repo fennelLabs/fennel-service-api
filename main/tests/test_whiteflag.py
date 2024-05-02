@@ -8,7 +8,7 @@ class TestWhiteflagViews(TestCase):
         client = Client()
         user_model = get_user_model()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "get_fee_for_new_signal_test_whiteflag",
                 "password": "get_fee_for_new_signal_test_whiteflag",
@@ -19,14 +19,14 @@ class TestWhiteflagViews(TestCase):
         assert auth_response.json()["token"] is not None
         user = user_model.objects.get(username="get_fee_for_new_signal_test_whiteflag")
         response = client.post(
-            "/v1/fennel/create_account/",
+            "/api/v1/fennel/create_account/",
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         assert response.status_code == 200
         assert UserKeys.objects.filter(user=user).first().mnemonic is not None
         assert UserKeys.objects.filter(user=user).first().mnemonic != ""
         encode_response = client.post(
-            "/v1/whiteflag/encode/",
+            "/api/v1/whiteflag/encode/",
             {
                 "encryptionIndicator": "0",
                 "duressIndicator": "0",
@@ -52,7 +52,7 @@ class TestWhiteflagViews(TestCase):
             "signal": encode_response.json(),
         }
         response = client.post(
-            "/v1/fennel/get_fee_for_new_signal/",
+            "/api/v1/fennel/get_fee_for_new_signal/",
             payload,
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
@@ -64,7 +64,7 @@ class TestWhiteflagViews(TestCase):
         client = Client()
         user_model = get_user_model()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "get_fee_for_new_signal_test_whiteflag_2",
                 "password": "get_fee_for_new_signal_test_whiteflag_2",
@@ -77,7 +77,7 @@ class TestWhiteflagViews(TestCase):
             username="get_fee_for_new_signal_test_whiteflag_2"
         )
         response = client.post(
-            "/v1/fennel/create_account/",
+            "/api/v1/fennel/create_account/",
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         assert response.status_code == 200
@@ -87,7 +87,7 @@ class TestWhiteflagViews(TestCase):
             "signal": "5746313024a00000000000000000000000000000000000000000000000000000000000000002910118480881290000000114e4245102400706000000000000"
         }
         response = client.post(
-            "/v1/fennel/get_fee_for_new_signal/",
+            "/api/v1/fennel/get_fee_for_new_signal/",
             payload,
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
@@ -98,7 +98,7 @@ class TestWhiteflagViews(TestCase):
     def whiteflag_announce_public_key(self):
         client = Client()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "whiteflag_announce_public_key_test",
                 "password": "whiteflag_announce_public_key_test",
@@ -108,14 +108,14 @@ class TestWhiteflagViews(TestCase):
         assert auth_response.status_code == 200
         assert auth_response.json()["token"] is not None
         response = client.post(
-            "/v1/crypto/dh/generate_keypair/",
+            "/api/v1/crypto/dh/generate_keypair/",
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         assert response.status_code == 200
         assert response.json()["public_key"] is not None
         assert response.json()["private_key"] is not None
         response = client.post(
-            "/v1/whiteflag/announce_public_key/",
+            "/api/v1/whiteflag/announce_public_key/",
             {
                 "public_key": response.json()["public_key"],
             },

@@ -11,7 +11,7 @@ class TestReferenceMessages(TestCase):
         client = Client()
         user_model = get_user_model()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "breaking_referenced_message_test",
                 "password": "test",
@@ -46,7 +46,7 @@ class TestReferenceMessages(TestCase):
         signal.save()
         baker.make(UserKeys, user=user)
         response = client.post(
-            "/v1/whiteflag/decode_list/",
+            "/api/v1/whiteflag/decode_list/",
             {"signals": signal.id},
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )

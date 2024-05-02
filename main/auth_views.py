@@ -122,7 +122,7 @@ class CustomPasswordResetView:
             "current_user": reset_password_token.user,
             "username": reset_password_token.user.username,
             "email": reset_password_token.user.email,
-            "password_reset_token": f"https://api.fennellabs.com/v1/auth/reset_password/{reset_password_token.key}",
+            "password_reset_token": f"https://api.fennellabs.com/api/v1/auth/reset_password/{reset_password_token.key}",
         }
 
         # render email text

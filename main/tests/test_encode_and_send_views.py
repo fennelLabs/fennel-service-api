@@ -12,7 +12,7 @@ class TestEncodeAndSendViews(TestCase):
         client = Client()
         user_model = get_user_model()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "encode_and_send_signal_test",
                 "password": "test",
@@ -23,7 +23,7 @@ class TestEncodeAndSendViews(TestCase):
         assert auth_response.json()["token"] is not None
         user = user_model.objects.get(username="encode_and_send_signal_test")
         client.post(
-            "/v1/fennel/create_account/",
+            "/api/v1/fennel/create_account/",
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         user_keys = UserKeys.objects.get(user=user)
@@ -50,7 +50,7 @@ class TestEncodeAndSendViews(TestCase):
             )
         }
         response = client.post(
-            "/v1/whiteflag/get_fee_for_encode_and_send_signal/",
+            "/api/v1/whiteflag/get_fee_for_encode_and_send_signal/",
             payload,
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
@@ -61,7 +61,7 @@ class TestEncodeAndSendViews(TestCase):
         client = Client()
         user_model = get_user_model()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "encode_and_send_signal_test",
                 "password": "test",
@@ -72,7 +72,7 @@ class TestEncodeAndSendViews(TestCase):
         assert auth_response.json()["token"] is not None
         user = user_model.objects.get(username="encode_and_send_signal_test")
         client.post(
-            "/v1/fennel/create_account/",
+            "/api/v1/fennel/create_account/",
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         user_keys = UserKeys.objects.get(user=user)
@@ -99,7 +99,7 @@ class TestEncodeAndSendViews(TestCase):
             )
         }
         response = client.post(
-            "/v1/whiteflag/encode_and_send_signal/",
+            "/api/v1/whiteflag/encode_and_send_signal/",
             payload,
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
@@ -109,7 +109,7 @@ class TestEncodeAndSendViews(TestCase):
         client = Client()
         user_model = get_user_model()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "encode_and_send_signal_test",
                 "password": "test",
@@ -120,7 +120,7 @@ class TestEncodeAndSendViews(TestCase):
         assert auth_response.json()["token"] is not None
         user = user_model.objects.get(username="encode_and_send_signal_test")
         client.post(
-            "/v1/fennel/create_account/",
+            "/api/v1/fennel/create_account/",
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         group = APIGroup.objects.create(
@@ -152,7 +152,7 @@ class TestEncodeAndSendViews(TestCase):
             "recipient_group": "test_group",
         }
         response = client.post(
-            "/v1/whiteflag/encode_and_send_signal/",
+            "/api/v1/whiteflag/encode_and_send_signal/",
             payload,
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )

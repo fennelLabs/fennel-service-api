@@ -12,7 +12,7 @@ class TestFennelViews(TestCase):
     def test_create_account(self):
         client = Client()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "create_account_test",
                 "password": "test",
@@ -22,12 +22,12 @@ class TestFennelViews(TestCase):
         assert auth_response.status_code == 200
         assert auth_response.json()["token"] is not None
         response = client.post(
-            "/v1/fennel/create_account/",
+            "/api/v1/fennel/create_account/",
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         assert response.status_code == 200
         response = client.post(
-            "/v1/fennel/get_address/",
+            "/api/v1/fennel/get_address/",
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         assert response.status_code == 200
@@ -38,7 +38,7 @@ class TestFennelViews(TestCase):
             baker.make("main.Transaction")
         client = Client()
         response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "fee_history_count_test",
                 "password": "test",
@@ -48,7 +48,7 @@ class TestFennelViews(TestCase):
         assert response.status_code == 200
         assert response.json()["token"] is not None
         response = client.get(
-            "/v1/fennel/get_fee_history/10/",
+            "/api/v1/fennel/get_fee_history/10/",
             HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
         )
         assert response.status_code == 200
@@ -60,7 +60,7 @@ class TestFennelViews(TestCase):
             baker.make("main.Transaction")
         client = Client()
         response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "fee_history_test",
                 "password": "fee_historytest",
@@ -70,7 +70,7 @@ class TestFennelViews(TestCase):
         assert response.status_code == 200
         assert response.json()["token"] is not None
         response = client.get(
-            "/v1/fennel/get_fee_history/",
+            "/api/v1/fennel/get_fee_history/",
             HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
         )
         assert response.status_code == 200
@@ -81,7 +81,7 @@ class TestFennelViews(TestCase):
         client = Client()
         user_model = get_user_model()
         response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "signals_test",
                 "password": "signals_test",
@@ -98,7 +98,7 @@ class TestFennelViews(TestCase):
         for _ in range(100):
             baker.make("main.Signal", sender=user)
         response = client.get(
-            "/v1/fennel/get_signals/",
+            "/api/v1/fennel/get_signals/",
             HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
         )
         assert response.status_code == 200
@@ -109,7 +109,7 @@ class TestFennelViews(TestCase):
         client = Client()
         user_model = get_user_model()
         response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "confirm_signal_test",
                 "password": "confirm_signal_test",
@@ -121,7 +121,7 @@ class TestFennelViews(TestCase):
         user = user_model.objects.get(username="confirm_signal_test")
         signal = baker.make("main.Signal", sender=user)
         response = client.post(
-            "/v1/fennel/confirm_signal/",
+            "/api/v1/fennel/confirm_signal/",
             {"id": signal.id},
             HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
         )
@@ -138,7 +138,7 @@ class TestFennelViews(TestCase):
         client = Client()
         user_model = get_user_model()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "confirm_signal_test",
                 "password": "confirm_signal_test",
@@ -150,7 +150,7 @@ class TestFennelViews(TestCase):
         user = user_model.objects.get(username="confirm_signal_test")
         signal = baker.make("main.Signal", sender=user)
         response = client.post(
-            "/v1/fennel/confirm_signal/",
+            "/api/v1/fennel/confirm_signal/",
             {"id": signal.id},
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
@@ -160,7 +160,7 @@ class TestFennelViews(TestCase):
         assert confirmation is not None
         assert confirmation.confirmer == user
         response = client.post(
-            "/v1/fennel/confirm_signal/",
+            "/api/v1/fennel/confirm_signal/",
             {"id": signal.id},
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
@@ -175,7 +175,7 @@ class TestFennelViews(TestCase):
         client = Client()
         user_model = get_user_model()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "confirm_signal_list_test",
                 "password": "confirm_signal_list_test",
@@ -191,7 +191,7 @@ class TestFennelViews(TestCase):
         )
         signal = baker.make("main.Signal", sender=user)
         response = client.post(
-            "/v1/fennel/confirm_signal/",
+            "/api/v1/fennel/confirm_signal/",
             {"id": signal.id},
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
@@ -201,7 +201,7 @@ class TestFennelViews(TestCase):
         assert confirmation is not None
         assert confirmation.confirmer == user
         response = client.get(
-            "/v1/fennel/get_signals/",
+            "/api/v1/fennel/get_signals/",
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         assert response.status_code == 200
@@ -215,7 +215,7 @@ class TestFennelViews(TestCase):
         client = Client()
         user_model = get_user_model()
         response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "signals_test",
                 "password": "signals_test",
@@ -232,7 +232,7 @@ class TestFennelViews(TestCase):
         for _ in range(100):
             baker.make("main.Signal", sender=user)
         response = client.get(
-            "/v1/fennel/get_signals/",
+            "/api/v1/fennel/get_signals/",
             HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
         )
         assert response.status_code == 200
@@ -244,7 +244,7 @@ class TestFennelViews(TestCase):
         client = Client()
         user_model = get_user_model()
         response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "signals_count_test",
                 "password": "signals_count_test",
@@ -261,7 +261,7 @@ class TestFennelViews(TestCase):
         for _ in range(100):
             baker.make("main.Signal", sender=user)
         response = client.get(
-            "/v1/fennel/get_signals/10/",
+            "/api/v1/fennel/get_signals/10/",
             HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
         )
         assert response.status_code == 200
@@ -272,7 +272,7 @@ class TestFennelViews(TestCase):
         client = Client()
         user_model = get_user_model()
         response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "signals_count_test",
                 "password": "signals_count_test",
@@ -289,7 +289,7 @@ class TestFennelViews(TestCase):
         for i in range(100):
             baker.make("main.Signal", pk=i, sender=user)
         response = client.get(
-            "/v1/fennel/get_signals_in_range/1/10/",
+            "/api/v1/fennel/get_signals_in_range/1/10/",
             HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
         )
         assert response.status_code == 200
@@ -299,7 +299,7 @@ class TestFennelViews(TestCase):
         client = Client()
         user_model = get_user_model()
         response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "unsynced_signals_test",
                 "password": "unsynced_signals_test",
@@ -312,7 +312,7 @@ class TestFennelViews(TestCase):
         for _ in range(100):
             baker.make("main.Signal", sender=user)
         response = client.get(
-            "/v1/fennel/get_unsynced_signals/",
+            "/api/v1/fennel/get_unsynced_signals/",
             HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
         )
         assert response.status_code == 200
@@ -323,7 +323,7 @@ class TestFennelViews(TestCase):
         client = Client()
         user_model = get_user_model()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "record_signal_fee_test",
                 "password": "record_signal_fee_test",
@@ -334,7 +334,7 @@ class TestFennelViews(TestCase):
         assert auth_response.json()["token"] is not None
         user = user_model.objects.get(username="record_signal_fee_test")
         response = client.post(
-            "/v1/fennel/create_account/",
+            "/api/v1/fennel/create_account/",
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         assert response.status_code == 200
@@ -352,7 +352,7 @@ class TestFennelViews(TestCase):
         client = Client()
         user_model = get_user_model()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "get_fee_for_new_signal_test",
                 "password": "get_fee_for_new_signal_test",
@@ -363,7 +363,7 @@ class TestFennelViews(TestCase):
         assert auth_response.json()["token"] is not None
         user = user_model.objects.get(username="get_fee_for_new_signal_test")
         response = client.post(
-            "/v1/fennel/create_account/",
+            "/api/v1/fennel/create_account/",
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         assert response.status_code == 200
@@ -373,7 +373,7 @@ class TestFennelViews(TestCase):
             "signal": "This is a test.",
         }
         response = client.post(
-            "/v1/fennel/get_fee_for_new_signal/",
+            "/api/v1/fennel/get_fee_for_new_signal/",
             payload,
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
@@ -385,7 +385,7 @@ class TestFennelViews(TestCase):
         client = Client()
         user_model = get_user_model()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "get_fee_for_new_signal_test_empty",
                 "password": "get_fee_for_new_signal_test_empty",
@@ -396,7 +396,7 @@ class TestFennelViews(TestCase):
         assert auth_response.json()["token"] is not None
         user = user_model.objects.get(username="get_fee_for_new_signal_test_empty")
         response = client.post(
-            "/v1/fennel/create_account/",
+            "/api/v1/fennel/create_account/",
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         assert response.status_code == 200
@@ -406,7 +406,7 @@ class TestFennelViews(TestCase):
             "signal": "",
         }
         response = client.post(
-            "/v1/fennel/get_fee_for_new_signal/",
+            "/api/v1/fennel/get_fee_for_new_signal/",
             payload,
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
@@ -416,7 +416,7 @@ class TestFennelViews(TestCase):
         client = Client()
         user_model = get_user_model()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "get_fee_for_new_signal_test_whiteflag",
                 "password": "get_fee_for_new_signal_test_whiteflag",
@@ -427,7 +427,7 @@ class TestFennelViews(TestCase):
         assert auth_response.json()["token"] is not None
         user = user_model.objects.get(username="get_fee_for_new_signal_test_whiteflag")
         response = client.post(
-            "/v1/fennel/create_account/",
+            "/api/v1/fennel/create_account/",
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         assert response.status_code == 200
@@ -437,7 +437,7 @@ class TestFennelViews(TestCase):
             "signal": "5746313024a00000000000000000000000000000000000000000000000000000000000000002910118480881290000000114e4245102400706000000000000",
         }
         response = client.post(
-            "/v1/fennel/get_fee_for_new_signal/",
+            "/api/v1/fennel/get_fee_for_new_signal/",
             payload,
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
@@ -448,7 +448,7 @@ class TestFennelViews(TestCase):
     def test_get_address_no_error_when_userkeys_is_none(self):
         client = Client()
         response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "no_error_when_address_is_none_test",
                 "password": "no_error_when_address_is_none_test",
@@ -458,7 +458,7 @@ class TestFennelViews(TestCase):
         assert response.status_code == 200
         assert response.json()["token"] is not None
         response = client.post(
-            "/v1/fennel/get_address/",
+            "/api/v1/fennel/get_address/",
             HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
         )
         assert response.status_code == 400
@@ -467,7 +467,7 @@ class TestFennelViews(TestCase):
         client = Client()
         user_model = get_user_model()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "get_fee_for_sync_signal_test",
                 "password": "get_fee_for_sync_signal_test",
@@ -478,7 +478,7 @@ class TestFennelViews(TestCase):
         assert auth_response.json()["token"] is not None
         user = user_model.objects.get(username="get_fee_for_sync_signal_test")
         client.post(
-            "/v1/fennel/create_account/",
+            "/api/v1/fennel/create_account/",
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         signal_id = Signal.objects.create(
@@ -486,7 +486,7 @@ class TestFennelViews(TestCase):
             signal_text="This is a test.",
         ).id
         response = client.post(
-            "/v1/fennel/get_fee_for_sync_signal/",
+            "/api/v1/fennel/get_fee_for_sync_signal/",
             {"id": signal_id},
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
@@ -499,7 +499,7 @@ class TestFennelViews(TestCase):
     def test_get_account_balance(self):
         client = Client()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "get_account_balance_test",
                 "password": "get_account_balance_test",
@@ -509,11 +509,11 @@ class TestFennelViews(TestCase):
         assert auth_response.status_code == 200
         assert auth_response.json()["token"] is not None
         client.post(
-            "/v1/fennel/create_account/",
+            "/api/v1/fennel/create_account/",
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         response = client.post(
-            "/v1/fennel/get_account_balance/",
+            "/api/v1/fennel/get_account_balance/",
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         assert response.status_code == 200
@@ -523,7 +523,7 @@ class TestFennelViews(TestCase):
     def test_send_new_signal_no_balance(self):
         client = Client()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "send_new_signal_no_balance_test",
                 "password": "send_new_signal_no_balance_test",
@@ -533,14 +533,14 @@ class TestFennelViews(TestCase):
         assert auth_response.status_code == 200
         assert auth_response.json()["token"] is not None
         client.post(
-            "/v1/fennel/create_account/",
+            "/api/v1/fennel/create_account/",
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         payload = {
             "signal": "This is a test.",
         }
         response = client.post(
-            "/v1/fennel/send_new_signal/",
+            "/api/v1/fennel/send_new_signal/",
             payload,
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )

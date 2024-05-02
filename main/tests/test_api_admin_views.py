@@ -8,7 +8,7 @@ class TestAPIAdminViews(TestCase):
     def test_create_new_api_group(self):
         client = Client()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_create_new_api_group",
                 "password": "testpassword",
@@ -18,13 +18,13 @@ class TestAPIAdminViews(TestCase):
         assert auth_response.status_code == 200
         assert auth_response.json()["token"] is not None
         login_response = client.post(
-            "/v1/auth/login/",
+            "/api/v1/auth/login/",
             {"username": "test_create_new_api_group", "password": "testpassword"},
         )
         assert login_response.status_code == 200
         token = login_response.json()["token"]
         response = client.post(
-            "/v1/group/create/",
+            "/api/v1/group/create/",
             {
                 "api_group_name": "test_create_new_api_group",
                 "email": "test_create_new_api_group@test.com",
@@ -39,7 +39,7 @@ class TestAPIAdminViews(TestCase):
     def test_add_user_to_api_group(self):
         client = Client()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_add_user_to_api_group",
                 "password": "testpassword",
@@ -47,7 +47,7 @@ class TestAPIAdminViews(TestCase):
             },
         )
         auth_response_two = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_add_user_to_api_group_two",
                 "password": "testpassword",
@@ -57,13 +57,13 @@ class TestAPIAdminViews(TestCase):
         assert auth_response.status_code == 200
         assert auth_response_two.status_code == 200
         login_response = client.post(
-            "/v1/auth/login/",
+            "/api/v1/auth/login/",
             {"username": "test_add_user_to_api_group", "password": "testpassword"},
         )
         assert login_response.status_code == 200
         token = login_response.json()["token"]
         response = client.post(
-            "/v1/group/create/",
+            "/api/v1/group/create/",
             {
                 "api_group_name": "test_add_user_to_api_group",
                 "email": "test_add_user_to_api_group@test.com",
@@ -75,7 +75,7 @@ class TestAPIAdminViews(TestCase):
         assert group is not None
         assert group.admin_list.filter(username="test_add_user_to_api_group").exists()
         response = client.post(
-            "/v1/group/add_user/",
+            "/api/v1/group/add_user/",
             {
                 "api_group_name": "test_add_user_to_api_group",
                 "username": "test_add_user_to_api_group_two",
@@ -92,7 +92,7 @@ class TestAPIAdminViews(TestCase):
     def test_add_user_to_api_group_as_non_admin(self):
         client = Client()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_add_user_to_api_group_as_non_admin",
                 "password": "testpassword",
@@ -100,7 +100,7 @@ class TestAPIAdminViews(TestCase):
             },
         )
         auth_response_two = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_add_user_to_api_group_as_non_admin_two",
                 "password": "testpassword",
@@ -110,7 +110,7 @@ class TestAPIAdminViews(TestCase):
         assert auth_response.status_code == 200
         assert auth_response_two.status_code == 200
         login_response = client.post(
-            "/v1/auth/login/",
+            "/api/v1/auth/login/",
             {
                 "username": "test_add_user_to_api_group_as_non_admin",
                 "password": "testpassword",
@@ -119,7 +119,7 @@ class TestAPIAdminViews(TestCase):
         assert login_response.status_code == 200
         token = login_response.json()["token"]
         login_response_two = client.post(
-            "/v1/auth/login/",
+            "/api/v1/auth/login/",
             {
                 "username": "test_add_user_to_api_group_as_non_admin_two",
                 "password": "testpassword",
@@ -128,7 +128,7 @@ class TestAPIAdminViews(TestCase):
         assert login_response_two.status_code == 200
         token_two = login_response_two.json()["token"]
         response = client.post(
-            "/v1/group/create/",
+            "/api/v1/group/create/",
             {
                 "api_group_name": "test_add_user_to_api_group_as_non_admin",
                 "email": "test_add_user_to_api_group_as_non_admin@test.com",
@@ -142,7 +142,7 @@ class TestAPIAdminViews(TestCase):
             username="test_add_user_to_api_group_as_non_admin"
         ).exists()
         response = client.post(
-            "/v1/group/add_user/",
+            "/api/v1/group/add_user/",
             {
                 "api_group_name": "test_add_user_to_api_group_as_non_admin",
                 "username": "test_add_user_to_api_group_as_non_admin_two",
@@ -159,7 +159,7 @@ class TestAPIAdminViews(TestCase):
     def test_remove_user_from_api_group(self):
         client = Client()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_remove_user_from_api_group",
                 "password": "testpassword",
@@ -167,7 +167,7 @@ class TestAPIAdminViews(TestCase):
             },
         )
         auth_response_two = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_remove_user_from_api_group_two",
                 "password": "testpassword",
@@ -177,13 +177,13 @@ class TestAPIAdminViews(TestCase):
         assert auth_response.status_code == 200
         assert auth_response_two.status_code == 200
         login_response = client.post(
-            "/v1/auth/login/",
+            "/api/v1/auth/login/",
             {"username": "test_remove_user_from_api_group", "password": "testpassword"},
         )
         assert login_response.status_code == 200
         token = login_response.json()["token"]
         response = client.post(
-            "/v1/group/create/",
+            "/api/v1/group/create/",
             {
                 "api_group_name": "test_remove_user_from_api_group",
                 "email": "test_remove_user_from_api_group@test.com",
@@ -197,7 +197,7 @@ class TestAPIAdminViews(TestCase):
             username="test_remove_user_from_api_group"
         ).exists()
         response = client.post(
-            "/v1/group/add_user/",
+            "/api/v1/group/add_user/",
             {
                 "api_group_name": "test_remove_user_from_api_group",
                 "username": "test_remove_user_from_api_group_two",
@@ -211,7 +211,7 @@ class TestAPIAdminViews(TestCase):
             username="test_remove_user_from_api_group_two"
         ).exists()
         response = client.post(
-            "/v1/group/remove_user/",
+            "/api/v1/group/remove_user/",
             {
                 "api_group_name": "test_remove_user_from_api_group",
                 "username": "test_remove_user_from_api_group_two",
@@ -228,7 +228,7 @@ class TestAPIAdminViews(TestCase):
     def test_remove_user_from_api_group_as_non_admin(self):
         client = Client()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_remove_user_from_api_group",
                 "password": "testpassword",
@@ -236,7 +236,7 @@ class TestAPIAdminViews(TestCase):
             },
         )
         auth_response_two = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_remove_user_from_api_group_two",
                 "password": "testpassword",
@@ -246,14 +246,14 @@ class TestAPIAdminViews(TestCase):
         assert auth_response.status_code == 200
         assert auth_response_two.status_code == 200
         login_response = client.post(
-            "/v1/auth/login/",
+            "/api/v1/auth/login/",
             {"username": "test_remove_user_from_api_group", "password": "testpassword"},
         )
         assert login_response.status_code == 200
         token = login_response.json()["token"]
         token_two = auth_response_two.json()["token"]
         response = client.post(
-            "/v1/group/create/",
+            "/api/v1/group/create/",
             {
                 "api_group_name": "test_remove_user_from_api_group",
                 "email": "test_remove_user_from_api_group@test.com",
@@ -267,7 +267,7 @@ class TestAPIAdminViews(TestCase):
             username="test_remove_user_from_api_group"
         ).exists()
         response = client.post(
-            "/v1/group/add_user/",
+            "/api/v1/group/add_user/",
             {
                 "api_group_name": "test_remove_user_from_api_group",
                 "username": "test_remove_user_from_api_group_two",
@@ -281,7 +281,7 @@ class TestAPIAdminViews(TestCase):
             username="test_remove_user_from_api_group_two"
         ).exists()
         response = client.post(
-            "/v1/group/remove_user/",
+            "/api/v1/group/remove_user/",
             {
                 "api_group_name": "test_remove_user_from_api_group",
                 "username": "test_remove_user_from_api_group_two",
@@ -296,7 +296,7 @@ class TestAPIAdminViews(TestCase):
     def test_remove_user_from_api_group_not_in_group(self):
         client = Client()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_remove_user_from_api_group",
                 "password": "testpassword",
@@ -304,7 +304,7 @@ class TestAPIAdminViews(TestCase):
             },
         )
         auth_response_two = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_remove_user_from_api_group_two",
                 "password": "testpassword",
@@ -314,13 +314,13 @@ class TestAPIAdminViews(TestCase):
         assert auth_response.status_code == 200
         assert auth_response_two.status_code == 200
         login_response = client.post(
-            "/v1/auth/login/",
+            "/api/v1/auth/login/",
             {"username": "test_remove_user_from_api_group", "password": "testpassword"},
         )
         assert login_response.status_code == 200
         token = login_response.json()["token"]
         response = client.post(
-            "/v1/group/create/",
+            "/api/v1/group/create/",
             {
                 "api_group_name": "test_remove_user_from_api_group",
                 "email": "test@test.com",
@@ -335,7 +335,7 @@ class TestAPIAdminViews(TestCase):
             username="test_remove_user_from_api_group"
         ).exists()
         response = client.post(
-            "/v1/group/remove_user/",
+            "/api/v1/group/remove_user/",
             {
                 "api_group_name": "test_remove_user_from_api_group",
                 "username": "test_remove_user_from_api_group_two",
@@ -352,7 +352,7 @@ class TestAPIAdminViews(TestCase):
     def test_add_admin_to_api_group(self):
         client = Client()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_add_admin_to_api_group",
                 "password": "testpassword",
@@ -360,7 +360,7 @@ class TestAPIAdminViews(TestCase):
             },
         )
         auth_response_two = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_add_admin_to_api_group_two",
                 "password": "testpassword",
@@ -370,13 +370,13 @@ class TestAPIAdminViews(TestCase):
         assert auth_response.status_code == 200
         assert auth_response_two.status_code == 200
         login_response = client.post(
-            "/v1/auth/login/",
+            "/api/v1/auth/login/",
             {"username": "test_add_admin_to_api_group", "password": "testpassword"},
         )
         assert login_response.status_code == 200
         token = login_response.json()["token"]
         response = client.post(
-            "/v1/group/create/",
+            "/api/v1/group/create/",
             {
                 "api_group_name": "test_add_admin_to_api_group",
                 "email": "test@test.com",
@@ -389,7 +389,7 @@ class TestAPIAdminViews(TestCase):
         assert group.name == "test_add_admin_to_api_group"
         assert group.admin_list.filter(username="test_add_admin_to_api_group").exists()
         response = client.post(
-            "/v1/group/add_user/",
+            "/api/v1/group/add_user/",
             {
                 "api_group_name": "test_add_admin_to_api_group",
                 "username": "test_add_admin_to_api_group_two",
@@ -403,7 +403,7 @@ class TestAPIAdminViews(TestCase):
             username="test_add_admin_to_api_group_two"
         ).exists()
         response = client.post(
-            "/v1/group/add_admin/",
+            "/api/v1/group/add_admin/",
             {
                 "api_group_name": "test_add_admin_to_api_group",
                 "username": "test_add_admin_to_api_group_two",
@@ -420,7 +420,7 @@ class TestAPIAdminViews(TestCase):
     def test_add_admin_to_api_group_as_non_admin(self):
         client = Client()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_add_admin_to_api_group_as_non_admin",
                 "password": "testpassword",
@@ -428,7 +428,7 @@ class TestAPIAdminViews(TestCase):
             },
         )
         auth_response_two = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_add_admin_to_api_group_as_non_admin_two",
                 "password": "testpassword",
@@ -438,7 +438,7 @@ class TestAPIAdminViews(TestCase):
         assert auth_response.status_code == 200
         assert auth_response_two.status_code == 200
         login_response = client.post(
-            "/v1/auth/login/",
+            "/api/v1/auth/login/",
             {
                 "username": "test_add_admin_to_api_group_as_non_admin",
                 "password": "testpassword",
@@ -447,7 +447,7 @@ class TestAPIAdminViews(TestCase):
         assert login_response.status_code == 200
         token = login_response.json()["token"]
         login_response_two = client.post(
-            "/v1/auth/login/",
+            "/api/v1/auth/login/",
             {
                 "username": "test_add_admin_to_api_group_as_non_admin_two",
                 "password": "testpassword",
@@ -456,7 +456,7 @@ class TestAPIAdminViews(TestCase):
         assert login_response_two.status_code == 200
         token_two = login_response_two.json()["token"]
         response = client.post(
-            "/v1/group/create/",
+            "/api/v1/group/create/",
             {
                 "api_group_name": "test_add_admin_to_api_group_as_non_admin",
                 "email": "test@test.com",
@@ -470,7 +470,7 @@ class TestAPIAdminViews(TestCase):
             username="test_add_admin_to_api_group_as_non_admin"
         ).exists()
         response = client.post(
-            "/v1/group/add_user/",
+            "/api/v1/group/add_user/",
             {
                 "api_group_name": "test_add_admin_to_api_group_as_non_admin",
                 "username": "test_add_admin_to_api_group_as_non_admin_two",
@@ -484,7 +484,7 @@ class TestAPIAdminViews(TestCase):
             username="test_add_admin_to_api_group_as_non_admin_two"
         ).exists()
         response = client.post(
-            "/v1/group/add_admin/",
+            "/api/v1/group/add_admin/",
             {
                 "api_group_name": "test_add_admin_to_api_group_as_non_admin",
                 "username": "test_add_admin_to_api_group_as_non_admin_two",
@@ -501,7 +501,7 @@ class TestAPIAdminViews(TestCase):
     def test_add_admin_to_api_group_already_in_group(self):
         client = Client()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_add_admin_to_api_group_already_in_group",
                 "password": "testpassword",
@@ -509,7 +509,7 @@ class TestAPIAdminViews(TestCase):
             },
         )
         auth_response_two = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_add_admin_to_api_group_already_in_group_two",
                 "password": "testpassword",
@@ -519,7 +519,7 @@ class TestAPIAdminViews(TestCase):
         assert auth_response.status_code == 200
         assert auth_response_two.status_code == 200
         login_response = client.post(
-            "/v1/auth/login/",
+            "/api/v1/auth/login/",
             {
                 "username": "test_add_admin_to_api_group_already_in_group",
                 "password": "testpassword",
@@ -528,7 +528,7 @@ class TestAPIAdminViews(TestCase):
         assert login_response.status_code == 200
         token = login_response.json()["token"]
         response = client.post(
-            "/v1/group/create/",
+            "/api/v1/group/create/",
             {
                 "api_group_name": "test_add_admin_to_api_group_already_in_group",
                 "email": "test@test.com",
@@ -544,7 +544,7 @@ class TestAPIAdminViews(TestCase):
             username="test_add_admin_to_api_group_already_in_group"
         ).exists()
         response = client.post(
-            "/v1/group/add_user/",
+            "/api/v1/group/add_user/",
             {
                 "api_group_name": "test_add_admin_to_api_group_already_in_group",
                 "username": "test_add_admin_to_api_group_already_in_group_two",
@@ -558,7 +558,7 @@ class TestAPIAdminViews(TestCase):
             username="test_add_admin_to_api_group_already_in_group_two"
         ).exists()
         response = client.post(
-            "/v1/group/add_user/",
+            "/api/v1/group/add_user/",
             {
                 "api_group_name": "test_add_admin_to_api_group_already_in_group",
                 "username": "test_add_admin_to_api_group_already_in_group_two",
@@ -575,7 +575,7 @@ class TestAPIAdminViews(TestCase):
     def test_remove_admin_from_api_group(self):
         client = Client()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_remove_admin_from_api_group",
                 "password": "testpassword",
@@ -583,7 +583,7 @@ class TestAPIAdminViews(TestCase):
             },
         )
         auth_response_two = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_remove_admin_from_api_group_two",
                 "password": "testpassword",
@@ -593,7 +593,7 @@ class TestAPIAdminViews(TestCase):
         assert auth_response.status_code == 200
         assert auth_response_two.status_code == 200
         login_response = client.post(
-            "/v1/auth/login/",
+            "/api/v1/auth/login/",
             {
                 "username": "test_remove_admin_from_api_group",
                 "password": "testpassword",
@@ -602,7 +602,7 @@ class TestAPIAdminViews(TestCase):
         assert login_response.status_code == 200
         token = login_response.json()["token"]
         response = client.post(
-            "/v1/group/create/",
+            "/api/v1/group/create/",
             {
                 "api_group_name": "test_remove_admin_from_api_group",
                 "email": "test@test.com",
@@ -616,7 +616,7 @@ class TestAPIAdminViews(TestCase):
             username="test_remove_admin_from_api_group"
         ).exists()
         response = client.post(
-            "/v1/group/add_user/",
+            "/api/v1/group/add_user/",
             {
                 "api_group_name": "test_remove_admin_from_api_group",
                 "username": "test_remove_admin_from_api_group_two",
@@ -630,7 +630,7 @@ class TestAPIAdminViews(TestCase):
             username="test_remove_admin_from_api_group_two"
         ).exists()
         response = client.post(
-            "/v1/group/add_admin/",
+            "/api/v1/group/add_admin/",
             {
                 "api_group_name": "test_remove_admin_from_api_group",
                 "username": "test_remove_admin_from_api_group_two",
@@ -644,7 +644,7 @@ class TestAPIAdminViews(TestCase):
             username="test_remove_admin_from_api_group_two"
         ).exists()
         response = client.post(
-            "/v1/group/remove_admin/",
+            "/api/v1/group/remove_admin/",
             {
                 "api_group_name": "test_remove_admin_from_api_group",
                 "username": "test_remove_admin_from_api_group_two",
@@ -661,7 +661,7 @@ class TestAPIAdminViews(TestCase):
     def test_remove_admin_from_api_group_as_non_admin(self):
         client = Client()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_remove_admin_from_api_group_as_non_admin",
                 "password": "testpassword",
@@ -669,7 +669,7 @@ class TestAPIAdminViews(TestCase):
             },
         )
         auth_response_two = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_remove_admin_from_api_group_as_non_admin_two",
                 "password": "testpassword",
@@ -677,7 +677,7 @@ class TestAPIAdminViews(TestCase):
             },
         )
         auth_response_three = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_remove_admin_from_api_group_as_non_admin_three",
                 "password": "testpassword",
@@ -688,7 +688,7 @@ class TestAPIAdminViews(TestCase):
         assert auth_response_two.status_code == 200
         assert auth_response_three.status_code == 200
         login_response = client.post(
-            "/v1/auth/login/",
+            "/api/v1/auth/login/",
             {
                 "username": "test_remove_admin_from_api_group_as_non_admin",
                 "password": "testpassword",
@@ -698,7 +698,7 @@ class TestAPIAdminViews(TestCase):
         token = login_response.json()["token"]
         token_three = auth_response_three.json()["token"]
         response = client.post(
-            "/v1/group/create/",
+            "/api/v1/group/create/",
             {
                 "api_group_name": "test_remove_admin_from_api_group_as_non_admin",
                 "email": "test@test.com",
@@ -714,7 +714,7 @@ class TestAPIAdminViews(TestCase):
             username="test_remove_admin_from_api_group_as_non_admin"
         ).exists()
         response = client.post(
-            "/v1/group/add_user/",
+            "/api/v1/group/add_user/",
             {
                 "api_group_name": "test_remove_admin_from_api_group_as_non_admin",
                 "username": "test_remove_admin_from_api_group_as_non_admin_two",
@@ -728,7 +728,7 @@ class TestAPIAdminViews(TestCase):
             username="test_remove_admin_from_api_group_as_non_admin_two"
         ).exists()
         response = client.post(
-            "/v1/group/add_user/",
+            "/api/v1/group/add_user/",
             {
                 "api_group_name": "test_remove_admin_from_api_group_as_non_admin",
                 "username": "test_remove_admin_from_api_group_as_non_admin_three",
@@ -742,7 +742,7 @@ class TestAPIAdminViews(TestCase):
             username="test_remove_admin_from_api_group_as_non_admin_three"
         ).exists()
         response = client.post(
-            "/v1/group/add_admin/",
+            "/api/v1/group/add_admin/",
             {
                 "api_group_name": "test_remove_admin_from_api_group_as_non_admin",
                 "username": "test_remove_admin_from_api_group_as_non_admin_two",
@@ -756,7 +756,7 @@ class TestAPIAdminViews(TestCase):
             username="test_remove_admin_from_api_group_as_non_admin_two"
         ).exists()
         response = client.post(
-            "/v1/group/remove_admin/",
+            "/api/v1/group/remove_admin/",
             {
                 "api_group_name": "test_remove_admin_from_api_group_as_non_admin",
                 "username": "test_remove_admin_from_api_group_as_non_admin_two",
@@ -773,7 +773,7 @@ class TestAPIAdminViews(TestCase):
     def test_remove_admin_from_api_group_not_in_group(self):
         client = Client()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_remove_admin_from_api_group_not_in_group",
                 "password": "testpassword",
@@ -781,7 +781,7 @@ class TestAPIAdminViews(TestCase):
             },
         )
         auth_response_two = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_remove_admin_from_api_group_not_in_group_two",
                 "password": "testpassword",
@@ -789,7 +789,7 @@ class TestAPIAdminViews(TestCase):
             },
         )
         auth_response_three = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_remove_admin_from_api_group_not_in_group_three",
                 "password": "testpassword",
@@ -800,7 +800,7 @@ class TestAPIAdminViews(TestCase):
         assert auth_response_two.status_code == 200
         assert auth_response_three.status_code == 200
         login_response = client.post(
-            "/v1/auth/login/",
+            "/api/v1/auth/login/",
             {
                 "username": "test_remove_admin_from_api_group_not_in_group",
                 "password": "testpassword",
@@ -810,7 +810,7 @@ class TestAPIAdminViews(TestCase):
         token = login_response.json()["token"]
         token_two = auth_response_two.json()["token"]
         response = client.post(
-            "/v1/group/create/",
+            "/api/v1/group/create/",
             {
                 "api_group_name": "test_remove_admin_from_api_group_not_in_group",
                 "email": "test@test.com",
@@ -826,7 +826,7 @@ class TestAPIAdminViews(TestCase):
             username="test_remove_admin_from_api_group_not_in_group"
         ).exists()
         response = client.post(
-            "/v1/group/add_user/",
+            "/api/v1/group/add_user/",
             {
                 "api_group_name": "test_remove_admin_from_api_group_not_in_group",
                 "username": "test_remove_admin_from_api_group_not_in_group_two",
@@ -840,7 +840,7 @@ class TestAPIAdminViews(TestCase):
             username="test_remove_admin_from_api_group_not_in_group_two"
         ).exists()
         response = client.post(
-            "/v1/group/add_user/",
+            "/api/v1/group/add_user/",
             {
                 "api_group_name": "test_remove_admin_from_api_group_not_in_group",
                 "username": "test_remove_admin_from_api_group_not_in_group_three",
@@ -854,7 +854,7 @@ class TestAPIAdminViews(TestCase):
             username="test_remove_admin_from_api_group_not_in_group_three"
         ).exists()
         response = client.post(
-            "/v1/group/add_admin/",
+            "/api/v1/group/add_admin/",
             {
                 "api_group_name": "test_remove_admin_from_api_group_not_in_group",
                 "username": "test_remove_admin_from_api_group_not_in_group_two",
@@ -871,7 +871,7 @@ class TestAPIAdminViews(TestCase):
             username="test_remove_admin_from_api_group_not_in_group_three"
         ).exists()
         response = client.post(
-            "/v1/group/remove_admin/",
+            "/api/v1/group/remove_admin/",
             {
                 "api_group_name": "test_remove_admin_from_api_group_not_in_group",
                 "username": "test_remove_admin_from_api_group_not_in_group_three",
@@ -889,7 +889,7 @@ class TestAPIAdminViews(TestCase):
         client = Client()
         user_model = get_user_model()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_get_api_group_users",
                 "password": "testpassword",
@@ -897,7 +897,7 @@ class TestAPIAdminViews(TestCase):
             },
         )
         auth_response_two = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_get_api_group_users_two",
                 "password": "testpassword",
@@ -907,7 +907,7 @@ class TestAPIAdminViews(TestCase):
         assert auth_response.status_code == 200
         assert auth_response_two.status_code == 200
         login_response = client.post(
-            "/v1/auth/login/",
+            "/api/v1/auth/login/",
             {
                 "username": "test_get_api_group_users",
                 "password": "testpassword",
@@ -925,7 +925,7 @@ class TestAPIAdminViews(TestCase):
             mnemonic="test_get_api_group_users_two",
         )
         response = client.post(
-            "/v1/group/create/",
+            "/api/v1/group/create/",
             {
                 "api_group_name": "test_get_api_group_users",
                 "email": "test_get_api_group_users@test.com",
@@ -938,7 +938,7 @@ class TestAPIAdminViews(TestCase):
         assert group.name == "test_get_api_group_users"
         assert group.admin_list.filter(username="test_get_api_group_users").exists()
         response = client.post(
-            "/v1/group/add_user/",
+            "/api/v1/group/add_user/",
             {
                 "api_group_name": "test_get_api_group_users",
                 "username": "test_get_api_group_users_two",
@@ -950,7 +950,7 @@ class TestAPIAdminViews(TestCase):
         assert response.status_code == 200
         assert group.user_list.filter(username="test_get_api_group_users_two").exists()
         response = client.post(
-            "/v1/group/get_api_group_users/",
+            "/api/v1/group/get_api_group_users/",
             {
                 "api_group_name": "test_get_api_group_users",
                 "api_key": group.api_key,
@@ -969,7 +969,7 @@ class TestAPIAdminViews(TestCase):
         client = Client()
         user_model = get_user_model()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_get_api_group_list",
                 "password": "testpassword",
@@ -981,7 +981,7 @@ class TestAPIAdminViews(TestCase):
         assert auth_response.status_code == 200
         token = auth_response.json()["token"]
         response = client.post(
-            "/v1/group/create/",
+            "/api/v1/group/create/",
             {
                 "api_group_name": "test_get_api_group_list",
                 "email": "test_get_api_group_list@test.com",
@@ -990,7 +990,7 @@ class TestAPIAdminViews(TestCase):
         )
         assert response.status_code == 200
         response = client.get(
-            "/v1/group/fennel_admin/get_list/",
+            "/api/v1/group/fennel_admin/get_list/",
             HTTP_AUTHORIZATION=f"Token {token}",
         )
         assert response.status_code == 200

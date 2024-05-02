@@ -9,7 +9,7 @@ class TestAPIGroupJoinRequestViews(TestCase):
         client = Client()
         user_model = get_user_model()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_get_api_group_users",
                 "password": "testpassword",
@@ -17,7 +17,7 @@ class TestAPIGroupJoinRequestViews(TestCase):
             },
         )
         auth_response_two = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_get_api_group_users_two",
                 "password": "testpassword",
@@ -27,7 +27,7 @@ class TestAPIGroupJoinRequestViews(TestCase):
         assert auth_response.status_code == 200
         assert auth_response_two.status_code == 200
         login_response = client.post(
-            "/v1/auth/login/",
+            "/api/v1/auth/login/",
             {
                 "username": "test_get_api_group_users",
                 "password": "testpassword",
@@ -45,7 +45,7 @@ class TestAPIGroupJoinRequestViews(TestCase):
             mnemonic="test_get_api_group_users_two",
         )
         response = client.post(
-            "/v1/group/create/",
+            "/api/v1/group/create/",
             {
                 "api_group_name": "test_get_api_group_users",
                 "email": "test_get_api_group_users@test.com",
@@ -58,7 +58,7 @@ class TestAPIGroupJoinRequestViews(TestCase):
         assert group.name == "test_get_api_group_users"
         assert group.admin_list.filter(username="test_get_api_group_users").exists()
         response = client.post(
-            "/v1/group/send_join_request/",
+            "/api/v1/group/send_join_request/",
             {
                 "api_group_name": "test_get_api_group_users",
             },
@@ -74,7 +74,7 @@ class TestAPIGroupJoinRequestViews(TestCase):
         client = Client()
         user_model = get_user_model()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_get_api_group_users",
                 "password": "testpassword",
@@ -82,7 +82,7 @@ class TestAPIGroupJoinRequestViews(TestCase):
             },
         )
         auth_response_two = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_get_api_group_users_two",
                 "password": "testpassword",
@@ -92,7 +92,7 @@ class TestAPIGroupJoinRequestViews(TestCase):
         assert auth_response.status_code == 200
         assert auth_response_two.status_code == 200
         login_response = client.post(
-            "/v1/auth/login/",
+            "/api/v1/auth/login/",
             {
                 "username": "test_get_api_group_users",
                 "password": "testpassword",
@@ -110,7 +110,7 @@ class TestAPIGroupJoinRequestViews(TestCase):
             mnemonic="test_get_api_group_users_two",
         )
         response = client.post(
-            "/v1/group/create/",
+            "/api/v1/group/create/",
             {
                 "api_group_name": "test_get_api_group_users",
                 "email": "test_get_api_group_users@test.com",
@@ -123,7 +123,7 @@ class TestAPIGroupJoinRequestViews(TestCase):
         assert group.name == "test_get_api_group_users"
         assert group.admin_list.filter(username="test_get_api_group_users").exists()
         response = client.post(
-            "/v1/group/send_join_request/",
+            "/api/v1/group/send_join_request/",
             {
                 "api_group_name": "test_get_api_group_users",
             },
@@ -135,7 +135,7 @@ class TestAPIGroupJoinRequestViews(TestCase):
             user__username="test_get_api_group_users_two",
         ).exists()
         response = client.post(
-            "/v1/group/get_join_requests/",
+            "/api/v1/group/get_join_requests/",
             {
                 "api_group_name": "test_get_api_group_users",
             },
@@ -147,7 +147,7 @@ class TestAPIGroupJoinRequestViews(TestCase):
     def test_get_api_group_join_requests_no_requests(self):
         client = Client()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_get_api_group_join_requests",
                 "password": "testpassword",
@@ -158,7 +158,7 @@ class TestAPIGroupJoinRequestViews(TestCase):
         token = auth_response.json()["token"]
         assert token is not None
         response = client.post(
-            "/v1/group/create/",
+            "/api/v1/group/create/",
             {
                 "api_group_name": "test_get_api_group_join_requests",
                 "email": "test_get_api_group_join_requests@test.com",
@@ -173,7 +173,7 @@ class TestAPIGroupJoinRequestViews(TestCase):
             username="test_get_api_group_join_requests"
         ).exists()
         response = client.post(
-            "/v1/group/get_join_requests/",
+            "/api/v1/group/get_join_requests/",
             {
                 "api_group_name": "test_get_api_group_join_requests",
             },
@@ -186,7 +186,7 @@ class TestAPIGroupJoinRequestViews(TestCase):
         client = Client()
         user_model = get_user_model()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_get_api_group_users",
                 "password": "testpassword",
@@ -194,7 +194,7 @@ class TestAPIGroupJoinRequestViews(TestCase):
             },
         )
         auth_response_two = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test_get_api_group_users_two",
                 "password": "testpassword",
@@ -204,7 +204,7 @@ class TestAPIGroupJoinRequestViews(TestCase):
         assert auth_response.status_code == 200
         assert auth_response_two.status_code == 200
         login_response = client.post(
-            "/v1/auth/login/",
+            "/api/v1/auth/login/",
             {
                 "username": "test_get_api_group_users",
                 "password": "testpassword",
@@ -222,7 +222,7 @@ class TestAPIGroupJoinRequestViews(TestCase):
             mnemonic="test_get_api_group_users_two",
         )
         response = client.post(
-            "/v1/group/create/",
+            "/api/v1/group/create/",
             {
                 "api_group_name": "test_get_api_group_users",
                 "email": "test_get_api_group_users@test.com",
@@ -235,7 +235,7 @@ class TestAPIGroupJoinRequestViews(TestCase):
         assert group.name == "test_get_api_group_users"
         assert group.admin_list.filter(username="test_get_api_group_users").exists()
         response = client.post(
-            "/v1/group/send_join_request/",
+            "/api/v1/group/send_join_request/",
             {
                 "api_group_name": "test_get_api_group_users",
             },
@@ -247,7 +247,7 @@ class TestAPIGroupJoinRequestViews(TestCase):
             user__username="test_get_api_group_users_two",
         )
         response = client.post(
-            "/v1/group/accept_join_request/",
+            "/api/v1/group/accept_join_request/",
             {
                 "join_request_id": group_request.id,
             },

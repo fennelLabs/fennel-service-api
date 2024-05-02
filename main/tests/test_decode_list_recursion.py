@@ -11,7 +11,7 @@ class TestDecodeListRecursion(TestCase):
         client = Client()
         user_model = get_user_model()
         response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "decode_long_list_test",
                 "password": "test",
@@ -38,7 +38,7 @@ class TestDecodeListRecursion(TestCase):
         ]
         signals_list = [signal.id for signal in signals]
         response = client.post(
-            "/v1/whiteflag/decode_list/",
+            "/api/v1/whiteflag/decode_list/",
             {"signals": signals_list},
             HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
         )

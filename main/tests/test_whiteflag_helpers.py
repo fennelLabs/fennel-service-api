@@ -53,7 +53,7 @@ class TestWhiteflagHelpers(TestCase):
     def test_whiteflag_generate_shared_secret_key(self):
         client = Client()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test",
                 "password": "test",
@@ -78,7 +78,7 @@ class TestWhiteflagHelpers(TestCase):
             private_diffie_hellman_key=keys_dict_two["secret_key"],
         )
         response = client.post(
-            f"/v1/whiteflag/generate_encryption_key/{group_2.id}/",
+            f"/api/v1/whiteflag/generate_encryption_key/{group_2.id}/",
             HTTP_AUTHORIZATION=f"Token {auth_response.data['token']}",
         )
         assert response.status_code == 200

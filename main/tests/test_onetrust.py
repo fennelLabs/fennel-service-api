@@ -8,7 +8,7 @@ class TestOneTrustViews(TestCase):
         client = Client()
         user_model = get_user_model()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "create_self_custodial_account_test",
                 "password": "create_self_custodial_account_test",
@@ -19,12 +19,12 @@ class TestOneTrustViews(TestCase):
         assert auth_response.json()["token"] is not None
         user = user_model.objects.get(username="create_self_custodial_account_test")
         response = client.post(
-            "/v1/group/create/",
+            "/api/v1/group/create/",
             {"api_group_name": "test", "email": "test@test.com"},
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         response = client.post(
-            "/v1/onetrust/create_self_custodial_account/",
+            "/api/v1/onetrust/create_self_custodial_account/",
             {
                 "api_key": response.json()["api_key"],
                 "api_secret": response.json()["api_secret"],
@@ -41,7 +41,7 @@ class TestOneTrustViews(TestCase):
         client = Client()
         user_model = get_user_model()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "reconstruct_self_custodial_account_test",
                 "password": "reconstruct_self_custodial_account_test",
@@ -54,7 +54,7 @@ class TestOneTrustViews(TestCase):
             username="reconstruct_self_custodial_account_test"
         )
         response = client.post(
-            "/v1/group/create/",
+            "/api/v1/group/create/",
             {"api_group_name": "test", "email": "test@test.com"},
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
@@ -64,7 +64,7 @@ class TestOneTrustViews(TestCase):
         api_key = response.json()["api_key"]
         api_secret = response.json()["api_secret"]
         response = client.post(
-            "/v1/onetrust/create_self_custodial_account/",
+            "/api/v1/onetrust/create_self_custodial_account/",
             {
                 "api_key": api_key,
                 "api_secret": api_secret,
@@ -84,7 +84,7 @@ class TestOneTrustViews(TestCase):
             "api_secret": api_secret,
         }
         response = client.post(
-            "/v1/onetrust/reconstruct_self_custodial_account/",
+            "/api/v1/onetrust/reconstruct_self_custodial_account/",
             payload,
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
@@ -95,7 +95,7 @@ class TestOneTrustViews(TestCase):
         client = Client()
         user_model = get_user_model()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "get_self_custodial_account_address_test",
                 "password": "get_self_custodial_account_address_test",
@@ -108,7 +108,7 @@ class TestOneTrustViews(TestCase):
             username="get_self_custodial_account_address_test"
         )
         response = client.post(
-            "/v1/group/create/",
+            "/api/v1/group/create/",
             {"api_group_name": "test", "email": "test_group@test.com"},
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
@@ -118,7 +118,7 @@ class TestOneTrustViews(TestCase):
         api_key = response.json()["api_key"]
         api_secret = response.json()["api_secret"]
         response = client.post(
-            "/v1/onetrust/create_self_custodial_account/",
+            "/api/v1/onetrust/create_self_custodial_account/",
             {
                 "api_key": api_key,
                 "api_secret": api_secret,
@@ -139,7 +139,7 @@ class TestOneTrustViews(TestCase):
             "api_secret": api_secret,
         }
         response = client.post(
-            "/v1/onetrust/reconstruct_self_custodial_account/",
+            "/api/v1/onetrust/reconstruct_self_custodial_account/",
             payload,
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
@@ -151,7 +151,7 @@ class TestOneTrustViews(TestCase):
             "api_secret": api_secret,
         }
         response = client.post(
-            "/v1/onetrust/get_self_custodial_account_address/",
+            "/api/v1/onetrust/get_self_custodial_account_address/",
             payload,
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )

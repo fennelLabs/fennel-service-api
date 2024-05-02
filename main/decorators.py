@@ -22,7 +22,7 @@ def requires_mnemonic_created(view_func):
         return Response(
             {
                 "error": "user does not have a blockchain account",
-                "fix": "call /v1/fennel/create_account first",
+                "fix": "call /api/v1/fennel/create_account first",
             },
             status=400,
         )

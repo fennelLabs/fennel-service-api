@@ -10,7 +10,7 @@ class TestProductionIssues(TestCase):
     def test_no_attribute_recipient_group_in_send_new_signal(self):
         client = Client()
         auth_response = client.post(
-            "/v1/auth/register/",
+            "/api/v1/auth/register/",
             {
                 "username": "test",
                 "password": "test",
@@ -20,7 +20,7 @@ class TestProductionIssues(TestCase):
         assert auth_response.status_code == 200
         assert auth_response.json()["token"] is not None
         client.post(
-            "/v1/fennel/create_account/",
+            "/api/v1/fennel/create_account/",
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         APIGroup.objects.create(
@@ -31,7 +31,7 @@ class TestProductionIssues(TestCase):
             "recipient_group": "testapirodney",
         }
         response = client.post(
-            "/v1/fennel/send_new_signal/",
+            "/api/v1/fennel/send_new_signal/",
             payload,
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
