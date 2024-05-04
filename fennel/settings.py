@@ -298,3 +298,5 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 REST_KNOX = {
     "TOKEN_TTL": timedelta(hours=10),
 }
+
+CORS_ORIGIN_ALLOW_ALL = True
