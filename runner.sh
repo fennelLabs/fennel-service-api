@@ -10,6 +10,15 @@ function all() {
   setup
 }
 
+function all_no_tests() {
+  migrate
+  pip3 install -r requirements.txt
+  python3 -m safety check -r requirements.txt
+  python3 manage.py check
+  static
+  setup
+}
+
 function run_tests() {
   coverage run manage.py test -v 2
 }
@@ -96,6 +105,11 @@ run)
 
 init-all-run)
   all
+  gunicorn_run
+  ;;
+
+init-all-run-prod)
+  all_no_tests
   gunicorn_run
   ;;
 
