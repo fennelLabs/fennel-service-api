@@ -33,6 +33,7 @@ ALLOWED_HOSTS = [
     "api.fennellabs.com",
     "10.0.38.110",
     "api-lb-1539191200.us-east-2.elb.amazonaws.com",
+    os.environ.get('HOST_IP'),
 ]
 
 CORS_ORIGIN_WHITELIST = [
