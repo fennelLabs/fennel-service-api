@@ -1,0 +1,17 @@
+{% extends "dashboard/base_no_group.html" %}
+{% block content %}
+{% load crispy_forms_tags %}
+<div class="row">
+  <h1>Import Wallet</h1>
+  <form
+    action="{% url 'dashboard:import_wallet' group_id %}"
+    id="import_wallet"
+    method="post"
+    name="import_wallet"
+  >
+    {% csrf_token %}
+    {{ form|crispy }}
+    <button type="submit" class="btn btn-primary">Import</button>
+  </form>
+</div>
+{% endblock %}

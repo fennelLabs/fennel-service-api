@@ -98,3 +98,42 @@ class TestWalletViews(TestCase):
             UserKeys.objects.get(user=User.objects.get(username="testuser2")).address
             is not None
         )
+    
+    def test_import_wallet(self):
+        self.client.login(username="testuser", password="testpass")
+        response = self.client.post(
+            reverse(
+                "dashboard:create_wallet",
+                kwargs={"group_id": APIGroup.objects.get(name="testgroup").id},
+            )
+        )
+        assert UserKeys.objects.filter(
+            user=User.objects.get(username="testuser")
+        ).exists()
+        assert (
+            UserKeys.objects.get(user=User.objects.get(username="testuser")).mnemonic
+            is not None
+        )
+        assert (
+            UserKeys.objects.get(user=User.objects.get(username="testuser")).address
+            is not None
+        )
+        response = self.client.post(
+            reverse(
+                "dashboard:import_wallet",
+                kwargs={"group_id": APIGroup.objects.get(name="testgroup").id},
+            ),
+            {
+                "mnemonic": UserKeys.objects.get(user=User.objects.get(username="testuser")).mnemonic,
+            }
+        )
+        self.assertRedirects(
+            response,
+            reverse(
+                "dashboard:api_group_members",
+                kwargs={"group_id": APIGroup.objects.get(name="testgroup").id},
+            ),
+            status_code=302,
+            target_status_code=200,
+            fetch_redirect_response=True,
+        )

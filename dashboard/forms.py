@@ -98,6 +98,27 @@ class TransferTokenForm(forms.Form):
         return cleaned_data
 
 
+class TransferTokenToAddressForm(forms.Form):
+    recipient = forms.CharField(label="Recipient", max_length=100)
+    amount = forms.IntegerField(label="Amount")
+
+    def clean(self):
+        cleaned_data = super().clean()
+        recipient = cleaned_data.get("recipient")
+        amount = cleaned_data.get("amount")
+
+        if recipient is None:
+            raise forms.ValidationError("Recipient is required")
+
+        if amount is None:
+            raise forms.ValidationError("Amount is required")
+
+        if amount <= 0:
+            raise forms.ValidationError("Amount must be greater than 0")
+
+        return cleaned_data
+
+
 class CreateApiGroupForm(forms.Form):
     group_name = forms.CharField(label="Group Name", max_length=100)
 
@@ -132,5 +153,18 @@ class SendAPIGroupRequestForm(forms.Form):
 
         if not APIGroup.objects.filter(name=group_name).exists():
             raise forms.ValidationError("Group name does not exist")
+
+        return cleaned_data
+
+
+class ImportWalletForm(forms.Form):
+    mnemonic = forms.CharField(label="Mnemonic", max_length=250)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        mnemonic = cleaned_data.get("mnemonic")
+
+        if mnemonic is None:
+            raise forms.ValidationError("Mnemonic is required")
 
         return cleaned_data

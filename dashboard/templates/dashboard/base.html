@@ -44,11 +44,15 @@
             {% if user.has_wallet %}
             <li class="nav-item">
               <div
-                class="nav-link p-3">Address: {{ user.address }}</div>
+                class="nav-link p-3"><a href="{% url 'dashboard:import_wallet' group_id %}" class="nav-link p-3">Address: {{ user.address }}</a></div>
             </li>
             <li class="nav-item">
               <a href="{% url 'dashboard:get_balance' %}"
                 class="nav-link p-3">{{ user.balance }} FNL</a>
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'dashboard:transfer_tokens_to_address' group_id %}"
+                class="nav-link p-3">Send</a>
             </li>
             {% endif %}
             <li class="nav-item">

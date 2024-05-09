@@ -134,3 +134,29 @@ class TestTokenViews(TestCase):
                 kwargs={"group_id": APIGroup.objects.get(name="testgroup").id},
             ),
         )
+
+    def test_transfer_tokens_to_address(self):
+        self.client.login(username="testuser", password="testpass")
+        response = self.client.get(
+            reverse(
+                "dashboard:create_wallet",
+                kwargs={"group_id": APIGroup.objects.get(name="testgroup").id},
+            ),
+        )
+        response = self.client.post(
+            reverse(
+                "dashboard:create_wallet_for_member",
+                kwargs={
+                    "group_id": APIGroup.objects.get(name="testgroup").id,
+                    "member_id": User.objects.get(username="testuser2").id,
+                },
+            ),
+        )
+        response = self.client.get(
+            reverse(
+                "dashboard:transfer_tokens_to_address",
+                kwargs={"group_id": APIGroup.objects.get(name="testgroup").id},
+            ),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "dashboard/transfer_tokens_address.html")

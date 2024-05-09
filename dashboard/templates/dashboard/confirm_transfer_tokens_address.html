@@ -1,0 +1,20 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+{% load crispy_forms_tags %}
+<form
+  action="{% url 'dashboard:confirm_transfer_tokens_to_address' %}"
+  id="confirm_transfer_token_form"
+  method="post"
+  name="confirm_tranfer_token_form"
+>
+  {% csrf_token %}
+  <div>
+    Are you sure you want to send {{ amount }} tokens to {{ address }} with a fee of {{ fee }} ?
+  </div>
+  <input type="hidden" name="group_id" value="{{ group_id }}" />
+  <input type="hidden" name="address" value="{{ address }}" />
+  <input type="hidden" name="amount" value="{{ amount }}" />
+  <button class="btn-primary" type="submit">Send</button>
+  <a class="btn-primary" href="{% url 'dashboard:index' group_id %}">Cancel</a>
+</form>
+{% endblock %}

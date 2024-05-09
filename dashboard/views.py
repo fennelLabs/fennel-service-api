@@ -1,12 +1,13 @@
 import os
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 
 from silk.profiling.profiler import silk_profile
 
-from dashboard.decorators import require_authentication
-from dashboard.forms import CreateApiGroupForm, SendAPIGroupRequestForm
+from dashboard.decorators import require_admin, require_authentication
+from dashboard.forms import CreateApiGroupForm, ImportWalletForm, SendAPIGroupRequestForm, TransferTokenToAddressForm
 from dashboard.models import APIGroup, APIGroupJoinRequest, UserKeys
+from dashboard.blockchain_helpers import check_balance, get_fee_for_transfer_token, transfer_token
 
 import requests
 
@@ -76,6 +77,97 @@ def create_api_group(request):
         "dashboard/index.html",
         {"form": form, "join_request_form": SendAPIGroupRequestForm()},
     )
+
+
+@silk_profile(name="import_wallet")
+@require_authentication
+def import_wallet(request, group_id=None):
+    if request.method == "POST":
+        form = ImportWalletForm(request.POST)
+        if not form.is_valid():
+            return render(request, "dashboard/import_wallet.html", {"form": ImportWalletForm()})
+        if UserKeys.objects.filter(user=request.user).exists():
+            keys = UserKeys.objects.get(user=request.user)
+            keys.mnemonic = form.cleaned_data.get("mnemonic")
+            keys.save()
+            messages.success(request, "Fennel wallet imported.")
+            return redirect("dashboard:api_group_members", group_id=group_id)
+    form = ImportWalletForm()
+    return render(request, "dashboard/import_wallet.html", {"form": form, "group_id": group_id})
+
+
+@silk_profile(name="transfer_tokens_to_address_post")
+def __tranfer_tokens_to_address_post(request, form, user_key, group_id):
+    amount = form.cleaned_data.get("amount")
+    address = form.cleaned_data.get("address")
+    balance = check_balance(user_key)
+    fee = get_fee_for_transfer_token(address, amount, user_key)
+    if balance == -1:
+        messages.error(
+            request,
+            "There was an error checking your balance. Please try again later.",
+        )
+        return redirect("dashboard:index", group_id=group_id)
+    if fee == -1:
+        messages.error(
+            request,
+            "There was an error checking the fee for this transaction. Please try again later.",
+        )
+        return redirect("dashboard:index", group_id=group_id)
+    if balance < amount + fee:
+        messages.error(
+            request,
+            "You do not have enough tokens to complete this transaction.",
+        )
+        return redirect("dashboard:index", group_id=group_id)
+    return render(
+        request,
+        "dashboard/confirm_transfer_tokens_address.html",
+        {
+            "group_id": group_id,
+            "address": address,
+            "fee": round(fee / 1000000000000, 4),
+            "amount": amount,
+        },
+    )
+
+
+@silk_profile(name="transfer_tokens_to_address")
+@require_authentication
+@require_admin
+def transfer_tokens_to_address(request, group_id=None):
+    messages.get_messages(request).used = True
+    user_key = get_object_or_404(UserKeys, user=request.user)
+    if not user_key.mnemonic:
+        messages.error(
+            request,
+            "You have not created a Fennel wallet yet.",
+        )
+        return redirect("dashboard:index", group_id=group_id)
+    if request.method == "GET":
+        form = TransferTokenToAddressForm()
+    if request.method == "POST":
+        form = TransferTokenToAddressForm(request.POST)
+        if form.is_valid():
+            return __tranfer_tokens_to_address_post(
+                request, form, user_key, group_id
+            )
+    return render(
+        request,
+        "dashboard/transfer_tokens_address.html",
+        {"group_id": group_id, form: form},
+    )
+
+
+@silk_profile(name="confirm_transfer_tokens_to_address")
+@require_authentication
+@require_admin
+def confirm_transfer_tokens_to_address(request, group_id=None):
+    user_key = get_object_or_404(UserKeys, user=request.user)
+    amount = request.POST.get("amount")
+    address = request.POST.get("address")
+    transfer_token(address, amount, user_key)
+    return redirect("dashboard:index", group_id=group_id)
 
 
 @silk_profile(name="get_balance")

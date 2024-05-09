@@ -31,6 +31,21 @@ urlpatterns = [
         "create_wallet/<int:group_id>/", admin_views.create_wallet, name="create_wallet"
     ),
     path(
+        "import-wallet/<int:group_id>/",
+        views.import_wallet,
+        name="import_wallet",
+    ),
+    path(
+        "transfer-tokens/<int:group_id>/",
+        views.transfer_tokens_to_address,
+        name="transfer_tokens_to_address",
+    ),
+    path(
+        "transfer-tokens/confirm/<int:group_id>/",
+        views.confirm_transfer_tokens_to_address,
+        name="confirm_transfer_tokens_to_address",
+    ),
+    path(
         "generate-group-encryption-keys/<int:group_id>/",
         admin_views.generate_group_encryption_keys,
         name="generate_group_encryption_keys",

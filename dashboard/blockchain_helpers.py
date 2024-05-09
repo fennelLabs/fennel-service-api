@@ -42,6 +42,29 @@ def create_wallet_with_userkeys(request, keys: UserKeys) -> None:
         )
 
 
+@silk_profile(name="import_account_with_mnemonic")
+def import_account_with_mnemonic(request, mnemonic: str) -> None:
+    response = requests.post(
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_address",
+        data={"mnemonic": mnemonic},
+        timeout=5,
+    )
+    if response.status_code != 200:
+        messages.error(
+            request,
+            "Failed to import Fennel wallet.",
+        )
+        return
+    UserKeys.objects.create(
+        mnemonic=mnemonic,
+        address=response.json()["address"],
+    )
+    messages.success(
+        request,
+        "Fennel wallet imported.",
+    )
+
+
 @silk_profile(name="check_balance")
 def check_balance(key: UserKeys) -> int:
     payload = {"mnemonic": key.mnemonic}
