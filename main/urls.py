@@ -21,6 +21,7 @@ app_name = "main"
 urlpatterns = [
     path("get_version/", views.get_version),
     path("healthcheck/", views.healthcheck),
+    path("livecheck/", views.livecheck),
     path("group/create/", api_admin_views.create_new_api_group),
     path("group/fennel_admin/get_list/", api_admin_views.get_api_group_list),
     path("group/add_user/", api_admin_views.add_user_to_api_group),
