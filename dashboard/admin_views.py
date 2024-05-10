@@ -40,6 +40,7 @@ def api_group_join_requests(request, group_id=None):
 @require_authentication
 def accept_join_request(request, group_id=None, request_id=None):
     request_obj = APIGroupJoinRequest.objects.get(id=request_id)
+    request_obj.api_group.user_list.add(request_obj.user)
     request_obj.accepted = True
     request_obj.save()
     return redirect("dashboard:api_group_join_requests", group_id=group_id)
@@ -176,7 +177,7 @@ def transfer_tokens_to_member(request, group_id=None, member_id=None):
     return render(
         request,
         "dashboard/transfer_tokens.html",
-        {"group_id": group_id, "member_id": member.id, form: form},
+        {"group_id": group_id, "member_id": member.id, "form": form},
     )
 
 

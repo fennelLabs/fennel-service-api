@@ -80,6 +80,11 @@ class AdminViewsTests(TestCase):
             fetch_redirect_response=True,
         )
         assert APIGroupJoinRequest.objects.get(id=join.id).accepted is True
+        assert (
+            APIGroup.objects.get(name="testgroup")
+            .user_list.filter(username="testuser2")
+            .exists()
+        )
 
     def test_reject_join_request_view(self):
         self.client.login(username="testuser", password="testpass")
