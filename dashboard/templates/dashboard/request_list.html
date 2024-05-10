@@ -14,10 +14,10 @@
             <tr>
             <td>{{ request.user.username }}</td>
             <td>
-                <a href="{% url 'admin:accept_request' request.id %}">Accept</a>
+                <a href="{% url 'dashboard:accept_join_request' group_id request.id %}">Accept</a>
             </td>
             <td>
-                <a href="{% url 'admin:reject_request' request.id %}">Reject</a>
+                <a href="{% url 'dashboard:reject_join_request' group_id request.id %}">Reject</a>
             </td>
             </tr>
         {% endfor %}

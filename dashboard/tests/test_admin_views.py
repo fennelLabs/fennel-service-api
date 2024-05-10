@@ -35,6 +35,13 @@ class AdminViewsTests(TestCase):
 
     def test_api_group_join_requests_view(self):
         self.client.login(username="testuser", password="testpass")
+        User.objects.create_user(
+            username="testuser2", password="testpass", email="testuser2@test.com"
+        )
+        join = APIGroupJoinRequest.objects.create(
+            api_group=APIGroup.objects.get(name="testgroup"),
+            user=User.objects.get(username="testuser2"),
+        )
         response = self.client.get(
             reverse(
                 "dashboard:api_group_join_requests",
