@@ -55,7 +55,8 @@ def import_account_with_mnemonic(request, mnemonic: str) -> None:
             "Failed to import Fennel wallet.",
         )
         return
-    UserKeys.objects.create(
+    UserKeys.objects.update_or_create(
+        user=request.user,
         mnemonic=mnemonic,
         address=response.json()["address"],
     )

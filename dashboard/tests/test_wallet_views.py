@@ -98,7 +98,7 @@ class TestWalletViews(TestCase):
             UserKeys.objects.get(user=User.objects.get(username="testuser2")).address
             is not None
         )
-    
+
     def test_import_wallet(self):
         self.client.login(username="testuser", password="testpass")
         response = self.client.post(
@@ -124,8 +124,10 @@ class TestWalletViews(TestCase):
                 kwargs={"group_id": APIGroup.objects.get(name="testgroup").id},
             ),
             {
-                "mnemonic": UserKeys.objects.get(user=User.objects.get(username="testuser")).mnemonic,
-            }
+                "mnemonic": UserKeys.objects.get(
+                    user=User.objects.get(username="testuser")
+                ).mnemonic,
+            },
         )
         self.assertRedirects(
             response,

@@ -27,6 +27,8 @@
                 {% endif %}
                 {% else %}
                 <a href="{% url 'dashboard:create_wallet' group_id %}">Create a Wallet</a>
+                |
+                <a href="{% url 'dashboard:import_wallet' group_id %}">Import Wallet</a>
                 {% endif %}
             </td>
             <td>

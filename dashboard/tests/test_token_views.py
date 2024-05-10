@@ -160,3 +160,6 @@ class TestTokenViews(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "dashboard/transfer_tokens_address.html")
+        self.assertContains(response, "form")
+        self.assertContains(response, "recipient")
+        self.assertContains(response, "amount")

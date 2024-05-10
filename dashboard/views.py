@@ -1,13 +1,24 @@
 import os
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
+from django.contrib.messages.storage import default_storage
 
 from silk.profiling.profiler import silk_profile
 
 from dashboard.decorators import require_admin, require_authentication
-from dashboard.forms import CreateApiGroupForm, ImportWalletForm, SendAPIGroupRequestForm, TransferTokenToAddressForm
+from dashboard.forms import (
+    CreateApiGroupForm,
+    ImportWalletForm,
+    SendAPIGroupRequestForm,
+    TransferTokenToAddressForm,
+)
 from dashboard.models import APIGroup, APIGroupJoinRequest, UserKeys
-from dashboard.blockchain_helpers import check_balance, get_fee_for_transfer_token, transfer_token
+from dashboard.blockchain_helpers import (
+    check_balance,
+    get_fee_for_transfer_token,
+    import_account_with_mnemonic,
+    transfer_token,
+)
 
 import requests
 
@@ -15,6 +26,7 @@ import requests
 @silk_profile(name="index")
 @require_authentication
 def index(request):
+    request._messages = default_storage(request)
     if request.user.api_group_admins.all().exists():
         return redirect(
             "dashboard:api_group_members",
@@ -85,15 +97,18 @@ def import_wallet(request, group_id=None):
     if request.method == "POST":
         form = ImportWalletForm(request.POST)
         if not form.is_valid():
-            return render(request, "dashboard/import_wallet.html", {"form": ImportWalletForm()})
-        if UserKeys.objects.filter(user=request.user).exists():
-            keys = UserKeys.objects.get(user=request.user)
-            keys.mnemonic = form.cleaned_data.get("mnemonic")
-            keys.save()
-            messages.success(request, "Fennel wallet imported.")
-            return redirect("dashboard:api_group_members", group_id=group_id)
+            print("form is not valid")
+            return render(
+                request,
+                "dashboard/import_wallet.html",
+                {"form": form, "group_id": group_id},
+            )
+        import_account_with_mnemonic(request, form.cleaned_data.get("mnemonic"))
+        return redirect("dashboard:api_group_members", group_id=group_id)
     form = ImportWalletForm()
-    return render(request, "dashboard/import_wallet.html", {"form": form, "group_id": group_id})
+    return render(
+        request, "dashboard/import_wallet.html", {"form": form, "group_id": group_id}
+    )
 
 
 @silk_profile(name="transfer_tokens_to_address_post")
@@ -107,19 +122,19 @@ def __tranfer_tokens_to_address_post(request, form, user_key, group_id):
             request,
             "There was an error checking your balance. Please try again later.",
         )
-        return redirect("dashboard:index", group_id=group_id)
+        return redirect("dashboard:api_group_members", group_id=group_id)
     if fee == -1:
         messages.error(
             request,
             "There was an error checking the fee for this transaction. Please try again later.",
         )
-        return redirect("dashboard:index", group_id=group_id)
+        return redirect("dashboard:api_group_members", group_id=group_id)
     if balance < amount + fee:
         messages.error(
             request,
             "You do not have enough tokens to complete this transaction.",
         )
-        return redirect("dashboard:index", group_id=group_id)
+        return redirect("dashboard:api_group_members", group_id=group_id)
     return render(
         request,
         "dashboard/confirm_transfer_tokens_address.html",
@@ -149,13 +164,11 @@ def transfer_tokens_to_address(request, group_id=None):
     if request.method == "POST":
         form = TransferTokenToAddressForm(request.POST)
         if form.is_valid():
-            return __tranfer_tokens_to_address_post(
-                request, form, user_key, group_id
-            )
+            return __tranfer_tokens_to_address_post(request, form, user_key, group_id)
     return render(
         request,
         "dashboard/transfer_tokens_address.html",
-        {"group_id": group_id, form: form},
+        {"group_id": group_id, "form": form},
     )
 
 
