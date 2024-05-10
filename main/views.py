@@ -18,12 +18,14 @@ def livecheck(request):
         f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/hello_there/", timeout=5
     )
     if response.status_code != 200:
+        print("bitwise is unreachable")
         raise Http404
     response = requests.get(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/healthcheck",
         timeout=5,
     )
     if response.status_code != 200:
+        print("subservice is unreachable.")
         raise Http404
     return Response()
 
