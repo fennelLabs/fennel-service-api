@@ -104,7 +104,7 @@ def transfer_token(recipient: str, amount: int, user_key: UserKeys) -> None:
     payload = {
         "mnemonic": user_key.mnemonic,
         "to": recipient,
-        "amount": amount,
+        "amount": amount * 1000000000000,
     }
     response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/transfer_token",
