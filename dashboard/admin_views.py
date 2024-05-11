@@ -141,7 +141,7 @@ def __tranfer_tokens_to_member_post(request, form, user_key, member, group_id):
         return redirect("dashboard:api_group_members", group_id=group_id)
     return render(
         request,
-        "dashboard/confirm_transfer_tokens.html",
+        "dashboard/confirm_transfer_tokens_to_member.html",
         {
             "group_id": group_id,
             "member_id": member.id,
