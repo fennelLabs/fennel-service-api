@@ -1,3 +1,4 @@
+import logging
 import os
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
@@ -114,9 +115,12 @@ def create_wallet_for_member(request, group_id=None, member_id=None):
 
 @silk_profile(name="transfer_tokens_to_member_post")
 def __tranfer_tokens_to_member_post(request, form, user_key, member, group_id):
+    logging.info("Transferring tokens post received.")
     amount = form.cleaned_data.get("amount")
     balance = check_balance(user_key)
+    logging.info(f"Balance: {balance}")
     fee = get_fee_for_transfer_token(member.address, amount, user_key)
+    logging.info(f"Fee: {fee}")
     if balance == -1:
         messages.error(
             request,
