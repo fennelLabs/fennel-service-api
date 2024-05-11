@@ -113,6 +113,7 @@ def create_wallet_for_member(request, group_id=None, member_id=None):
 def __tranfer_tokens_to_member_post(request, form, user_key, member, group_id):
     logging.info("Transferring tokens post received.")
     amount = form.cleaned_data.get("amount")
+    username = member.username
     balance = check_balance(user_key)
     logging.info(f"Balance: {balance}")
     fee = get_fee_for_transfer_token(member.address, amount, user_key)
@@ -142,6 +143,7 @@ def __tranfer_tokens_to_member_post(request, form, user_key, member, group_id):
             "member_id": member.id,
             "fee": round(fee / 1000000000000, 4),
             "amount": amount,
+            "username": username,
         },
     )
 
