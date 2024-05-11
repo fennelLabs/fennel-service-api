@@ -65,10 +65,7 @@ class TestOneTrustViews(TestCase):
         api_secret = response.json()["api_secret"]
         response = client.post(
             "/api/v1/onetrust/create_self_custodial_account/",
-            {
-                "api_key": api_key,
-                "api_secret": api_secret,
-            },
+            {"api_key": api_key, "api_secret": api_secret,},
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         assert response.status_code == 200
@@ -119,10 +116,7 @@ class TestOneTrustViews(TestCase):
         api_secret = response.json()["api_secret"]
         response = client.post(
             "/api/v1/onetrust/create_self_custodial_account/",
-            {
-                "api_key": api_key,
-                "api_secret": api_secret,
-            },
+            {"api_key": api_key, "api_secret": api_secret,},
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         assert response.status_code == 200

@@ -107,14 +107,10 @@ class UserKeys(models.Model):
 
 class PrivateMessage(models.Model):
     sender = models.ForeignKey(
-        "auth.User",
-        related_name="private_messages_sent",
-        on_delete=models.CASCADE,
+        "auth.User", related_name="private_messages_sent", on_delete=models.CASCADE,
     )
     receiver = models.ForeignKey(
-        "auth.User",
-        related_name="private_messages_received",
-        on_delete=models.CASCADE,
+        "auth.User", related_name="private_messages_received", on_delete=models.CASCADE,
     )
     message = models.CharField(max_length=4096)
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -126,14 +122,10 @@ class PrivateMessage(models.Model):
 
 class TrustConnection(models.Model):
     user = models.ForeignKey(
-        "auth.User",
-        related_name="trust_connections",
-        on_delete=models.CASCADE,
+        "auth.User", related_name="trust_connections", on_delete=models.CASCADE,
     )
     trusted_user = models.ForeignKey(
-        "auth.User",
-        related_name="trusted_by",
-        on_delete=models.CASCADE,
+        "auth.User", related_name="trusted_by", on_delete=models.CASCADE,
     )
     timestamp = models.DateTimeField(auto_now_add=True)
 
@@ -143,13 +135,9 @@ class TrustConnection(models.Model):
 
 class TrustRequest(models.Model):
     user = models.ForeignKey(
-        "auth.User",
-        related_name="trust_requests",
-        on_delete=models.CASCADE,
+        "auth.User", related_name="trust_requests", on_delete=models.CASCADE,
     )
     trusted_user = models.ForeignKey(
-        "auth.User",
-        related_name="trust_requests_received",
-        on_delete=models.CASCADE,
+        "auth.User", related_name="trust_requests_received", on_delete=models.CASCADE,
     )
     timestamp = models.DateTimeField(auto_now_add=True)

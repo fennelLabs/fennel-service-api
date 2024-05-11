@@ -36,17 +36,11 @@ def get_api_group_list(request):
             {
                 "active": api_group.active,
                 "user_list": [
-                    {
-                        "username": user.username,
-                        "email": user.email,
-                    }
+                    {"username": user.username, "email": user.email,}
                     for user in api_group.user_list.all()
                 ],
                 "admin_list": [
-                    {
-                        "username": user.username,
-                        "email": user.email,
-                    }
+                    {"username": user.username, "email": user.email,}
                     for user in api_group.admin_list.all()
                 ],
                 "request_count": api_group.request_counter,

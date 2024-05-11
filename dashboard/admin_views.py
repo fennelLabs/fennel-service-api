@@ -80,11 +80,7 @@ def api_group_members(request, group_id=None):
     return render(
         request,
         "dashboard/member_list.html",
-        {
-            "members": members,
-            "group_id": group.id,
-            "account_created": account_created,
-        },
+        {"members": members, "group_id": group.id, "account_created": account_created,},
     )
 
 
@@ -135,8 +131,7 @@ def __tranfer_tokens_to_member_post(request, form, user_key, member, group_id):
         return redirect("dashboard:api_group_members", group_id=group_id)
     if balance < amount + fee:
         messages.error(
-            request,
-            "You do not have enough tokens to complete this transaction.",
+            request, "You do not have enough tokens to complete this transaction.",
         )
         return redirect("dashboard:api_group_members", group_id=group_id)
     return render(
@@ -157,17 +152,16 @@ def __tranfer_tokens_to_member_post(request, form, user_key, member, group_id):
 def transfer_tokens_to_member(request, group_id=None, member_id=None):
     messages.get_messages(request).used = True
     member = get_object_or_404(UserKeys, user__pk=member_id)
+    recipient = User.objects.get(id=member_id)
     if not member.mnemonic:
         messages.error(
-            request,
-            "This member has not created a Fennel wallet yet.",
+            request, "This member has not created a Fennel wallet yet.",
         )
         return redirect("dashboard:api_group_members", group_id=group_id)
     user_key = get_object_or_404(UserKeys, user=request.user)
     if not user_key.mnemonic:
         messages.error(
-            request,
-            "You have not created a Fennel wallet yet.",
+            request, "You have not created a Fennel wallet yet.",
         )
         return redirect("dashboard:api_group_members", group_id=group_id)
     if request.method == "GET":
@@ -181,7 +175,12 @@ def transfer_tokens_to_member(request, group_id=None, member_id=None):
     return render(
         request,
         "dashboard/transfer_tokens.html",
-        {"group_id": group_id, "member_id": member.id, "form": form},
+        {
+            "group_id": group_id,
+            "member_id": member.id,
+            "form": form,
+            "username": recipient.username,
+        },
     )
 
 
@@ -205,20 +204,17 @@ def remove_group_member(request, group_id=None, member_id=None):
     member = get_object_or_404(User, id=member_id)
     if not group.user_list.filter(id=member_id).exists():
         messages.error(
-            request,
-            "This user is not a member of this API Group.",
+            request, "This user is not a member of this API Group.",
         )
         return redirect("dashboard:api_group_members", group_id=group_id)
     if group.admin_list.filter(id=member_id).exists():
         messages.error(
-            request,
-            "You cannot remove an admin from an API Group.",
+            request, "You cannot remove an admin from an API Group.",
         )
         return redirect("dashboard:api_group_members", group_id=group_id)
     if member == request.user:
         messages.error(
-            request,
-            "You cannot remove yourself from an API Group.",
+            request, "You cannot remove yourself from an API Group.",
         )
         return redirect("dashboard:api_group_members", group_id=group_id)
     group.user_list.remove(member)
@@ -233,8 +229,7 @@ def generate_group_encryption_keys(request, group_id=None):
     group = get_object_or_404(APIGroup, id=group_id)
     if group.public_diffie_hellman_key:
         messages.error(
-            request,
-            "This API Group already has encryption keys.",
+            request, "This API Group already has encryption keys.",
         )
         return redirect("dashboard:api_group_members", group_id=group_id)
     response = requests.post(

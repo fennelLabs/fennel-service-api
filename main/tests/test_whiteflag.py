@@ -116,9 +116,7 @@ class TestWhiteflagViews(TestCase):
         assert response.json()["private_key"] is not None
         response = client.post(
             "/api/v1/whiteflag/announce_public_key/",
-            {
-                "public_key": response.json()["public_key"],
-            },
+            {"public_key": response.json()["public_key"],},
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         assert response.status_code == 200

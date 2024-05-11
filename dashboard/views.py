@@ -131,8 +131,7 @@ def __tranfer_tokens_to_address_post(request, form, user_key, group_id):
         return redirect("dashboard:api_group_members", group_id=group_id)
     if balance < amount + fee:
         messages.error(
-            request,
-            "You do not have enough tokens to complete this transaction.",
+            request, "You do not have enough tokens to complete this transaction.",
         )
         return redirect("dashboard:api_group_members", group_id=group_id)
     return render(
@@ -155,8 +154,7 @@ def transfer_tokens_to_address(request, group_id=None):
     user_key = get_object_or_404(UserKeys, user=request.user)
     if not user_key.mnemonic:
         messages.error(
-            request,
-            "You have not created a Fennel wallet yet.",
+            request, "You have not created a Fennel wallet yet.",
         )
         return redirect("dashboard:index", group_id=group_id)
     if request.method == "GET":

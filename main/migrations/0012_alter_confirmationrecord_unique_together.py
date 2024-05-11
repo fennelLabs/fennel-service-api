@@ -13,7 +13,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterUniqueTogether(
-            name="confirmationrecord",
-            unique_together={("signal", "confirmer")},
+            name="confirmationrecord", unique_together={("signal", "confirmer")},
         ),
     ]

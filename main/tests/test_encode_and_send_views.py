@@ -123,9 +123,7 @@ class TestEncodeAndSendViews(TestCase):
             "/api/v1/fennel/create_account/",
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
-        group = APIGroup.objects.create(
-            name="test_group",
-        )
+        group = APIGroup.objects.create(name="test_group",)
         group.user_list.add(user)
         user_keys = UserKeys.objects.get(user=user)
         user_keys.balance = "1000000000"

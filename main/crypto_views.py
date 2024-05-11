@@ -128,12 +128,7 @@ def dh_encrypt_whiteflag_message(request):
         form.cleaned_data["message"], form.cleaned_data["shared_secret"]
     )
     if success:
-        return Response(
-            {
-                "encrypted": signal,
-            },
-            200,
-        )
+        return Response({"encrypted": signal,}, 200,)
     return Response(signal, 400)
 
 
@@ -148,12 +143,7 @@ def dh_decrypt_whiteflag_message(request):
         form.cleaned_data["message"], form.cleaned_data["shared_secret"]
     )
     if success:
-        return Response(
-            {
-                "decrypted": signal,
-            },
-            200,
-        )
+        return Response({"decrypted": signal,}, 200,)
     return Response(signal, 400)
 
 

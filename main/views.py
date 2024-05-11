@@ -1,8 +1,6 @@
 import os
 from django.http import Http404
-from rest_framework.decorators import (
-    api_view,
-)
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import requests
 
@@ -21,8 +19,7 @@ def livecheck(request):
         print("bitwise is unreachable")
         raise Http404
     response = requests.get(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/healthcheck",
-        timeout=5,
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/healthcheck", timeout=5,
     )
     if response.status_code != 200:
         print("subservice is unreachable.")
@@ -38,8 +35,7 @@ def healthcheck(request):
 @api_view(["GET"])
 def subservice_healthcheck(request):
     response = requests.get(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/healthcheck",
-        timeout=5,
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/healthcheck", timeout=5,
     )
     if response.status_code == 200:
         return Response("Ok")

@@ -3,9 +3,7 @@ from django.test.client import Client
 from django.contrib.auth import get_user_model
 from model_bakery import baker
 from main.models import Transaction, Signal, ConfirmationRecord, UserKeys
-from main.fennel_views import (
-    record_signal_fee,
-)
+from main.fennel_views import record_signal_fee
 
 
 class TestFennelViews(TestCase):
@@ -92,8 +90,7 @@ class TestFennelViews(TestCase):
         assert response.json()["token"] is not None
         user = user_model.objects.get(username="signals_test")
         UserKeys.objects.update_or_create(
-            user=user,
-            address="test",
+            user=user, address="test",
         )
         for _ in range(100):
             baker.make("main.Signal", sender=user)
@@ -186,8 +183,7 @@ class TestFennelViews(TestCase):
         assert auth_response.json()["token"] is not None
         user = user_model.objects.get(username="confirm_signal_list_test")
         UserKeys.objects.update_or_create(
-            user=user,
-            address="test",
+            user=user, address="test",
         )
         signal = baker.make("main.Signal", sender=user)
         response = client.post(
@@ -226,8 +222,7 @@ class TestFennelViews(TestCase):
         assert response.json()["token"] is not None
         user = user_model.objects.get(username="signals_test")
         UserKeys.objects.update_or_create(
-            user=user,
-            address="test",
+            user=user, address="test",
         )
         for _ in range(100):
             baker.make("main.Signal", sender=user)
@@ -255,8 +250,7 @@ class TestFennelViews(TestCase):
         assert response.json()["token"] is not None
         user = user_model.objects.get(username="signals_count_test")
         UserKeys.objects.update_or_create(
-            user=user,
-            address="test",
+            user=user, address="test",
         )
         for _ in range(100):
             baker.make("main.Signal", sender=user)
@@ -283,8 +277,7 @@ class TestFennelViews(TestCase):
         assert response.json()["token"] is not None
         user = user_model.objects.get(username="signals_count_test")
         UserKeys.objects.update_or_create(
-            user=user,
-            address="test",
+            user=user, address="test",
         )
         for i in range(100):
             baker.make("main.Signal", pk=i, sender=user)
@@ -482,8 +475,7 @@ class TestFennelViews(TestCase):
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         signal_id = Signal.objects.create(
-            sender=user,
-            signal_text="This is a test.",
+            sender=user, signal_text="This is a test.",
         ).id
         response = client.post(
             "/api/v1/fennel/get_fee_for_sync_signal/",

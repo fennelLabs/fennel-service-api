@@ -30,17 +30,12 @@ from main.decorators import subject_to_api_limit
 def create_self_custodial_account(request):
     if UserKeys.objects.filter(user=request.user).exists():
         if UserKeys.objects.get(user=request.user).mnemonic:
-            return Response(
-                {
-                    "error": "user already has an account",
-                }
-            )
+            return Response({"error": "user already has an account",})
         keys = UserKeys.objects.get(user=request.user)
     else:
         keys = UserKeys.objects.create(user=request.user)
     response = requests.get(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/create_account",
-        timeout=5,
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/create_account", timeout=5,
     )
     mnemonic = response.json()["mnemonic"]
     public_key = response.json()["publicKey"]
@@ -72,11 +67,7 @@ def reconstruct_self_custodial_account(request):
         ast.literal_eval(bytes.fromhex(request.data["user_shard"]).decode("utf-8")),
     ]
     mnemonic = reconstruct_mnemonic(key_shards)
-    return Response(
-        {
-            "mnemonic": mnemonic,
-        }
-    )
+    return Response({"mnemonic": mnemonic,})
 
 
 @silk_profile(name="download_self_custodial_account_as_json")

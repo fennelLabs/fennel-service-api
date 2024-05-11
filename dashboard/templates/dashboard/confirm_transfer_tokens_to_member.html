@@ -9,12 +9,12 @@
 >
   {% csrf_token %}
   <div>
-    Are you sure you want to send {{ amount }} tokens to {{ member_id }} with a fee of {{ fee }} ?
+    Are you sure you want to send {{ amount }} tokens to {{ username }} with a fee of {{ fee }} ?
   </div>
   <input type="hidden" name="group_id" value="{{ group_id }}" />
   <input type="hidden" name="member_id" value="{{ member_id }}" />
   <input type="hidden" name="amount" value="{{ amount }}" />
-  <button class="btn-primary" type="submit">Send</button>
-  <a class="btn-primary" href="{% url 'dashboard:api_group_members' group_id %}">Cancel</a>
+  <button class="btn btn-primary" type="submit">Send</button>
+  <a class="btn btn-primary" href="{% url 'dashboard:api_group_members' group_id %}">Cancel</a>
 </form>
 {% endblock %}

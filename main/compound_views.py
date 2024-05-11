@@ -50,26 +50,11 @@ def get_fee_for_encode_and_send_signal(request):
         balance = check_balance(user_key)["balance"]
         if not success:
             return Response(
-                {
-                    "signal_response": response,
-                    "balance": balance,
-                },
-                status=400,
+                {"signal_response": response, "balance": balance,}, status=400,
             )
-        return Response(
-            {
-                "signal_response": response,
-                "balance": balance,
-            },
-            status=200,
-        )
+        return Response({"signal_response": response, "balance": balance,}, status=200,)
     except requests.HTTPError:
-        return Response(
-            {
-                "message": "could not get fees",
-            },
-            status=400,
-        )
+        return Response({"message": "could not get fees",}, status=400,)
 
 
 @api_view(["POST"])
@@ -92,23 +77,16 @@ def encode_and_send_signal(request):
             )
         else:
             return Response(
-                {
-                    "message": "specified recipient group does not exist",
-                },
-                status=400,
+                {"message": "specified recipient group does not exist",}, status=400,
             )
     signal_text_encoded, signal_encode_success = whiteflag_encoder_helper(
         serializer.validated_data["signal_body"], sender_group, recipient_group
     )
     if not signal_encode_success:
         signal_text_encoded["step"] = "signal_encode"
-        return Response(
-            signal_text_encoded,
-            status=400,
-        )
+        return Response(signal_text_encoded, status=400,)
     signal = Signal.objects.create(
-        signal_text=signal_text_encoded,
-        sender=request.user,
+        signal_text=signal_text_encoded, sender=request.user,
     )
     if recipient_group:
         signal.viewers.add(recipient_group)
@@ -116,14 +94,8 @@ def encode_and_send_signal(request):
         UserKeys.objects.get(user=request.user), signal
     )
     if not signal_success:
-        return Response(
-            signal_sent_response,
-            status=400,
-        )
-    return Response(
-        signal_sent_response,
-        status=200,
-    )
+        return Response(signal_sent_response, status=400,)
+    return Response(signal_sent_response, status=200,)
 
 
 @api_view(["POST"])
@@ -153,10 +125,7 @@ def encode_list(request):
                 "message": "signal encoded",
             }
         )
-    return Response(
-        processed,
-        status=200,
-    )
+    return Response(processed, status=200,)
 
 
 @api_view(["POST"])
@@ -168,18 +137,14 @@ def decode_list(request):
         return Response(serializer.errors, status=400)
     signals = serializer.data["signals"]
     signals_list = Signal.objects.filter(
-        pk__in=signals,
-        signal_text__startswith="574631",
+        pk__in=signals, signal_text__startswith="574631",
     )
     if len(signals_list) == 0:
         return Response({"message": "No signals found for the given list"}, status=400)
     response_json = []
     for signal in signals_list:
         response_json.append(process_decoding_signal(request.user, signal, depth=0))
-    return Response(
-        response_json,
-        status=200,
-    )
+    return Response(response_json, status=200,)
 
 
 @api_view(["POST"])
@@ -237,12 +202,7 @@ def get_fee_for_send_signal_with_annotations(request):
             status=200,
         )
     except requests.HTTPError:
-        return Response(
-            {
-                "message": "could not get fees",
-            },
-            status=400,
-        )
+        return Response({"message": "could not get fees",}, status=400,)
 
 
 @api_view(["POST"])
@@ -265,25 +225,16 @@ def send_signal_with_annotations(request):
             )
         else:
             return Response(
-                {
-                    "message": "specified recipient group does not exist",
-                },
-                status=400,
+                {"message": "specified recipient group does not exist",}, status=400,
             )
     signal_text_encoded, signal_encode_success = whiteflag_encoder_helper(
         serializer.validated_data["signal_body"], sender_group, recipient_group
     )
     if not signal_encode_success:
         signal_text_encoded["step"] = "signal_encode"
-        return Response(
-            {
-                "signal_response": signal_text_encoded,
-            },
-            status=400,
-        )
+        return Response({"signal_response": signal_text_encoded,}, status=400,)
     signal = Signal.objects.create(
-        signal_text=signal_text_encoded,
-        sender=request.user,
+        signal_text=signal_text_encoded, sender=request.user,
     )
     if recipient_group:
         signal.viewers.add(recipient_group)
@@ -313,8 +264,7 @@ def send_signal_with_annotations(request):
             status=400,
         )
     annotation = Signal.objects.create(
-        signal_text=annotation_text_encoded,
-        sender=request.user,
+        signal_text=annotation_text_encoded, sender=request.user,
     )
     if recipient_group:
         annotation.viewers.add(recipient_group)
@@ -359,12 +309,7 @@ def get_fee_for_send_signal_list(request):
         form = SignalForm({"signal": signal})
         if not form.is_valid():
             processed.append(
-                {
-                    "signal": signal,
-                    "success": False,
-                    "message": form.errors,
-                    "fee": 0,
-                }
+                {"signal": signal, "success": False, "message": form.errors, "fee": 0,}
             )
         else:
             payload = {
@@ -420,16 +365,11 @@ def send_signal_list(request):
         )
         if not form.is_valid():
             processed.append(
-                {
-                    "signal": signal,
-                    "success": False,
-                    "message": form.errors,
-                }
+                {"signal": signal, "success": False, "message": form.errors,}
             )
         else:
             signal_object = Signal.objects.create(
-                signal_text=form.cleaned_data["signal"],
-                sender=request.user,
+                signal_text=form.cleaned_data["signal"], sender=request.user,
             )
             signal_sent_response, signal_success = signal_send_helper(
                 UserKeys.objects.get(user=request.user), signal_object
@@ -441,7 +381,4 @@ def send_signal_list(request):
                     "message": signal_sent_response,
                 }
             )
-    return Response(
-        processed,
-        status=200,
-    )
+    return Response(processed, status=200,)

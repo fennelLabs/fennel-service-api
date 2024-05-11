@@ -138,9 +138,7 @@ else:
     }
 
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        "knox.auth.TokenAuthentication",
-    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": ["knox.auth.TokenAuthentication",],
     "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
 }
 
@@ -151,15 +149,9 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
 ]
 
 STORAGES = {
@@ -234,12 +226,8 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "filters": {
-        "require_debug_false": {
-            "()": "django.utils.log.RequireDebugFalse",
-        },
-        "require_debug_true": {
-            "()": "django.utils.log.RequireDebugTrue",
-        },
+        "require_debug_false": {"()": "django.utils.log.RequireDebugFalse",},
+        "require_debug_true": {"()": "django.utils.log.RequireDebugTrue",},
     },
     "formatters": {
         "django.server": {
@@ -300,7 +288,7 @@ SILKY_INTERCEPT_FUNC = silk_intercept
 SILKY_MAX_RESPONSE_BODY_SIZE = 1024
 SILKY_META = True
 SILKY_INTERCEPT_PERCENT = 50
-SILKY_MAX_RECORDED_REQUESTS = 10**3
+SILKY_MAX_RECORDED_REQUESTS = 10 ** 3
 SILKY_MAX_RECORDED_REQUESTS_CHECK_PERCENT = 10
 SILKY_PYTHON_PROFILER_RESULT_PATH = os.path.join(BASE_DIR, "profile")
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
