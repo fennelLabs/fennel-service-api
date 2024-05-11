@@ -2,7 +2,7 @@
 {% block content %}
 {% load crispy_forms_tags %}
 <form
-  action="{% url 'dashboard:confirm_transfer_tokens_to_member' %}"
+  action="{% url 'dashboard:confirm_transfer_tokens_to_member' group_id member_id %}"
   id="confirm_transfer_token_form"
   method="post"
   name="confirm_tranfer_token_form"
