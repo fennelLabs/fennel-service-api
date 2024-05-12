@@ -50,9 +50,15 @@ def import_account_with_mnemonic(request, mnemonic: str) -> None:
             request, "Failed to import Fennel wallet.",
         )
         return
-    UserKeys.objects.update_or_create(
-        user=request.user, mnemonic=mnemonic, address=response.json()["address"],
-    )
+    if UserKeys.objects.filter(user=request.user).exists():
+        keys = UserKeys.objects.filter(user=request.user)[0]
+        keys.mnemonic = mnemonic
+        keys.address = response.json()["address"]
+        keys.save()
+    else:
+        UserKeys.objects.create(
+            user=request.user, mnemonic=mnemonic, address=response.json()["address"],
+        )
     messages.success(
         request, "Fennel wallet imported.",
     )
@@ -101,16 +107,30 @@ def get_fee_for_transfer_token(recipient: str, amount: int, user_key: UserKeys) 
 
 @silk_profile(name="transfer_token")
 def transfer_token(recipient: str, amount: int, user_key: UserKeys) -> None:
+    print("preparing request")
+    math_response = requests.get(
+        f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/big_multiply",
+        params={"a": amount, "b": 1000000000000},
+        timeout=5,
+    )
+    if math_response.status_code != 200:
+        return
+    if not math_response.json()["success"]:
+        return
+    adjusted_value = math_response.json()["result"]
+    print("sending adjusted value")
     payload = {
         "mnemonic": user_key.mnemonic,
         "to": recipient,
-        "amount": amount * 1000000000000,
+        "amount": adjusted_value,
     }
+    print("sending payload")
     response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/transfer_token",
         data=payload,
         timeout=5,
     )
+    print("response received")
     if response.status_code != 200:
         return
     check_balance(user_key)

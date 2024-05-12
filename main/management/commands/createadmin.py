@@ -6,6 +6,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
 from django.core.management.base import BaseCommand
 
+from main.models import UserKeys
+
 
 class Command(BaseCommand):
     """
@@ -30,6 +32,11 @@ class Command(BaseCommand):
             superuser.first_name = "Admin"
             superuser.last_name = "User"
             superuser.save()
+            UserKeys.objects.create(
+                user=superuser,
+                mnemonic="bottom drive obey lake curtain smoke basket hold race lonely fit walk//Alice",
+                address="5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+            )
         else:
             superuser = User.objects.get(username="admin")
         if not superuser.groups.filter(name="FennelAdmin").exists():
