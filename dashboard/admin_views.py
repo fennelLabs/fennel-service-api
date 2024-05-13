@@ -198,7 +198,17 @@ def confirm_transfer_tokens_to_member(request, group_id=None, member_id=None):
     user_key = get_object_or_404(UserKeys, user=request.user)
     amount = request.POST.get("amount")
     print("confirming transfer of tokens")
-    transfer_token(member.address, amount, user_key)
+    result = transfer_token(member.address, amount, user_key)
+    if result["status"] == -1:
+        messages.error(
+            request,
+            result["message"],
+        )
+    else:
+        messages.success(
+            request,
+            f"Successfully transferred {amount} tokens to {member.user.username}.",
+        )
     return redirect("dashboard:api_group_members", group_id=group_id)
 
 

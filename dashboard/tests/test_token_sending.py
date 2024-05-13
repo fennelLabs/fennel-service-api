@@ -1,5 +1,7 @@
+import os
 from django.test import Client, TestCase
 from django.urls import reverse
+import requests
 
 from dashboard.models import APIGroup, APIGroupJoinRequest, User, UserKeys
 
@@ -79,3 +81,13 @@ class TestTokenSending(TestCase):
             data={"amount": 50},
             content_type="application/x-www-form-urlencoded",
         )
+
+    def test_big_multiply_call(self):
+        math_response = requests.post(
+            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/big_multiply",
+            json={"a": "50", "b": "1000000000000"},
+            timeout=5,
+        )
+        self.assertEqual(math_response.status_code, 200)
+        self.assertEqual(int(math_response.json()["result"]), 50000000000000)
+        

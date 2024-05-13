@@ -116,17 +116,20 @@ def get_fee_for_transfer_token(recipient: str, amount: int, user_key: UserKeys) 
 
 
 @silk_profile(name="transfer_token")
-def transfer_token(recipient: str, amount: int, user_key: UserKeys) -> None:
+def transfer_token(recipient: str, amount: int, user_key: UserKeys) -> {int, str}:
     print("preparing request")
-    math_response = requests.get(
+    math_response = requests.post(
         f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/big_multiply",
-        params={"a": amount, "b": 1000000000000},
+        json={"a": str(amount), "b": "1000000000000"},
         timeout=5,
     )
+    print(math_response.status_code)
+    if math_response.status_code == 404:
+        return {"status": -1, "message": "Failed to access token calculation service."}
     if math_response.status_code != 200:
-        return
+        return {"status": -1, "message": "Failed to retrieve adjusted amount. There was an error in the service."}
     if not math_response.json()["success"]:
-        return
+        return {"status": -1, "message": "Token adjustment was not successful."}
     adjusted_value = math_response.json()["result"]
     print("sending adjusted value")
     payload = {
@@ -142,5 +145,6 @@ def transfer_token(recipient: str, amount: int, user_key: UserKeys) -> None:
     )
     print("response received")
     if response.status_code != 200:
-        return
+        return {"status": -1, "message": "Failed to transfer token."}
     check_balance(user_key)
+    return {"status": 0, "message": "Token transferred."}

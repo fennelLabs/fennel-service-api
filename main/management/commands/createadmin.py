@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
 from django.core.management.base import BaseCommand
 
-from main.models import UserKeys
+from main.models import UserKeys, APIGroup
 
 
 class Command(BaseCommand):
@@ -41,3 +41,15 @@ class Command(BaseCommand):
             superuser = User.objects.get(username="admin")
         if not superuser.groups.filter(name="FennelAdmin").exists():
             superuser.groups.add(Group.objects.get(name="FennelAdmin"))
+        if not User.objects.filter(username="test").exists():
+            testuser = User.objects.create_user(
+                username="test", password="test", email="test@test.com"
+            )
+        else:
+            testuser = User.objects.get(username="test")
+        if not APIGroup.objects.filter(name="Test").exists():
+            group = APIGroup.objects.create(name="Test")
+            group.admin_list.add(superuser)
+            group.user_list.add(superuser)
+            group.user_list.add(testuser)
+            group.save()

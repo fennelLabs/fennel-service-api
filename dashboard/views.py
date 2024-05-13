@@ -179,7 +179,17 @@ def confirm_transfer_tokens_to_address(request, group_id=None):
     user_key = get_object_or_404(UserKeys, user=request.user)
     amount = request.POST.get("amount")
     address = request.POST.get("address")
-    transfer_token(address, amount, user_key)
+    result = transfer_token(address, amount, user_key)
+    if result == -1:
+        messages.error(
+            request,
+            result["error"],
+        )
+    else:
+        messages.success(
+            request,
+            f"Successfully transferred {amount} tokens to {address}.",
+        )
     return redirect("dashboard:index", group_id=group_id)
 
 
