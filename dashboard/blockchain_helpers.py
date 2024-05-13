@@ -13,11 +13,13 @@ import requests
 def create_wallet_with_userkeys(request, keys: UserKeys) -> None:
     if keys.mnemonic is not None and keys.mnemonic != "":
         messages.error(
-            request, "Fennel wallet already exists.",
+            request,
+            "Fennel wallet already exists.",
         )
         return
     response = requests.get(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/create_account", timeout=5,
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/create_account",
+        timeout=5,
     )
     mnemonic = response.json()["mnemonic"]
     keys.mnemonic = mnemonic
@@ -30,11 +32,13 @@ def create_wallet_with_userkeys(request, keys: UserKeys) -> None:
     keys.save()
     if response.status_code != 200:
         messages.error(
-            request, "Failed to create Fennel wallet.",
+            request,
+            "Failed to create Fennel wallet.",
         )
     else:
         messages.success(
-            request, "Fennel wallet created.",
+            request,
+            "Fennel wallet created.",
         )
 
 
@@ -47,7 +51,8 @@ def import_account_with_mnemonic(request, mnemonic: str) -> None:
     )
     if response.status_code != 200:
         messages.error(
-            request, "Failed to import Fennel wallet.",
+            request,
+            "Failed to import Fennel wallet.",
         )
         return
     if UserKeys.objects.filter(user=request.user).exists():
@@ -57,10 +62,13 @@ def import_account_with_mnemonic(request, mnemonic: str) -> None:
         keys.save()
     else:
         UserKeys.objects.create(
-            user=request.user, mnemonic=mnemonic, address=response.json()["address"],
+            user=request.user,
+            mnemonic=mnemonic,
+            address=response.json()["address"],
         )
     messages.success(
-        request, "Fennel wallet imported.",
+        request,
+        "Fennel wallet imported.",
     )
 
 
@@ -100,7 +108,9 @@ def get_fee_for_transfer_token(recipient: str, amount: int, user_key: UserKeys) 
     if response.status_code != 200:
         return -1
     Transaction.objects.create(
-        function="transfer_token", payload_size=0, fee=response.json()["fee"],
+        function="transfer_token",
+        payload_size=0,
+        fee=response.json()["fee"],
     )
     return round(int(response.json()["fee"]) / 1000000000000, 4)
 

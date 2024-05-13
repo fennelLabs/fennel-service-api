@@ -72,3 +72,10 @@ class TestTokenSending(TestCase):
             ),
             data={"amount": 10},
         )
+
+    def test_confirm_transfer_tokens_404(self):
+        self.client.post(
+            path="/api/dashboard/members/1/transfer/1/confirm/",
+            data={"amount": 50},
+            content_type="application/x-www-form-urlencoded",
+        )
