@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     "silk",
     "bootstrap5",
     "crispy_bootstrap5",
+    "anymail",
 ]
 
 MIDDLEWARE = [
@@ -210,11 +211,15 @@ CSRF_COOKIE_SAMESITE = "None"
 REST_SESSION_LOGIN = False
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = os.environ.get("EMAIL_HOST")
-EMAIL_PORT = os.environ.get("EMAIL_PORT")
-EMAIL_HOST_USER = os.environ.get("EMAIL_USERNAME")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_PASSWORD")
-EMAIL_USE_TLS = True
+
+ANYMAIL = {
+    "AMAZON_SES_CLIENT_PARAMS": {
+        "aws_access_key_id": os.getenv("AWS_SES_ACCESS_KEY_ID"),
+        "aws_secret_access_key": os.getenv("AWS_SES_SECRET_ACCESS_KEY"),
+        "region_name": "us-east-2",
+    },
+}
+
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
 SERVER_EMAIL = os.environ.get("SERVER_EMAIL")
 
