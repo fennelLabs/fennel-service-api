@@ -908,7 +908,10 @@ class TestAPIAdminViews(TestCase):
         assert auth_response_two.status_code == 200
         login_response = client.post(
             "/api/v1/auth/login/",
-            {"username": "test_get_api_group_users", "password": "testpassword",},
+            {
+                "username": "test_get_api_group_users",
+                "password": "testpassword",
+            },
         )
         assert login_response.status_code == 200
         token = login_response.json()["token"]
@@ -987,7 +990,8 @@ class TestAPIAdminViews(TestCase):
         )
         assert response.status_code == 200
         response = client.get(
-            "/api/v1/group/fennel_admin/get_list/", HTTP_AUTHORIZATION=f"Token {token}",
+            "/api/v1/group/fennel_admin/get_list/",
+            HTTP_AUTHORIZATION=f"Token {token}",
         )
         assert response.status_code == 200
         assert len(response.json()) == 1

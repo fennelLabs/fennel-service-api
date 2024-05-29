@@ -69,7 +69,10 @@ class TestAPIGroupViews(TestCase):
         ).exists()
         response = client.post(
             "/api/v1/group/generate_keypair/",
-            {"api_key": group.api_key, "api_secret": group.api_secret,},
+            {
+                "api_key": group.api_key,
+                "api_secret": group.api_secret,
+            },
             HTTP_AUTHORIZATION=f"Token {token}",
         )
         assert response.status_code == 200
@@ -118,13 +121,19 @@ class TestAPIGroupViews(TestCase):
         assert group.admin_list.filter(username="test_get_apigroup_keypair").exists()
         response = client.post(
             "/api/v1/group/generate_keypair/",
-            {"api_key": group.api_key, "api_secret": group.api_secret,},
+            {
+                "api_key": group.api_key,
+                "api_secret": group.api_secret,
+            },
             HTTP_AUTHORIZATION=f"Token {token}",
         )
         assert response.status_code == 200
         response = client.post(
             "/api/v1/group/get_keypair/",
-            {"api_key": group.api_key, "api_secret": group.api_secret,},
+            {
+                "api_key": group.api_key,
+                "api_secret": group.api_secret,
+            },
             HTTP_AUTHORIZATION=f"Token {token}",
         )
         assert response.status_code == 200
@@ -173,7 +182,10 @@ class TestAPIGroupViews(TestCase):
         assert group.admin_list.filter(username="test_get_apigroup_keypair").exists()
         response = client.post(
             "/api/v1/group/get_keypair/",
-            {"api_key": group.api_key, "api_secret": group.api_secret,},
+            {
+                "api_key": group.api_key,
+                "api_secret": group.api_secret,
+            },
             HTTP_AUTHORIZATION=f"Token {token}",
         )
         assert response.status_code == 400

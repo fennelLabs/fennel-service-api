@@ -90,4 +90,3 @@ class TestTokenSending(TestCase):
         )
         self.assertEqual(math_response.status_code, 200)
         self.assertEqual(int(math_response.json()["result"]), 50000000000000)
-        

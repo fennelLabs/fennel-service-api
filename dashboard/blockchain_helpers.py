@@ -127,7 +127,10 @@ def transfer_token(recipient: str, amount: int, user_key: UserKeys) -> {int, str
     if math_response.status_code == 404:
         return {"status": -1, "message": "Failed to access token calculation service."}
     if math_response.status_code != 200:
-        return {"status": -1, "message": "Failed to retrieve adjusted amount. There was an error in the service."}
+        return {
+            "status": -1,
+            "message": "Failed to retrieve adjusted amount. There was an error in the service.",
+        }
     if not math_response.json()["success"]:
         return {"status": -1, "message": "Token adjustment was not successful."}
     adjusted_value = math_response.json()["result"]

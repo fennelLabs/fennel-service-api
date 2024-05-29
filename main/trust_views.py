@@ -35,7 +35,9 @@ def get_fee_for_issue_trust(request):
         timeout=5,
     )
     Transaction.objects.create(
-        function="issue_trust", payload_size=0, fee=response.json()["fee"],
+        function="issue_trust",
+        payload_size=0,
+        fee=response.json()["fee"],
     )
     response_json = {}
     response_json["fee"] = int(response.json()["fee"])
@@ -87,7 +89,9 @@ def get_fee_for_remove_trust(request):
         timeout=5,
     )
     Transaction.objects.create(
-        function="remove_trust", payload_size=0, fee=response.json()["fee"],
+        function="remove_trust",
+        payload_size=0,
+        fee=response.json()["fee"],
     )
     response_json = {}
     response_json["fee"] = int(response.json()["fee"])
@@ -139,7 +143,9 @@ def get_fee_for_request_trust(request):
         timeout=5,
     )
     Transaction.objects.create(
-        function="request_trust", payload_size=0, fee=response.json()["fee"],
+        function="request_trust",
+        payload_size=0,
+        fee=response.json()["fee"],
     )
     response_json = {}
     response_json["fee"] = int(response.json()["fee"])
@@ -189,7 +195,9 @@ def get_fee_for_cancel_trust_request(request):
         timeout=5,
     )
     Transaction.objects.create(
-        function="cancel_trust_request", payload_size=0, fee=response.json()["fee"],
+        function="cancel_trust_request",
+        payload_size=0,
+        fee=response.json()["fee"],
     )
     response_json = {}
     response_json["fee"] = int(response.json()["fee"])

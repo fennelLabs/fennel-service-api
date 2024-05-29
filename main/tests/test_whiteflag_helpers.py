@@ -54,7 +54,11 @@ class TestWhiteflagHelpers(TestCase):
         client = Client()
         auth_response = client.post(
             "/api/v1/auth/register/",
-            {"username": "test", "password": "test", "email": "test@test.com",},
+            {
+                "username": "test",
+                "password": "test",
+                "email": "test@test.com",
+            },
         )
         user_model = get_user_model()
         user = user_model.objects.get(username="test")

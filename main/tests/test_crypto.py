@@ -198,7 +198,9 @@ class TestCryptoViews(TestCase):
         assert response.status_code == 200
         assert response.json()["token"] is not None
         user = user_model.objects.get(username="get_my_keypair_no_keys_test")
-        UserKeys.objects.update_or_create(user=user,)
+        UserKeys.objects.update_or_create(
+            user=user,
+        )
         response = client.post(
             "/api/v1/crypto/dh/get_my_keypair/",
             HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',

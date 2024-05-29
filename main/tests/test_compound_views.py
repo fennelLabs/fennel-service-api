@@ -148,7 +148,9 @@ class TestCompoundViews(TestCase):
             signal_text="574631312af34c38e3af3ab687ac276965c11b369274da9ddf514bcc0eebf037a268f087f3bda708026b5f7a5b83e49072a2d32f83bc283c249601066c488a0a1e40bb4f27dcb409c14aa7c7b7f0f656c9bc184a8df6fbe7928a25d3e5b74a81ab16df93efcc30b1105c7ba56878afed34f318d337532a293b41c7b54d1af2c6b92414a79e68077655f7e3629bf93b2f43e553ebd518198c2cc1a782bcc3d37e1304f431c9997c803368f54ef2f2774f42543c32d",
         )
         baker.make(
-            Signal, sender=user, signal_text="This is not a whiteflag signal",
+            Signal,
+            sender=user,
+            signal_text="This is not a whiteflag signal",
         )
         response = client.post(
             "/api/v1/whiteflag/decode_list/",
@@ -272,10 +274,15 @@ class TestCompoundViews(TestCase):
         assert encode_response2.json() is not None
         assert encode_response2.json() != ""
         signal2 = baker.make(
-            Signal, sender=user, signal_text=encode_response2.json(), tx_hash="TEST2",
+            Signal,
+            sender=user,
+            signal_text=encode_response2.json(),
+            tx_hash="TEST2",
         )
         baker.make(
-            "main.ConfirmationRecord", signal=signal2, confirmer=user,
+            "main.ConfirmationRecord",
+            signal=signal2,
+            confirmer=user,
         )
         response = client.post(
             "/api/v1/whiteflag/decode_list/",
@@ -533,7 +540,9 @@ class TestCompoundViews(TestCase):
             "5746313024a00000000000000000000000000000000000000000000000000000000000000002910118480849b84800000114e4245102400706000000000000",
         ]
         for signal_text in signal_text_list:
-            Signal.objects.create(signal_text=signal_text,)
+            Signal.objects.create(
+                signal_text=signal_text,
+            )
         signal_ids_list = [signal.id for signal in Signal.objects.all()]
         client = Client()
         user_model = get_user_model()

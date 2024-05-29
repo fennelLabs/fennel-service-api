@@ -53,7 +53,10 @@ def whiteflag_encrypt_helper(message: str, shared_secret: str) -> (str, bool):
     try:
         response = requests.post(
             f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/dh_encrypt",
-            json={"plaintext": message[9:], "shared_secret": shared_secret,},
+            json={
+                "plaintext": message[9:],
+                "shared_secret": shared_secret,
+            },
             timeout=5,
         )
         return (message[0:7] + "1" + message[8:9] + response.text), True
@@ -66,7 +69,10 @@ def whiteflag_decrypt_helper(message: str, shared_secret: str) -> (str, bool):
     try:
         response = requests.post(
             f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/dh_decrypt",
-            json={"ciphertext": message[9:], "shared_secret": shared_secret,},
+            json={
+                "ciphertext": message[9:],
+                "shared_secret": shared_secret,
+            },
             timeout=5,
         )
         if response.status_code != 200:
@@ -81,7 +87,9 @@ def create_whiteflag_encoder_response(
 ):
     if response.status_code == 502:
         return (
-            {"error": "the whiteflag service is inaccessible",},
+            {
+                "error": "the whiteflag service is inaccessible",
+            },
             False,
         )
     try:
@@ -144,9 +152,9 @@ def whiteflag_encoder_helper(
         "objectTypeQuant": payload.get("objectTypeQuant", None),
     }
     if payload.get("referencedMessage", None) is None:
-        json_packet[
-            "referencedMessage"
-        ] = "0000000000000000000000000000000000000000000000000000000000000000"
+        json_packet["referencedMessage"] = (
+            "0000000000000000000000000000000000000000000000000000000000000000"
+        )
     processed_payload = json.dumps({k: v for k, v in json_packet.items() if v})
     response = requests.post(
         f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_encode",

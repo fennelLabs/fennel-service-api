@@ -6,7 +6,7 @@ for some of the functions in this module.
 import random
 from decimal import Decimal
 
-FIELD_SIZE = 10 ** 5
+FIELD_SIZE = 10**5
 
 
 def split_mnemonic(mnemonic):
@@ -79,7 +79,7 @@ def reconstruct_secret(shares):
 def polynom(share_component, coefficients):
     point = 0
     for coefficient_index, coefficient_value in enumerate(coefficients[::-1]):
-        point += share_component ** coefficient_index * coefficient_value
+        point += share_component**coefficient_index * coefficient_value
     return point
 
 

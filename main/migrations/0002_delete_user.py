@@ -10,5 +10,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.DeleteModel(name="User",),
+        migrations.DeleteModel(
+            name="User",
+        ),
     ]

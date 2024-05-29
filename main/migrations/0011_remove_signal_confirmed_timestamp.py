@@ -10,5 +10,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(model_name="signal", name="confirmed_timestamp",),
+        migrations.RemoveField(
+            model_name="signal",
+            name="confirmed_timestamp",
+        ),
     ]

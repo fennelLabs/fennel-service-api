@@ -60,4 +60,10 @@ def get_apigroup_keypair(request):
     ).private_diffie_hellman_key
     if public_key is None or private_key is None:
         return Response({"error": "keypair not created"}, status=400)
-    return Response({"public": public_key, "secret": private_key,}, status=200,)
+    return Response(
+        {
+            "public": public_key,
+            "secret": private_key,
+        },
+        status=200,
+    )

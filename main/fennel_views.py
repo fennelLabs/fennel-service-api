@@ -158,7 +158,8 @@ def create_account(request):
     else:
         keys = UserKeys.objects.create(user=request.user)
     response = requests.get(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/create_account", timeout=5,
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/create_account",
+        timeout=5,
     )
     mnemonic = response.json()["mnemonic"]
     keys.mnemonic = mnemonic
@@ -235,7 +236,9 @@ def get_fee_for_transfer_token(request):
         timeout=5,
     )
     Transaction.objects.create(
-        function="transfer_token", payload_size=0, fee=response.json()["fee"],
+        function="transfer_token",
+        payload_size=0,
+        fee=response.json()["fee"],
     )
     response_json = response.json()
     response_json["fee"] = response_json["fee"]
@@ -308,7 +311,10 @@ def send_new_signal(request):
             APIGroup.objects.get(name=form.cleaned_data["recipient_group"])
         )
     result, success = signal_send_helper(user_key, signal)
-    return Response(result, status=200 if success else 400,)
+    return Response(
+        result,
+        status=200 if success else 400,
+    )
 
 
 @silk_profile(name="get_fee_for_sync_signal")
@@ -343,7 +349,10 @@ def sync_signal(request):
     if signal.sender != request.user:
         return Response({"error": "sender is not current user"}, status=400)
     result, success = signal_send_helper(user_key, signal)
-    return Response(result, status=200 if success else 400,)
+    return Response(
+        result,
+        status=200 if success else 400,
+    )
 
 
 @silk_profile(name="confirm_signal")

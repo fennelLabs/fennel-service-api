@@ -28,7 +28,10 @@ class TestAPIGroupJoinRequestViews(TestCase):
         assert auth_response_two.status_code == 200
         login_response = client.post(
             "/api/v1/auth/login/",
-            {"username": "test_get_api_group_users", "password": "testpassword",},
+            {
+                "username": "test_get_api_group_users",
+                "password": "testpassword",
+            },
         )
         assert login_response.status_code == 200
         token = login_response.json()["token"]
@@ -56,12 +59,15 @@ class TestAPIGroupJoinRequestViews(TestCase):
         assert group.admin_list.filter(username="test_get_api_group_users").exists()
         response = client.post(
             "/api/v1/group/send_join_request/",
-            {"api_group_name": "test_get_api_group_users",},
+            {
+                "api_group_name": "test_get_api_group_users",
+            },
             HTTP_AUTHORIZATION=f"Token {auth_response_two.json()['token']}",
         )
         assert response.status_code == 200
         assert APIGroupJoinRequest.objects.filter(
-            api_group=group, user__username="test_get_api_group_users_two",
+            api_group=group,
+            user__username="test_get_api_group_users_two",
         ).exists()
 
     def test_get_api_group_join_requests(self):
@@ -87,7 +93,10 @@ class TestAPIGroupJoinRequestViews(TestCase):
         assert auth_response_two.status_code == 200
         login_response = client.post(
             "/api/v1/auth/login/",
-            {"username": "test_get_api_group_users", "password": "testpassword",},
+            {
+                "username": "test_get_api_group_users",
+                "password": "testpassword",
+            },
         )
         assert login_response.status_code == 200
         token = login_response.json()["token"]
@@ -115,16 +124,21 @@ class TestAPIGroupJoinRequestViews(TestCase):
         assert group.admin_list.filter(username="test_get_api_group_users").exists()
         response = client.post(
             "/api/v1/group/send_join_request/",
-            {"api_group_name": "test_get_api_group_users",},
+            {
+                "api_group_name": "test_get_api_group_users",
+            },
             HTTP_AUTHORIZATION=f"Token {auth_response_two.json()['token']}",
         )
         assert response.status_code == 200
         assert APIGroupJoinRequest.objects.filter(
-            api_group=group, user__username="test_get_api_group_users_two",
+            api_group=group,
+            user__username="test_get_api_group_users_two",
         ).exists()
         response = client.post(
             "/api/v1/group/get_join_requests/",
-            {"api_group_name": "test_get_api_group_users",},
+            {
+                "api_group_name": "test_get_api_group_users",
+            },
             HTTP_AUTHORIZATION=f"Token {token}",
         )
         assert response.status_code == 200
@@ -160,7 +174,9 @@ class TestAPIGroupJoinRequestViews(TestCase):
         ).exists()
         response = client.post(
             "/api/v1/group/get_join_requests/",
-            {"api_group_name": "test_get_api_group_join_requests",},
+            {
+                "api_group_name": "test_get_api_group_join_requests",
+            },
             HTTP_AUTHORIZATION=f"Token {token}",
         )
         assert response.status_code == 200
@@ -189,7 +205,10 @@ class TestAPIGroupJoinRequestViews(TestCase):
         assert auth_response_two.status_code == 200
         login_response = client.post(
             "/api/v1/auth/login/",
-            {"username": "test_get_api_group_users", "password": "testpassword",},
+            {
+                "username": "test_get_api_group_users",
+                "password": "testpassword",
+            },
         )
         assert login_response.status_code == 200
         token = login_response.json()["token"]
@@ -217,20 +236,26 @@ class TestAPIGroupJoinRequestViews(TestCase):
         assert group.admin_list.filter(username="test_get_api_group_users").exists()
         response = client.post(
             "/api/v1/group/send_join_request/",
-            {"api_group_name": "test_get_api_group_users",},
+            {
+                "api_group_name": "test_get_api_group_users",
+            },
             HTTP_AUTHORIZATION=f"Token {auth_response_two.json()['token']}",
         )
         assert response.status_code == 200
         group_request = APIGroupJoinRequest.objects.get(
-            api_group=group, user__username="test_get_api_group_users_two",
+            api_group=group,
+            user__username="test_get_api_group_users_two",
         )
         response = client.post(
             "/api/v1/group/accept_join_request/",
-            {"join_request_id": group_request.id,},
+            {
+                "join_request_id": group_request.id,
+            },
             HTTP_AUTHORIZATION=f"Token {token}",
         )
         assert response.status_code == 200
         assert not APIGroupJoinRequest.objects.filter(
-            api_group=group, user__username="test_get_api_group_users_two",
+            api_group=group,
+            user__username="test_get_api_group_users_two",
         ).exists()
         assert group.user_list.filter(username="test_get_api_group_users_two").exists()

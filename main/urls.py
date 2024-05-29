@@ -39,10 +39,22 @@ urlpatterns = [
         "group/get_api_group_requests_count/",
         api_admin_views.get_api_group_requests_count,
     ),
-    path("group/get_api_group_users/", api_admin_views.get_api_group_users,),
-    path("group/get_join_requests/", api_admin_views.get_join_requests,),
-    path("group/send_join_request/", api_admin_views.send_join_request,),
-    path("group/accept_join_request/", api_admin_views.accept_join_request,),
+    path(
+        "group/get_api_group_users/",
+        api_admin_views.get_api_group_users,
+    ),
+    path(
+        "group/get_join_requests/",
+        api_admin_views.get_join_requests,
+    ),
+    path(
+        "group/send_join_request/",
+        api_admin_views.send_join_request,
+    ),
+    path(
+        "group/accept_join_request/",
+        api_admin_views.accept_join_request,
+    ),
     path("whiteflag/healthcheck/", whiteflag_views.fennel_cli_healthcheck),
     path("fennel/healthcheck/", views.subservice_healthcheck),
     path("whiteflag/authenticate/", whiteflag_views.whiteflag_authenticate),
@@ -64,8 +76,14 @@ urlpatterns = [
         "whiteflag/generate_public_token/",
         whiteflag_views.whiteflag_generate_public_token,
     ),
-    path("whiteflag/decode_list/", compound_views.decode_list,),
-    path("whiteflag/encode_list/", compound_views.encode_list,),
+    path(
+        "whiteflag/decode_list/",
+        compound_views.decode_list,
+    ),
+    path(
+        "whiteflag/encode_list/",
+        compound_views.encode_list,
+    ),
     path(
         "whiteflag/get_fee_for_send_signal_with_annotations/",
         compound_views.get_fee_for_send_signal_with_annotations,
@@ -74,25 +92,54 @@ urlpatterns = [
         "whiteflag/get_fee_for_encode_and_send_signal/",
         compound_views.get_fee_for_encode_and_send_signal,
     ),
-    path("whiteflag/encode_and_send_signal/", compound_views.encode_and_send_signal,),
+    path(
+        "whiteflag/encode_and_send_signal/",
+        compound_views.encode_and_send_signal,
+    ),
     path(
         "whiteflag/send_signal_with_annotations/",
         compound_views.send_signal_with_annotations,
     ),
-    path("messages/get_messages/", message_views.get_messages,),
-    path("messages/get_sent_messages/", message_views.get_sent_messages,),
     path(
-        "messages/get_message_by_id/<int:message_id>/", message_views.get_message_by_id,
+        "messages/get_messages/",
+        message_views.get_messages,
     ),
-    path("messages/send_message/", message_views.send_message,),
-    path("crypto/dh/whiteflag/is_this_encrypted/", crypto_views.wf_is_this_encrypted,),
-    path("crypto/dh/generate_keypair/", crypto_views.generate_diffie_hellman_keypair,),
-    path("crypto/dh/get_my_keypair/", crypto_views.get_my_keypair,),
     path(
-        "crypto/dh/get_shared_secret/", crypto_views.get_diffie_hellman_shared_secret,
+        "messages/get_sent_messages/",
+        message_views.get_sent_messages,
     ),
-    path("crypto/dh/dm/encrypt_message/", crypto_views.dh_encrypt_message,),
-    path("crypto/dh/dm/decrypt_message/", crypto_views.dh_decrypt_message,),
+    path(
+        "messages/get_message_by_id/<int:message_id>/",
+        message_views.get_message_by_id,
+    ),
+    path(
+        "messages/send_message/",
+        message_views.send_message,
+    ),
+    path(
+        "crypto/dh/whiteflag/is_this_encrypted/",
+        crypto_views.wf_is_this_encrypted,
+    ),
+    path(
+        "crypto/dh/generate_keypair/",
+        crypto_views.generate_diffie_hellman_keypair,
+    ),
+    path(
+        "crypto/dh/get_my_keypair/",
+        crypto_views.get_my_keypair,
+    ),
+    path(
+        "crypto/dh/get_shared_secret/",
+        crypto_views.get_diffie_hellman_shared_secret,
+    ),
+    path(
+        "crypto/dh/dm/encrypt_message/",
+        crypto_views.dh_encrypt_message,
+    ),
+    path(
+        "crypto/dh/dm/decrypt_message/",
+        crypto_views.dh_decrypt_message,
+    ),
     path(
         "crypto/dh/whiteflag/encrypt_message/",
         crypto_views.dh_encrypt_whiteflag_message,

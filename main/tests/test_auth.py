@@ -133,7 +133,10 @@ class TestAuthViews(TestCase):
         assert response.status_code == 200
         response = client.post(
             "/api/v1/auth/reset_password/verify_token/",
-            {"token": "NOPE", "password": "newtestpassword",},
+            {
+                "token": "NOPE",
+                "password": "newtestpassword",
+            },
         )
         assert response.status_code == 404
         user_model = get_user_model()
