@@ -97,7 +97,6 @@ def import_wallet(request, group_id=None):
     if request.method == "POST":
         form = ImportWalletForm(request.POST)
         if not form.is_valid():
-            print("form is not valid")
             return render(
                 request,
                 "dashboard/import_wallet.html",
@@ -112,9 +111,8 @@ def import_wallet(request, group_id=None):
 
 
 @silk_profile(name="transfer_tokens_to_address_post")
-def __tranfer_tokens_to_address_post(request, form, user_key, group_id):
-    amount = form.cleaned_data.get("amount")
-    address = form.cleaned_data.get("address")
+def __tranfer_tokens_to_address_post(request, user_key, group_id, address, amount):
+    print(f"Transferring {amount} tokens to {address}.")
     balance = check_balance(user_key)
     fee = get_fee_for_transfer_token(address, amount, user_key)
     if balance == -1:
@@ -164,7 +162,11 @@ def transfer_tokens_to_address(request, group_id=None):
     if request.method == "POST":
         form = TransferTokenToAddressForm(request.POST)
         if form.is_valid():
-            return __tranfer_tokens_to_address_post(request, form, user_key, group_id)
+            amount = form.cleaned_data.get("amount")
+            address = form.cleaned_data.get("recipient")
+            return __tranfer_tokens_to_address_post(
+                request, user_key, group_id, address, amount
+            )
     return render(
         request,
         "dashboard/transfer_tokens_address.html",
@@ -190,7 +192,7 @@ def confirm_transfer_tokens_to_address(request, group_id=None):
             request,
             f"Successfully transferred {amount} tokens to {address}.",
         )
-    return redirect("dashboard:index", group_id=group_id)
+    return redirect("dashboard:api_group_members", group_id=group_id)
 
 
 @silk_profile(name="get_balance")
@@ -200,19 +202,13 @@ def get_balance(request):
         messages.error(request, "You do not have a wallet.")
         return redirect("dashboard:index")
     keys = UserKeys.objects.get(user=request.user)
-    response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_account_balance",
-        data={"mnemonic": keys.mnemonic},
-        timeout=5,
-    )
-    if response.status_code != 200:
+    balance_result = check_balance(keys)
+    if balance_result == -1:
         messages.error(
             request,
             "Subservice is not available. Try again later, or contact us at info@fennellabs.com.",
         )
         return redirect("dashboard:index")
-    keys.balance = response.json()["balance"]
-    keys.save()
     return redirect("dashboard:index")
 
 
@@ -222,25 +218,11 @@ def get_balance_for_member(request, group_id, member_id):
     if not UserKeys.objects.filter(user__pk=member_id).exists():
         messages.error(request, "That user does not have a wallet.")
         return redirect("dashboard:api_group_members", group_id=group_id)
-    keys = UserKeys.objects.get(user=request.user)
-    try:
-        response = requests.post(
-            f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_account_balance",
-            data={"mnemonic": keys.mnemonic},
-            timeout=5,
-        )
-    except requests.exceptions.ReadTimeout:
+    keys = UserKeys.objects.get(user__pk=member_id)
+    balance_result = check_balance(keys)
+    if balance_result == -1:
         messages.error(
             request,
             "Subservice is not available. Try again later, or contact us at info@fennellabs.com.",
         )
-        return redirect("dashboard:api_group_members", group_id=group_id)
-    if response.status_code != 200:
-        messages.error(
-            request,
-            "Subservice is not available. Try again later, or contact us at info@fennellabs.com.",
-        )
-        return redirect("dashboard:api_group_members", group_id=group_id)
-    keys.balance = response.json()["balance"]
-    keys.save()
     return redirect("dashboard:api_group_members", group_id=group_id)

@@ -2,7 +2,7 @@
 {% block content %}
 {% load crispy_forms_tags %}
 <form
-  action="{% url 'dashboard:confirm_transfer_tokens_to_address' %}"
+  action="{% url 'dashboard:confirm_transfer_tokens_to_address' group_id %}"
   id="confirm_transfer_token_form"
   method="post"
   name="confirm_tranfer_token_form"
@@ -14,7 +14,7 @@
   <input type="hidden" name="group_id" value="{{ group_id }}" />
   <input type="hidden" name="address" value="{{ address }}" />
   <input type="hidden" name="amount" value="{{ amount }}" />
-  <button class="btn-primary" type="submit">Send</button>
-  <a class="btn-primary" href="{% url 'dashboard:index' group_id %}">Cancel</a>
+  <button class="btn btn-primary" type="submit">Send</button>
+  <a class="btn btn-primary" href="{% url 'dashboard:api_group_members' group_id %}">Cancel</a>
 </form>
 {% endblock %}

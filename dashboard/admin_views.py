@@ -155,7 +155,7 @@ def __tranfer_tokens_to_member_post(request, form, user_key, member, group_id):
 def transfer_tokens_to_member(request, group_id=None, member_id=None):
     messages.get_messages(request).used = True
     member = get_object_or_404(UserKeys, user__pk=member_id)
-    recipient = User.objects.get(id=member_id)
+    recipient = member.user
     if not member.mnemonic:
         messages.error(
             request,
