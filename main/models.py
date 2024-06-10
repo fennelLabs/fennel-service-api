@@ -68,6 +68,7 @@ class Signal(models.Model):
     viewers = models.ManyToManyField(
         "APIGroup", related_name="viewable_signals", blank=True
     )
+    active = models.BooleanField(default=True)
 
     def __str__(self):
         return str(self.signal_text)

@@ -101,6 +101,13 @@ urlpatterns = [
         compound_views.send_signal_with_annotations,
     ),
     path(
+        "whiteflag/get_fee_for_discontinue_signal/<int:signal_id>/",
+        compound_views.get_fee_for_discontinue_signal,
+    ),
+    path("whiteflag/discontinue_signal/<int:signal_id>/", compound_views.discontinue_signal,),
+    path("messages/get_messages/", message_views.get_messages,),
+    path("messages/get_sent_messages/", message_views.get_sent_messages,),
+    path(
         "messages/get_messages/",
         message_views.get_messages,
     ),

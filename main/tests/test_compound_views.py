@@ -591,3 +591,30 @@ class TestCompoundViews(TestCase):
             HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
         )
         assert response.status_code == 200
+
+    def test_get_fee_for_discontinue_signal(self):
+        client = Client()
+        response = client.post(
+            "/api/v1/auth/register/",
+            {
+                "username": "get_fee_for_discontinue_signal_test",
+                "password": "test",
+                "email": "test@test.com",
+            },
+        )
+        assert response.status_code == 200
+        assert response.json()["token"] is not None
+        client.post(
+            "/api/v1/fennel/create_account/",
+            HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
+        )
+        signal = Signal.objects.create(
+            signal_text="57463130231874028bb2cce2270447493f0d319969b732100c46a5311f65e6cd13d8a73145c1bb119191b329b189b321b1a991919b099191a321b189b191b9a9b329b9c99181a981b991b1c9b321b189b991b9c99181a999b199b1c1b331b331b3199181a329b1b9b331b3119191bb20",
+            signal_body="{'prefix': 'WF', 'version': '1', 'encryptionIndicator': '0', 'duressIndicator': '0', 'messageCode': 'F', 'referenceIndicator': '3', 'referencedMessage': '0e805176599c44e088e927e1a6332d36e6420188d4a623ecbcd9a27b14e628b8', 'text': '{\"name\":\"Mabuny Primary School Ngok\"}'",
+            tx_hash="3efb4e0cfa83122b242634254c1920a769d615dfcc4c670bb53eb6f12843c3ae",
+        )
+        response = client.post(
+            f"/api/v1/whiteflag/get_fee_for_discontinue_signal/{signal.id}/",
+            HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
+        )
+        assert response.status_code == 200

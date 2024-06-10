@@ -572,6 +572,13 @@ Host: {{hostname}}:{{port}}
 Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
 
 ###
+# @name Fennel - Get Signals - Include Inactive
+# @no-cookie-jar
+GET /api/v1/fennel/get_signals/?include-inactive=True
+Host: {{hostname}}:{{port}}
+Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
+
+###
 # @name Fennel - Get Latest 5 Signals
 # @no-cookie-jar
 GET /api/v1/fennel/get_signals/5/

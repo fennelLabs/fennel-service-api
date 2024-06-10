@@ -380,10 +380,13 @@ def get_signal_by_id(request, signal_id):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def get_signals(request, count=None):
+    show_inactive = request.GET.get("include-inactive", False)
     groups = request.user.api_group_users.all()
-    queryset = Signal.objects.filter(Q(viewers=None) | Q(viewers__in=groups)).order_by(
-        "-timestamp"
-    )
+    queryset = Signal.objects.filter(
+        (Q(viewers=None) | Q(viewers__in=groups))
+    ).order_by("-timestamp")
+    if not show_inactive:
+        queryset = queryset.filter(active=True)
     if count is not None:
         queryset = queryset[:count]
     serializer = SignalSerializer(queryset, many=True)
@@ -395,11 +398,14 @@ def get_signals(request, count=None):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def get_signals_in_range(request, start_index=None, end_index=None):
+    show_inactive = request.GET.get("include-inactive", False)
     groups = request.user.api_group_users.all()
     queryset = Signal.objects.filter(
         (Q(viewers=None) | Q(viewers__in=groups))
         & Q(pk__range=(start_index, end_index))
     ).order_by("-timestamp")
+    if not show_inactive:
+        queryset = queryset.filter(active=True)
     serializer = SignalSerializer(queryset, many=True)
     return Response(serializer.data)
 

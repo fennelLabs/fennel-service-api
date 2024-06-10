@@ -26,7 +26,7 @@ from main.serializers import (
 from main.forms import SignalForm
 from main.models import APIGroup, Signal, UserKeys
 from main.signal_processors import process_decoding_signal
-from main.whiteflag_helpers import whiteflag_encoder_helper
+from main.whiteflag_helpers import whiteflag_encoder_helper, decode
 
 
 @api_view(["POST"])
@@ -441,7 +441,81 @@ def send_signal_list(request):
                     "message": signal_sent_response,
                 }
             )
-    return Response(
-        processed,
-        status=200,
+    return Response(processed, status=200,)
+
+
+@silk_profile(name="get_fee_for_discontinue_signal")
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+@requires_mnemonic_created
+def get_fee_for_discontinue_signal(request, signal_id=None):
+    user_key = UserKeys.objects.get(user=request.user)
+    signal = Signal.objects.get(pk=signal_id)
+    mnemonic = user_key.mnemonic
+    signal_text_encoded = signal.signal_text
+    signal_text, decode_success = decode(signal_text_encoded)
+    if not decode_success:
+        return Response({"message": "signal could not be decoded"}, status=400,)
+    discontinue_signal = {
+        "prefix": "WF",
+        "version": "1",
+        "encryptionIndicator": "0",
+        "duressIndicator": "0",
+        "messageCode": signal_text["messageCode"],
+        "text": signal_text["text"],
+        "referenceIndicator": "4",
+        "referencedMessage": signal.tx_hash,
+    }
+    discontinue_text_encoded = whiteflag_encoder_helper(discontinue_signal)
+    payload = {
+        "mnemonic": mnemonic,
+        "content": discontinue_text_encoded,
+    }
+    try:
+        response, success = record_signal_fee(payload)
+        balance = check_balance(user_key)["balance"]
+        if not success:
+            return Response(
+                {"signal_response": response, "balance": balance,}, status=400,
+            )
+        return Response({"signal_response": response, "balance": balance,}, status=200,)
+    except requests.HTTPError:
+        return Response({"message": "could not get fees",}, status=400,)
+
+
+@silk_profile(name="discontinue_signal")
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+@requires_mnemonic_created
+def discontinue_signal(request, signal_id=None):
+    signal = Signal.objects.get(pk=signal_id)
+    signal_text_encoded = signal.signal_text
+    signal_text, decode_success = decode(signal_text_encoded)
+    if not decode_success:
+        return Response({"message": "signal could not be decoded"}, status=400,)
+    discontinue_signal = {
+        "prefix": "WF",
+        "version": "1",
+        "encryptionIndicator": "0",
+        "duressIndicator": "0",
+        "messageCode": signal_text["messageCode"],
+        "text": signal_text["text"],
+        "referenceIndicator": "4",
+        "referencedMessage": signal.tx_hash,
+    }
+    discontinue_text_encoded = whiteflag_encoder_helper(discontinue_signal)
+    discontinue_signal = Signal.objects.create(
+        signal_text=discontinue_text_encoded, sender=request.user,
     )
+    discontinue_signal.references.add(signal)
+    discontinue_signal.save()
+    signal_sent_response, signal_success = signal_send_helper(
+        UserKeys.objects.get(user=request.user), discontinue_signal
+    )
+    if not signal_success:
+        return Response(signal_sent_response, status=400,)
+    signal.active = False
+    signal.save()
+    return Response(signal_sent_response, status=200,)
