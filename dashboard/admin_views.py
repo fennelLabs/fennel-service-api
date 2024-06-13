@@ -154,8 +154,20 @@ def __tranfer_tokens_to_member_post(request, form, user_key, member, group_id):
 @require_authentication
 def transfer_tokens_to_member(request, group_id=None, member_id=None):
     messages.get_messages(request).used = True
-    member = get_object_or_404(UserKeys, user__pk=member_id)
-    recipient = member.user
+    recipient = User.objects.get(id=member_id)
+    if not recipient:
+        messages.error(
+            request,
+            "This user does not exist.",
+        )
+        return redirect("dashboard:api_group_members", group_id=group_id)
+    member = get_object_or_404(UserKeys, user=recipient)
+    if not member:
+        messages.error(
+            request,
+            "This user does not have a Fennel wallet yet.",
+        )
+        return redirect("dashboard:api_group_members", group_id=group_id)
     if not member.mnemonic:
         messages.error(
             request,
@@ -196,7 +208,6 @@ def confirm_transfer_tokens_to_member(request, group_id=None, member_id=None):
     member = get_object_or_404(UserKeys, user__pk=member_id)
     user_key = get_object_or_404(UserKeys, user=request.user)
     amount = request.POST.get("amount")
-    print("confirming transfer of tokens")
     result = transfer_token(member.address, amount, user_key)
     if result["status"] == -1:
         messages.error(

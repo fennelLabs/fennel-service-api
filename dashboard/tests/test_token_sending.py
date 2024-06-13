@@ -1,4 +1,5 @@
 import os
+import random
 from django.test import Client, TestCase
 from django.urls import reverse
 import requests
@@ -22,28 +23,108 @@ class TestTokenSending(TestCase):
         self.group.user_list.add(self.user)
         self.group.save()
         self.client.login(username="test_user", password="test_password")
-        new_user = User.objects.create_user(
-            username="new_user", password="new_password"
-        )
-        APIGroupJoinRequest.objects.create(api_group=self.group, user=new_user)
-        self.client.get(
-            reverse("dashboard:api_group_join_requests", args=[self.group.id])
-        )
-        self.client.post(
-            reverse(
-                "dashboard:accept_join_request",
-                args=[self.group.id, APIGroupJoinRequest.objects.first().id],
+        User.objects.create_user(username="new_user", password="new_password")
+        for i in range(10):
+            User.objects.create_user(
+                username=f"new{i}_user", password="new_password"
             )
-        )
-        self.client.post(
+        shuffled_users = list(User.objects.all())
+        random.shuffle(shuffled_users)
+        for user in shuffled_users:
+            request = APIGroupJoinRequest.objects.create(api_group=self.group, user=user)
+            self.client.get(
+                reverse("dashboard:api_group_join_requests", args=[self.group.id])
+            )
+            self.client.post(
+                reverse(
+                    "dashboard:accept_join_request",
+                    args=[self.group.id, request.id],
+                )
+            )
+            self.client.post(
+                reverse(
+                    "dashboard:create_wallet_for_member",
+                    kwargs={
+                        "group_id": APIGroup.objects.get(name="test_group").id,
+                        "member_id": user.id,
+                    },
+                ),
+            )
+        for i in range(10):
+            user = User.objects.create_user(
+                username=f"test{i}_user", password="test_password"
+            )
+            UserKeys.objects.create(
+                user=user,
+            )
+            group = APIGroup.objects.create(name=f"test{i}_group")
+            group.admin_list.add(user)
+            group.user_list.add(user)
+            for j in range(10):
+                non_admin_user = User.objects.create_user(
+                    username=f"test{i}_user_{j}", password="test_password"
+                )
+                group.user_list.add(non_admin_user)
+            group.save()
+
+    def test_transfer_tokens_to_address_send_to_self(self):
+        response = self.client.post(
             reverse(
-                "dashboard:create_wallet_for_member",
+                "dashboard:transfer_tokens_to_member",
+                kwargs={
+                    "group_id": APIGroup.objects.get(name="test_group").id,
+                    "member_id": User.objects.get(username="test_user").id,
+                },
+            ),
+            data={"amount": 10},
+        )
+        self.assertTemplateUsed(response, "dashboard/confirm_transfer_tokens_to_member.html")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "test_user")
+
+    def test_transfer_tokens_to_address_check_usernames(self):
+        response = self.client.post(
+            reverse(
+                "dashboard:transfer_tokens_to_member",
                 kwargs={
                     "group_id": APIGroup.objects.get(name="test_group").id,
                     "member_id": User.objects.get(username="new_user").id,
                 },
             ),
+            data={"amount": 10},
         )
+        self.assertTemplateUsed(response, "dashboard/confirm_transfer_tokens_to_member.html")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "new_user")
+
+
+    def test_transfer_tokens_to_address_check_usernames_multiple(self):
+        response = self.client.post(
+            reverse(
+                "dashboard:transfer_tokens_to_member",
+                kwargs={
+                    "group_id": APIGroup.objects.get(name="test_group").id,
+                    "member_id": User.objects.get(username="new2_user").id,
+                },
+            ),
+            data={"amount": 10},
+        )
+        self.assertTemplateUsed(response, "dashboard/confirm_transfer_tokens_to_member.html")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Are you sure you want to send 10 tokens to new2_user with a fee of 0.0 ?")
+        response = self.client.post(
+            reverse(
+                "dashboard:transfer_tokens_to_member",
+                kwargs={
+                    "group_id": APIGroup.objects.get(name="test_group").id,
+                    "member_id": User.objects.get(username="new3_user").id,
+                },
+            ),
+            data={"amount": 10},
+        )
+        self.assertTemplateUsed(response, "dashboard/confirm_transfer_tokens_to_member.html")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Are you sure you want to send 10 tokens to new3_user with a fee of 0.0 ?")
 
     def test_transfer_tokens_to_address_post(self):
         response = self.client.post(
