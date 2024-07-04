@@ -9,6 +9,26 @@ import requests
 from main.models import APIGroup
 
 
+@silk_profile(name="generate_group_keys")
+def generate_group_keys(group: APIGroup) -> bool:
+    if (
+        group.public_diffie_hellman_key is not None
+        and group.private_diffie_hellman_key is not None
+    ):
+        return True
+    try:
+        response = requests.post(
+            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/generate_encryption_channel",
+            timeout=5,
+        )
+    except requests.HTTPError:
+        return False
+    group.public_diffie_hellman_key = response.json()["secret"]
+    group.private_diffie_hellman_key = response.json()["public"]
+    group.save()
+    return True
+
+
 @silk_profile(name="generate_diffie_hellman_keys")
 def generate_diffie_hellman_keys() -> dict:
     try:
@@ -32,6 +52,18 @@ def generate_diffie_hellman_keys() -> dict:
 
 @silk_profile(name="generate_shared_secret")
 def generate_shared_secret(our_group: APIGroup, their_group: APIGroup) -> (str, bool):
+    if (
+        our_group.private_diffie_hellman_key is None
+        or our_group.public_diffie_hellman_key is None
+    ):
+        if not generate_group_keys(our_group):
+            return ({"error": "our API group has no keypair"}, False)
+    if (
+        their_group.public_diffie_hellman_key is None
+        or their_group.public_diffie_hellman_key is None
+    ):
+        if not generate_group_keys(their_group):
+            return ({"error": "their API group has no keypair"}, False)
     try:
         response = requests.post(
             f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/accept_encryption_channel",

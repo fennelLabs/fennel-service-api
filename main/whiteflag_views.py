@@ -100,7 +100,7 @@ def whiteflag_generate_shared_secret_key(request, group_id=None):
     shared_secret, success = generate_shared_secret(our_group, their_group)
     if success:
         return Response({"success": True, "shared_secret": shared_secret})
-    return Response({"success": False, "error": "shared secret not generated"})
+    return Response({"success": False, "error": shared_secret["error"]})
 
 
 @silk_profile(name="whiteflag_decode")
