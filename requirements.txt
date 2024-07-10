@@ -60,3 +60,4 @@ tomli==2.0.1
 urllib3==1.26.18
 validators==0.21.0
 whitenoise==6.5.0
+zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
