@@ -13,17 +13,17 @@
         </tr>
     </thead>
     <tbody>
-        {% for member in members %}
+        {% for mem in members %}
             <tr>
-            <td>{{ member.username }}</td>
-            <td>{{ member|get_address }}</td>
-            <td><a href="{% url 'dashboard:get_balance_for_member' group_id member.id %}">{{ member|get_balance }}</a> FNL</td>
+            <td>{{ mem.username }}</td>
+            <td>{{ mem|get_address }}</td>
+            <td><a href="{% url 'dashboard:get_balance_for_member' group_id mem.id %}">{{ mem|get_balance }}</a> FNL</td>
             <td>
                 {% if account_created %}
-                {% if member|has_wallet %}
-                <a href="{% url 'dashboard:transfer_tokens_to_member' group_id member.id %}">Send Tokens</a>
+                {% if mem|has_wallet %}
+                <a href="{% url 'dashboard:transfer_tokens_to_member' group_id mem.id %}">Send Tokens</a>
                 {% else %}
-                <a href="{% url 'dashboard:create_wallet_for_member' group_id member.id %}">Create Wallet for Member</a>
+                <a href="{% url 'dashboard:create_wallet_for_member' group_id mem.id %}">Create Wallet for Member</a>
                 {% endif %}
                 {% else %}
                 <a href="{% url 'dashboard:create_wallet' group_id %}">Create a Wallet</a>
@@ -32,7 +32,7 @@
                 {% endif %}
             </td>
             <td>
-                <a href="{% url 'dashboard:remove_group_member' group_id member.id %}">Remove</a>
+                <a href="{% url 'dashboard:remove_group_member' group_id mem.id %}">Remove</a>
             </td>
             </tr>
         {% endfor %}
