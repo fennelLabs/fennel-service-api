@@ -154,7 +154,6 @@ def __tranfer_tokens_to_member_post(request, form, user_key, member, group_id):
 @require_authentication
 def transfer_tokens_to_member(request, group_id=None, member_id=None):
     messages.get_messages(request).used = True
-    recipient = User.objects.get(id=member_id)
     if not User.objects.filter(id=member_id).exists():
         messages.error(
             request,
@@ -201,7 +200,7 @@ def transfer_tokens_to_member(request, group_id=None, member_id=None):
         "dashboard/transfer_tokens.html",
         {
             "group_id": group_id,
-            "member_id": member.id,
+            "member_id": member_id,
             "form": form,
             "username": recipient.username,
         },
