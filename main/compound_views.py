@@ -254,8 +254,8 @@ def send_signal_with_annotations(request):
     if not serializer.is_valid():
         return Response(serializer.errors, status=400)
     sender_group = None
-    recipient_group = None
-    if serializer.validated_data.get("recipient_group", None):
+    recipient_group = serializer.validated_data.get("recipient_group", None)
+    if recipient_group and recipient_group != "":
         sender_group = request.user.api_group_users.first()
         if APIGroup.objects.filter(
             name=serializer.validated_data["recipient_group"]
