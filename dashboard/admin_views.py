@@ -141,7 +141,7 @@ def __tranfer_tokens_to_member_post(request, form, user_key, member, group_id):
         "dashboard/confirm_transfer_tokens_to_member.html",
         {
             "group_id": group_id,
-            "member_id": member.id,
+            "member_id": member.user.id,
             "fee": round(fee / 1000000000000, 4),
             "amount": amount,
             "username": username,
