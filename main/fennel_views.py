@@ -381,6 +381,8 @@ def get_signal_by_id(request, signal_id):
 @permission_classes([IsAuthenticated])
 def get_signals(request, count=None):
     show_inactive = request.GET.get("include-inactive", False)
+    start = request.GET.get("start", None)
+    end = request.GET.get("end", None)
     groups = request.user.api_group_users.all()
     queryset = Signal.objects.filter(
         (Q(viewers=None) | Q(viewers__in=groups))
@@ -389,6 +391,8 @@ def get_signals(request, count=None):
         queryset = queryset.filter(active=True)
     if count is not None:
         queryset = queryset[:count]
+    if start is not None and end is not None:
+        queryset = queryset.filter(pk__range=(start, end))
     serializer = SignalSerializer(queryset, many=True)
     return Response(serializer.data)
 
