@@ -375,6 +375,24 @@ def get_signal_by_id(request, signal_id):
     return Response(serializer.data)
 
 
+@silk_profile(name="search_signals")
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def search_signals(request):
+    query = request.GET.get("query", None)
+    show_inactive = request.GET.get("include-inactive", False)
+    groups = request.user.api_group_users.all()
+    queryset = Signal.objects.filter(
+        (Q(viewers=None) | Q(viewers__in=groups))
+        & Q(signal_text__icontains=query)
+    ).order_by("-timestamp")
+    if not show_inactive:
+        queryset = queryset.filter(active=True)
+    serializer = SignalSerializer(queryset, many=True)
+    return Response(serializer.data)
+
+
 @silk_profile(name="get_signals")
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
