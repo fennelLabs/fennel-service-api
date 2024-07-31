@@ -53,6 +53,8 @@ def process_decoding_signal(user, signal, depth=0):
             sender_group = signal.sender.api_group_users.first().name
     if signal_body and updated:
         signal.signal_body = json.dumps(signal_body)
+        signal.subject_code = signal_body.get("subjectCode", None)
+        signal.message_code = signal_body.get("messageCode", None)
         signal.save()
     return {
         "id": signal.id,

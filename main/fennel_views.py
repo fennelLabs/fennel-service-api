@@ -399,6 +399,10 @@ def search_signals(request):
 @permission_classes([IsAuthenticated])
 def get_signals(request, count=None):
     show_inactive = request.GET.get("include-inactive", False)
+    title = request.GET.get("title", None)
+    author = request.GET.get("author", None)
+    message_type = request.GET.get("message_type", None)
+    infrastructure_type = request.GET.get("infrastructure_type", None)
     start = request.GET.get("start", None)
     end = request.GET.get("end", None)
     groups = request.user.api_group_users.all()
@@ -407,6 +411,16 @@ def get_signals(request, count=None):
     ).order_by("-timestamp")
     if not show_inactive:
         queryset = queryset.filter(active=True)
+    query = Q()
+    if title is not None:
+        query = query | Q(signal_text__icontains=title)
+    if author is not None:
+        query = query | Q(sender__username__icontains=author)
+    if message_type is not None:
+        query = query | Q(message_code=message_type)
+    if infrastructure_type is not None:
+        query = query | Q(subject_code=infrastructure_type)
+    queryset = queryset.filter(query)
     if count is not None:
         queryset = queryset[:count]
     if start is not None and end is not None:

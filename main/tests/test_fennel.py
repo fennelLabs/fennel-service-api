@@ -329,6 +329,163 @@ class TestFennelViews(TestCase):
         assert response.status_code == 200
         assert len(response.json()) == 10
         assert response.json()[0]["sender"]["keys"]["address"] == "test"
+    
+    def test_get_signals_with_query(self):
+        client = Client()
+        user_model = get_user_model()
+        response = client.post(
+            "/api/v1/auth/register/",
+            {
+                "username": "signals_test",
+                "password": "signals_test",
+                "email": "signals_test@test.com",
+            },
+        )
+        assert response.status_code == 200
+        assert response.json()["token"] is not None
+        user = user_model.objects.get(username="signals_test")
+        UserKeys.objects.update_or_create(
+            user=user,
+            address="test",
+        )
+        for _ in range(10):
+            baker.make("main.Signal",
+                       sender=user,
+                       signal_text="This is a test.",
+                       )
+        for _ in range(10):
+            baker.make("main.Signal",
+                       sender=user,
+                       signal_text="This won't show up in the search.",
+                       )
+        response = client.get(
+            "/api/v1/fennel/get_signals/?title=test",
+            HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
+        )
+        assert response.status_code == 200
+        assert len(response.json()) == 10
+        assert response.json()[0]["sender"]["keys"]["address"] == "test"
+
+    def test_get_signals_with_author(self):
+        client = Client()
+        user_model = get_user_model()
+        response = client.post(
+            "/api/v1/auth/register/",
+            {
+                "username": "signals_test",
+                "password": "signals_test",
+                "email": "signals_test@test.com",
+            },
+        )
+        response = client.post(
+            "/api/v1/auth/register/",
+            {
+                "username": "another_test",
+                "password": "another_test",
+                "email": "another_test@test.com",
+            },
+        )
+        assert response.status_code == 200
+        assert response.json()["token"] is not None
+        user = user_model.objects.get(username="signals_test")
+        another_user = user_model.objects.get(username="another_test")
+        UserKeys.objects.update_or_create(
+            user=user,
+            address="test",
+        )
+        for _ in range(10):
+            baker.make("main.Signal",
+                       sender=user,
+                       signal_text="This is a test.",
+                       )
+        for _ in range(10):
+            baker.make("main.Signal",
+                       sender=another_user,
+                       signal_text="This won't show up in the search.",
+                       )
+        response = client.get(
+            "/api/v1/fennel/get_signals/?author=signals",
+            HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
+        )
+        assert response.status_code == 200
+        assert len(response.json()) == 10
+        assert response.json()[0]["sender"]["keys"]["address"] == "test"
+
+    def test_get_signals_with_subject_code(self):
+        client = Client()
+        user_model = get_user_model()
+        response = client.post(
+            "/api/v1/auth/register/",
+            {
+                "username": "signals_test",
+                "password": "signals_test",
+                "email": "signals_test@test.com",
+            },
+        )
+        assert response.status_code == 200
+        assert response.json()["token"] is not None
+        user = user_model.objects.get(username="signals_test")
+        UserKeys.objects.update_or_create(
+            user=user,
+            address="test",
+        )
+        for _ in range(10):
+            baker.make("main.Signal",
+                       sender=user,
+                       signal_text="This is a test.",
+                       subject_code="01",
+                       )
+        for _ in range(10):
+            baker.make("main.Signal",
+                       sender=user,
+                       signal_text="This won't show up in the search.",
+                       subject_code="02",
+                       )
+        response = client.get(
+            "/api/v1/fennel/get_signals/?infrastructure_type=01",
+            HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
+        )
+        assert response.status_code == 200
+        assert len(response.json()) == 10
+        assert response.json()[0]["sender"]["keys"]["address"] == "test"
+
+    def test_get_signals_with_message_code(self):
+        client = Client()
+        user_model = get_user_model()
+        response = client.post(
+            "/api/v1/auth/register/",
+            {
+                "username": "signals_test",
+                "password": "signals_test",
+                "email": "signals_test@test.com",
+            },
+        )
+        assert response.status_code == 200
+        assert response.json()["token"] is not None
+        user = user_model.objects.get(username="signals_test")
+        UserKeys.objects.update_or_create(
+            user=user,
+            address="test",
+        )
+        for _ in range(10):
+            baker.make("main.Signal",
+                       sender=user,
+                       signal_text="This is a test.",
+                       message_code="01",
+                       )
+        for _ in range(10):
+            baker.make("main.Signal",
+                       sender=user,
+                       signal_text="This won't show up in the search.",
+                       message_code="02",
+                       )
+        response = client.get(
+            "/api/v1/fennel/get_signals/?message_type=01",
+            HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
+        )
+        assert response.status_code == 200
+        assert len(response.json()) == 10
+        assert response.json()[0]["sender"]["keys"]["address"] == "test"
 
     def test_get_signals_address_included(self):
         client = Client()
