@@ -1,7 +1,8 @@
+import json
 from django.test import Client, TestCase
 from django.contrib.auth import get_user_model
 
-from main.models import APIGroup, Signal
+from main.models import APIGroup, Signal, UserKeys
 from main.whiteflag_helpers import whiteflag_encoder_helper
 from main.signal_processors import process_decoding_signal
 
@@ -84,3 +85,52 @@ class TestProductionIssues(TestCase):
             sender=user,
         )
         process_decoding_signal(user, signal)
+
+    def test_send_signal_with_annotations_longitude_crash(self):
+        client = Client()
+        user_model = get_user_model()
+        auth_response = client.post(
+            "/api/v1/auth/register/",
+            {
+                "username": "send_signal_with_annotations_test",
+                "password": "test",
+                "email": "send_signal_with_annotations_test@test.com",
+            },
+        )
+        assert auth_response.status_code == 200
+        assert auth_response.json()["token"] is not None
+        user = user_model.objects.get(username="send_signal_with_annotations_test")
+        client.post(
+            "/api/v1/fennel/create_account/",
+            HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+        )
+        user_keys = UserKeys.objects.get(user=user)
+        user_keys.balance = "1000000000"
+        user_keys.save()
+        payload = {
+            "signal_body": json.dumps(
+                {
+                    "encryptionIndicator": "0",
+                    "duressIndicator": "0",
+                    "messageCode": "I",
+                    "referenceIndicator": "4",
+                    "referencedMessage": "0000000000000000000000000000000000000000000000000000000000000000",
+                    "subjectCode": "51",
+                    "dateTime": "2023-09-01T09:37:09Z",
+                    "duration": "P00D00H00M",
+                    "objectType": "22",
+                    "objectLatitude": "12.045231",
+                    "objectLongitude": "012.54534",
+                    "objectSizeDim1": "0000",
+                    "objectSizeDim2": "0000",
+                    "objectOrientation": "000",
+                }
+            ),
+            "annotations": '{"test": "test"}',
+        }
+        response = client.post(
+            "/api/v1/whiteflag/send_signal_with_annotations/",
+            payload,
+            HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
+        )
+        assert response.status_code == 400

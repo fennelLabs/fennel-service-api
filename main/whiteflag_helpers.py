@@ -173,7 +173,7 @@ def whiteflag_encoder_helper(
         "resourceData": payload.get("resourceData", None),
         "pseudoMessageCode": payload.get("pseudoMessageCode", None),
         "subjectCode": payload.get("subjectCode", None),
-        "datetime": datetime_field,
+        "dateTime": datetime_field,
         "duration": payload.get("duration", None),
         "objectType": payload.get("objectType", None),
         "objectLatitude": payload.get("objectLatitude", None),
@@ -209,6 +209,8 @@ def send_decode_final_request(signal: str) -> (dict, bool):
         return ({"error": "could not decode signal"}, False)
     if response.status_code != 200:
         return ({"error": "could not decode signal"}, False)
+    if not response.json()["success"]:
+        return ({"error": response.json()["error"]}, False)
     decoded = json.loads(response.json()["decoded"])
     if decoded.get("text", None):
         decoded["text"] = bytes.fromhex(decoded["text"]).decode("utf-8")
