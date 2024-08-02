@@ -22,8 +22,4 @@ class Migration(migrations.Migration):
             name="subject_code",
             field=models.CharField(blank=True, max_length=2, null=True),
         ),
-        migrations.AlterUniqueTogether(
-            name="apigroupjoinrequest",
-            unique_together={("user", "api_group")},
-        ),
     ]
