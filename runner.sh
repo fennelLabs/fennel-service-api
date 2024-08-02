@@ -35,7 +35,8 @@ function migrate() {
   python3 manage.py makemigrations main
   python3 manage.py makemigrations dashboard
   python3 manage.py makemigrations
-  python3 manage.py migrate
+  python3 manage.py migrate --fake main
+  python3 manage.py migrate --fake dashboard
 }
 
 function makemigrations() {
