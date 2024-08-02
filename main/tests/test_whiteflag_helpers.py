@@ -132,7 +132,7 @@ class TestWhiteflagHelpers(TestCase):
         decoded_message, success = decode(encoded_message)
         assert success
         assert decoded_message is not None
-    
+
     def test_encode_discontinue_whiteflag_message(self):
         discontinue_signal = {
             "prefix": "WF",
@@ -150,7 +150,6 @@ class TestWhiteflagHelpers(TestCase):
         decoded_message, success = decode(encoded_message)
         assert success
         assert decoded_message is not None
-
 
     def test_decode_encrypted_whiteflag_message(self):
         keys_dict_one = generate_diffie_hellman_keys()

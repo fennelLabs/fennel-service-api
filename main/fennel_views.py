@@ -384,8 +384,7 @@ def search_signals(request):
     show_inactive = request.GET.get("include-inactive", False)
     groups = request.user.api_group_users.all()
     queryset = Signal.objects.filter(
-        (Q(viewers=None) | Q(viewers__in=groups))
-        & Q(signal_text__icontains=query)
+        (Q(viewers=None) | Q(viewers__in=groups)) & Q(signal_text__icontains=query)
     ).order_by("-timestamp")
     if not show_inactive:
         queryset = queryset.filter(active=True)

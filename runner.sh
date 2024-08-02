@@ -79,6 +79,7 @@ mkdir -p profile
 case "$1" in
 
 check)
+  migrate
   check
   ;;
 

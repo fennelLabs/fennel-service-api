@@ -25,13 +25,13 @@ class TestTokenSending(TestCase):
         self.client.login(username="test_user", password="test_password")
         User.objects.create_user(username="new_user", password="new_password")
         for i in range(10):
-            User.objects.create_user(
-                username=f"new{i}_user", password="new_password"
-            )
+            User.objects.create_user(username=f"new{i}_user", password="new_password")
         shuffled_users = list(User.objects.all())
         random.shuffle(shuffled_users)
         for user in shuffled_users:
-            request = APIGroupJoinRequest.objects.create(api_group=self.group, user=user)
+            request = APIGroupJoinRequest.objects.create(
+                api_group=self.group, user=user
+            )
             self.client.get(
                 reverse("dashboard:api_group_join_requests", args=[self.group.id])
             )
@@ -78,7 +78,9 @@ class TestTokenSending(TestCase):
             ),
             data={"amount": 10},
         )
-        self.assertTemplateUsed(response, "dashboard/confirm_transfer_tokens_to_member.html")
+        self.assertTemplateUsed(
+            response, "dashboard/confirm_transfer_tokens_to_member.html"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "test_user")
 
@@ -93,10 +95,11 @@ class TestTokenSending(TestCase):
             ),
             data={"amount": 10},
         )
-        self.assertTemplateUsed(response, "dashboard/confirm_transfer_tokens_to_member.html")
+        self.assertTemplateUsed(
+            response, "dashboard/confirm_transfer_tokens_to_member.html"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "new_user")
-
 
     def test_transfer_tokens_to_address_check_usernames_multiple(self):
         response = self.client.post(
@@ -109,9 +112,14 @@ class TestTokenSending(TestCase):
             ),
             data={"amount": 10},
         )
-        self.assertTemplateUsed(response, "dashboard/confirm_transfer_tokens_to_member.html")
+        self.assertTemplateUsed(
+            response, "dashboard/confirm_transfer_tokens_to_member.html"
+        )
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Are you sure you want to send 10 tokens to new2_user with a fee of 0.0 ?")
+        self.assertContains(
+            response,
+            "Are you sure you want to send 10 tokens to new2_user with a fee of 0.0 ?",
+        )
         response = self.client.post(
             reverse(
                 "dashboard:transfer_tokens_to_member",
@@ -122,9 +130,14 @@ class TestTokenSending(TestCase):
             ),
             data={"amount": 10},
         )
-        self.assertTemplateUsed(response, "dashboard/confirm_transfer_tokens_to_member.html")
+        self.assertTemplateUsed(
+            response, "dashboard/confirm_transfer_tokens_to_member.html"
+        )
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Are you sure you want to send 10 tokens to new3_user with a fee of 0.0 ?")
+        self.assertContains(
+            response,
+            "Are you sure you want to send 10 tokens to new3_user with a fee of 0.0 ?",
+        )
 
     def test_transfer_tokens_to_address_post(self):
         response = self.client.post(

@@ -569,7 +569,7 @@ Authorization: Token <token>
 # @no-cookie-jar
 GET /api/v1/fennel/get_signals/
 Host: {{hostname}}:{{port}}
-Authorization: Token f4e2d291b6f5aa79227c59d1dc8902ee7b5c66dd94db6c17628fda171e1b1fd6
+Authorization: Token 604b61017afe8ab9b9e6f490a059d0e178df0616a93399783b5f875664c3529b
 
 ###
 # @name Fennel - Get Signals - Include Inactive

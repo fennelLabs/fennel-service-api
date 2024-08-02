@@ -11,6 +11,8 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="signal", name="active", field=models.BooleanField(default=True),
+            model_name="signal",
+            name="active",
+            field=models.BooleanField(default=True),
         ),
     ]

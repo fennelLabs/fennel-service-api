@@ -441,7 +441,10 @@ def send_signal_list(request):
                     "message": signal_sent_response,
                 }
             )
-    return Response(processed, status=200,)
+    return Response(
+        processed,
+        status=200,
+    )
 
 
 @silk_profile(name="get_fee_for_discontinue_signal")
@@ -456,7 +459,10 @@ def get_fee_for_discontinue_signal(request, signal_id=None):
     signal_text_encoded = signal.signal_text
     signal_text, decode_success = decode(signal_text_encoded)
     if not decode_success:
-        return Response({"message": "signal could not be decoded"}, status=400,)
+        return Response(
+            {"message": "signal could not be decoded"},
+            status=400,
+        )
     discontinue_signal = {
         "prefix": "WF",
         "version": "1",
@@ -477,11 +483,26 @@ def get_fee_for_discontinue_signal(request, signal_id=None):
         balance = check_balance(user_key)["balance"]
         if not success:
             return Response(
-                {"signal_response": response, "balance": balance,}, status=400,
+                {
+                    "signal_response": response,
+                    "balance": balance,
+                },
+                status=400,
             )
-        return Response({"signal_response": response, "balance": balance,}, status=200,)
+        return Response(
+            {
+                "signal_response": response,
+                "balance": balance,
+            },
+            status=200,
+        )
     except requests.HTTPError:
-        return Response({"message": "could not get fees",}, status=400,)
+        return Response(
+            {
+                "message": "could not get fees",
+            },
+            status=400,
+        )
 
 
 @silk_profile(name="discontinue_signal")
@@ -494,7 +515,10 @@ def discontinue_signal(request, signal_id=None):
     signal_text_encoded = signal.signal_text
     signal_text, decode_success = decode(signal_text_encoded)
     if not decode_success:
-        return Response({"message": "signal could not be decoded"}, status=400,)
+        return Response(
+            {"message": "signal could not be decoded"},
+            status=400,
+        )
     discontinue_signal = {
         "prefix": "WF",
         "version": "1",
@@ -507,7 +531,8 @@ def discontinue_signal(request, signal_id=None):
     }
     discontinue_text_encoded = whiteflag_encoder_helper(discontinue_signal)
     discontinue_signal = Signal.objects.create(
-        signal_text=discontinue_text_encoded, sender=request.user,
+        signal_text=discontinue_text_encoded,
+        sender=request.user,
     )
     discontinue_signal.references.add(signal)
     discontinue_signal.save()
@@ -515,7 +540,13 @@ def discontinue_signal(request, signal_id=None):
         UserKeys.objects.get(user=request.user), discontinue_signal
     )
     if not signal_success:
-        return Response(signal_sent_response, status=400,)
+        return Response(
+            signal_sent_response,
+            status=400,
+        )
     signal.active = False
     signal.save()
-    return Response(signal_sent_response, status=200,)
+    return Response(
+        signal_sent_response,
+        status=200,
+    )
