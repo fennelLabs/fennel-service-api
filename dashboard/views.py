@@ -53,6 +53,13 @@ def send_group_join_request(request):
         group_name = join_form.cleaned_data.get("group_name")
         if group_name:
             group = APIGroup.objects.filter(name=group_name).first()
+            if APIGroupJoinRequest.objects.filter(
+                api_group=group, user=request.user
+            ).exists():
+                messages.error(
+                    request, f"You have already sent a request to {group.name}."
+                )
+                return redirect("dashboard:index")
             if group:
                 APIGroupJoinRequest.objects.create(api_group=group, user=request.user)
                 group.save()

@@ -34,9 +34,6 @@ class APIGroupJoinRequest(models.Model):
     def __str__(self):
         return str(self.user) + " wants to join " + str(self.api_group)
 
-    class Meta:
-        unique_together = ("user", "api_group")
-
 
 class Transaction(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
