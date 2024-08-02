@@ -31,10 +31,6 @@ function clean() {
 }
 
 function migrate() {
-  pwd
-  python3 manage.py makemigrations main
-  python3 manage.py makemigrations dashboard
-  python3 manage.py makemigrations
   python3 manage.py migrate
 }
 
@@ -79,6 +75,7 @@ mkdir -p profile
 case "$1" in
 
 check)
+  makemigrations
   migrate
   check
   ;;
