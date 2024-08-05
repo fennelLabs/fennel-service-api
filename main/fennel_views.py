@@ -1,3 +1,5 @@
+from functools import reduce
+import operator
 import os
 import datetime
 
@@ -401,7 +403,11 @@ def get_signals(request, count=None):
     title = request.GET.get("title", None)
     author = request.GET.get("author", None)
     message_type = request.GET.get("message_type", None)
+    message_types = message_type.split(",") if message_type is not None else []
     infrastructure_type = request.GET.get("infrastructure_type", None)
+    infrastructure_types = (
+        infrastructure_type.split(",") if infrastructure_type is not None else []
+    )
     start = request.GET.get("start", None)
     end = request.GET.get("end", None)
     groups = request.user.api_group_users.all()
@@ -417,9 +423,13 @@ def get_signals(request, count=None):
     if author is not None:
         query = query | Q(sender__username__icontains=author)
     if message_type is not None:
-        query = query | Q(message_code=message_type) | Q(signal_body__icontains=message_type)
+        query = query | Q(message_code__in=message_types)
+        for item in message_types:
+            query = query | Q(signal_body__icontains=item)
     if infrastructure_type is not None:
-        query = query | Q(subject_code=infrastructure_type) | Q(signal_body__icontains=infrastructure_type)
+        query = query | Q(subject_code__in=infrastructure_types)
+        for item in infrastructure_types:
+            query = query | Q(signal_body__icontains=item)
     queryset = queryset.filter(query)
     if count is not None:
         queryset = queryset[:count]
