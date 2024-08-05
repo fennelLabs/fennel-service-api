@@ -440,6 +440,7 @@ class TestFennelViews(TestCase):
                 "main.Signal",
                 sender=user,
                 signal_text="This is a test.",
+                signal_body="This is a test including 01 in the body.",
                 subject_code="01",
             )
         for _ in range(10):
@@ -449,12 +450,19 @@ class TestFennelViews(TestCase):
                 signal_text="This won't show up in the search.",
                 subject_code="02",
             )
+        for _ in range(10):
+            baker.make(
+                "main.Signal",
+                sender=user,
+                signal_text="This is a test.",
+                signal_body="This is a test including 01 in the body.",
+            )
         response = client.get(
             "/api/v1/fennel/get_signals/?infrastructure_type=01",
             HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
         )
         assert response.status_code == 200
-        assert len(response.json()) == 10
+        assert len(response.json()) == 20
         assert response.json()[0]["sender"]["keys"]["address"] == "test"
 
     def test_get_signals_with_message_code(self):
@@ -480,6 +488,7 @@ class TestFennelViews(TestCase):
                 "main.Signal",
                 sender=user,
                 signal_text="This is a test.",
+                signal_body="This is a test including 01 as the message code.",
                 message_code="01",
             )
         for _ in range(10):
@@ -489,12 +498,19 @@ class TestFennelViews(TestCase):
                 signal_text="This won't show up in the search.",
                 message_code="02",
             )
+        for _ in range(10):
+            baker.make(
+                "main.Signal",
+                sender=user,
+                signal_text="This is a test.",
+                signal_body="This is a test including 01 as the message code.",
+            )
         response = client.get(
             "/api/v1/fennel/get_signals/?message_type=01",
             HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
         )
         assert response.status_code == 200
-        assert len(response.json()) == 10
+        assert len(response.json()) == 20
         assert response.json()[0]["sender"]["keys"]["address"] == "test"
 
     def test_get_signals_address_included(self):

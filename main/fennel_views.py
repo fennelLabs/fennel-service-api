@@ -417,9 +417,9 @@ def get_signals(request, count=None):
     if author is not None:
         query = query | Q(sender__username__icontains=author)
     if message_type is not None:
-        query = query | Q(message_code=message_type)
+        query = query | Q(message_code=message_type) | Q(signal_body__icontains=message_type)
     if infrastructure_type is not None:
-        query = query | Q(subject_code=infrastructure_type)
+        query = query | Q(subject_code=infrastructure_type) | Q(signal_body__icontains=infrastructure_type)
     queryset = queryset.filter(query)
     if count is not None:
         queryset = queryset[:count]
