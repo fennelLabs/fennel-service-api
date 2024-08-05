@@ -413,6 +413,7 @@ def get_signals(request, count=None):
     query = Q()
     if title is not None:
         query = query | Q(signal_text__icontains=title)
+        query = query | Q(signal_body__icontains=title)
     if author is not None:
         query = query | Q(sender__username__icontains=author)
     if message_type is not None:

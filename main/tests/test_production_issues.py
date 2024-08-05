@@ -1,6 +1,9 @@
 import json
+
 from django.test import Client, TestCase
 from django.contrib.auth import get_user_model
+
+from model_bakery import baker
 
 from main.models import APIGroup, Signal, UserKeys
 from main.whiteflag_helpers import whiteflag_encoder_helper
@@ -180,3 +183,47 @@ class TestProductionIssues(TestCase):
             HTTP_AUTHORIZATION=f'Token {auth_response.json()["token"]}',
         )
         assert response.status_code == 400
+
+    def test_title_search(self):
+        client = Client()
+        user_model = get_user_model()
+        response = client.post(
+            "/api/v1/auth/register/",
+            {
+                "username": "signals_test",
+                "password": "signals_test",
+                "email": "signals_test@test.com",
+            },
+        )
+        assert response.status_code == 200
+        assert response.json()["token"] is not None
+        user = user_model.objects.get(username="signals_test")
+        UserKeys.objects.update_or_create(
+            user=user,
+            address="test",
+        )
+        for _ in range(10):
+            baker.make(
+                "main.Signal",
+                sender=user,
+                signal_text="This is a test.",
+            )
+        for _ in range(10):
+            baker.make(
+                "main.Signal",
+                sender=user,
+                signal_text="This won't show up in the search.",
+            )
+        for _ in range(10):
+            baker.make(
+                "main.Signal",
+                sender=user,
+                signal_body="This is a test.",
+            )
+        response = client.get(
+            "/api/v1/fennel/get_signals/?title=This is a test.",
+            HTTP_AUTHORIZATION=f'Token {response.json()["token"]}',
+        )
+        assert response.status_code == 200
+        assert len(response.json()) == 20
+        assert response.json()[0]["sender"]["keys"]["address"] == "test"
