@@ -402,6 +402,7 @@ def get_signals(request, count=None):
     show_inactive = request.GET.get("include-inactive", False)
     title = request.GET.get("title", None)
     author = request.GET.get("author", None)
+    authors = author.split(",") if author is not None else []
     message_type = request.GET.get("message_type", None)
     message_types = message_type.split(",") if message_type is not None else []
     infrastructure_type = request.GET.get("infrastructure_type", None)
@@ -416,21 +417,23 @@ def get_signals(request, count=None):
     ).order_by("-timestamp")
     if not show_inactive:
         queryset = queryset.filter(active=True)
-    query = Q()
     if title is not None:
-        query = query | Q(signal_text__icontains=title)
-        query = query | Q(signal_body__icontains=title)
+        queryset = queryset.filter(Q(signal_text__icontains=title)| Q(signal_body__icontains=title))
     if author is not None:
-        query = query | Q(sender__username__icontains=author)
+        query = Q()
+        for item in authors:
+            query = query | Q(sender__username__icontains=item)
+        queryset = queryset.filter(query | Q(sender__username__icontains=author))
     if message_type is not None:
-        query = query | Q(message_code__in=message_types)
+        query = Q()
         for item in message_types:
             query = query | Q(signal_body__icontains=item)
+        queryset = queryset.filter(query | Q(message_code__in=message_types))
     if infrastructure_type is not None:
-        query = query | Q(subject_code__in=infrastructure_types)
+        query = Q()
         for item in infrastructure_types:
             query = query | Q(signal_body__icontains=item)
-    queryset = queryset.filter(query)
+        queryset = queryset.filter(query | Q(subject_code__in=infrastructure_types))
     if count is not None:
         queryset = queryset[:count]
     if start is not None and end is not None:
