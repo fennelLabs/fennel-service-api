@@ -1,4 +1,4 @@
-FROM amd64/ubuntu:jammy
+FROM ubuntu:jammy
 
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update -y && \
@@ -11,8 +11,8 @@ RUN DEBIAN_FRONTEND=noninteractive \
     apt-get upgrade -y
 
 RUN python3 -m venv /opt/venv
-ENV VIRTUAL_ENV /opt/venv
-ENV PATH /opt/venv/bin:$PATH  
+ENV VIRTUAL_ENV=/opt/venv
+ENV PATH=/opt/venv/bin:$PATH  
 COPY requirements.txt /opt/app/requirements.txt
 RUN mkdir /opt/app/static
 RUN mkdir /opt/app/mediafiles
