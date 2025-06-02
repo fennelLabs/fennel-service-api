@@ -76,7 +76,6 @@ INSTALLED_APPS = [
     "knox",
     "django_nose",
     "silk",
-    "bootstrap5",
     "crispy_bootstrap5",
     "anymail",
 ]
@@ -176,7 +175,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 STORAGES = {
     "staticfiles": {
-        "BACKEND": "whiteenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
 
