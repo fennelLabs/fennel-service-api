@@ -28,7 +28,7 @@ def registration_view(request):
         if form.is_valid():
             form.save()
             return redirect(reverse("dashboard:login"))
-    if request.method == "GET":
+    else:
         form = RegistrationForm()
     return render(request, "auth/register.html", {"form": form})
 
@@ -46,7 +46,7 @@ def login_view(request):
             )
             login(request, user)
             return redirect(reverse("dashboard:index"))
-    if request.method == "GET":
+    else:
         form = LoginForm()
     return render(request, "auth/login.html", {"form": form})
 

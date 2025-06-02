@@ -76,7 +76,6 @@ INSTALLED_APPS = [
     "knox",
     "django_nose",
     "silk",
-    "bootstrap5",
     "crispy_bootstrap5",
     "anymail",
 ]
@@ -176,7 +175,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 STORAGES = {
     "staticfiles": {
-        "BACKEND": "whiteenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
 
@@ -215,8 +214,8 @@ CORS_ALLOWED_ORIGINS = [
 CSRF_COOKIE_HTTPONLY = True
 SESSION_COOKIE_HTTPONLY = True
 
-SESSION_COOKIE_SAMESITE = "None"
-CSRF_COOKIE_SAMESITE = "None"
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
 
 # TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
 
