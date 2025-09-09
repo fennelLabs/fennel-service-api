@@ -1,0 +1,130 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fennel-api
+  namespace: fennel-api
+  labels:
+    app: fennel-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fennel-api
+  template:
+    metadata:
+      labels:
+        app: fennel-api
+    spec:
+      nodeSelector:
+        agentpool: validator2b4
+      tolerations:
+      - key: "dedicated"
+        operator: "Equal"
+        value: "validator2"
+        effect: "NoSchedule"
+      - key: "zone"
+        operator: "Equal"
+        value: "api"
+        effect: "NoSchedule"
+      initContainers:
+      - name: wait-for-db
+        image: postgres:15-alpine
+        command:
+        - sh
+        - -c
+        - |
+          echo "Waiting for database..."
+          until pg_isready -h postgres-service -p 5432 -U $POSTGRES_USER; do
+            echo "Database not ready, waiting..."
+            sleep 5
+          done
+          echo "Database is ready!"
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: fennel-api-config
+              key: POSTGRES_USER
+      containers:
+      - name: fennel-api
+        image: fennelacr531.azurecr.io/fennel-service-api:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        workingDir: /opt/app
+        command:
+        - sh
+        - -c
+        - |
+          echo "Running migrations..."
+          python manage.py migrate
+          
+          echo "Collecting static files..."
+          python manage.py collectstatic --no-input
+          
+          echo "Starting Fennel API server with Gunicorn..."
+          gunicorn fennel.wsgi:application --bind 0.0.0.0:8080 --workers 2 --timeout 120
+        env:
+        - name: POSTGRES_HOST
+          value: "postgres-service"
+        - name: POSTGRES_PORT
+          value: "5432"
+        - name: POSTGRES_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: fennel-api-config
+              key: POSTGRES_DB
+        envFrom:
+        - configMapRef:
+            name: fennel-api-config
+        - secretRef:
+            name: fennel-api-secrets
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /admin/
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /admin/
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fennel-api-service
+  namespace: fennel-api
+spec:
+  selector:
+    app: fennel-api
+  ports:
+  - port: 1234
+    targetPort: 8080
+    name: api
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fennel-api-loadbalancer
+  namespace: fennel-api
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path: /admin/
+spec:
+  selector:
+    app: fennel-api
+  ports:
+  - port: 1234
+    targetPort: 8080
+    name: api
+  type: LoadBalancer
