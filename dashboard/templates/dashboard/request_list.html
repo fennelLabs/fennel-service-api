@@ -1,26 +1,66 @@
 {% extends "dashboard/base.html" %}
 {% block content %}
-  <h1>Requests</h1>
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Username</th>
-        <th></th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-        {% for request in requests %}
-            <tr>
-            <td>{{ request.user.username }}</td>
-            <td>
-                <a href="{% url 'dashboard:accept_join_request' group_id request.id %}">Accept</a>
-            </td>
-            <td>
-                <a href="{% url 'dashboard:reject_join_request' group_id request.id %}">Reject</a>
-            </td>
-            </tr>
-        {% endfor %}
-    </tbody>
-  </table>
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-user-plus"></i> Join Requests</h1>
+    <span class="badge bg-primary fs-6">{{ requests|length }} pending request{{ requests|length|pluralize }}</span>
+  </div>
+
+  {% if requests %}
+  <div class="card">
+    <div class="card-header">
+      <h5 class="mb-0">Pending Join Requests</h5>
+    </div>
+    <div class="card-body p-0">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th><i class="fas fa-user"></i> Username</th>
+            <th><i class="fas fa-envelope"></i> Email</th>
+            <th><i class="fas fa-calendar"></i> Requested</th>
+            <th><i class="fas fa-cogs"></i> Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+            {% for request in requests %}
+                <tr>
+                <td>
+                  <strong>{{ request.user.username }}</strong>
+                  {% if request.user.first_name %}
+                    <br><small class="text-muted">{{ request.user.first_name }} {{ request.user.last_name }}</small>
+                  {% endif %}
+                </td>
+                <td>{{ request.user.email }}</td>
+                <td>
+                  <small>{{ request.timestamp|date:"M d, Y" }}</small>
+                  <br><small class="text-muted">{{ request.timestamp|timesince }} ago</small>
+                </td>
+                <td>
+                    <a href="{% url 'dashboard:accept_join_request' group_id request.id %}" 
+                       class="btn btn-success btn-sm me-2"
+                       onclick="return confirm('Accept {{ request.user.username }} into the group?')">
+                      <i class="fas fa-check"></i> Accept
+                    </a>
+                    <a href="{% url 'dashboard:reject_join_request' group_id request.id %}" 
+                       class="btn btn-danger btn-sm"
+                       onclick="return confirm('Reject {{ request.user.username }} request?')">
+                      <i class="fas fa-times"></i> Reject
+                    </a>
+                </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+  <div class="card">
+    <div class="card-body text-center py-5">
+      <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+      <h4 class="text-muted">No Pending Requests</h4>
+      <p class="text-muted">There are no pending join requests for this group.</p>
+    </div>
+  </div>
+  {% endif %}
+</div>
 {% endblock %}

@@ -1,7 +1,7 @@
 import ast
 import json
 
-from silk.profiling.profiler import silk_profile
+from main.decorators import silk_profile
 
 from main.serializers import (
     ConfirmationRecordSerializer,

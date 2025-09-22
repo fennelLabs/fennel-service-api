@@ -2,7 +2,7 @@ import os
 
 from django.contrib import messages
 
-from silk.profiling.profiler import silk_profile
+from main.decorators import silk_profile
 
 from dashboard.models import Transaction, UserKeys
 
@@ -97,22 +97,32 @@ def get_fee_for_transfer_token(recipient: str, amount: int, user_key: UserKeys) 
         "to": recipient,
         "amount": amount,
     }
+    
     try:
+        # Call the improved subservice for dynamic fee calculation
         response = requests.post(
             f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_transfer_token",
             data=payload,
-            timeout=5,
+            timeout=10,  # Increased timeout for blockchain calls
         )
+        
+        if response.status_code != 200:
+            return -1
+            
+        fee_data = response.json()
+        
+        Transaction.objects.create(
+            function="transfer_token",
+            payload_size=0,
+            fee=fee_data["fee"],
+        )
+        
+        return round(int(fee_data["fee"]) / 1000000000000, 4)
+        
     except requests.exceptions.ReadTimeout:
         return -1
-    if response.status_code != 200:
+    except requests.exceptions.RequestException:
         return -1
-    Transaction.objects.create(
-        function="transfer_token",
-        payload_size=0,
-        fee=response.json()["fee"],
-    )
-    return round(int(response.json()["fee"]) / 1000000000000, 4)
 
 
 @silk_profile(name="transfer_token")

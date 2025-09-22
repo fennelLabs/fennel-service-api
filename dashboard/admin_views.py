@@ -2,7 +2,7 @@ import os
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 
-from silk.profiling.profiler import silk_profile
+from main.decorators import silk_profile
 
 import requests
 

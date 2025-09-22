@@ -1,6 +1,7 @@
 from django import forms
 
 from dashboard.models import APIGroup, User
+from main.models import APIGroupJoinRequest
 
 
 class RegistrationForm(forms.Form):
@@ -144,6 +145,21 @@ class SendAPIGroupRequestForm(forms.Form):
         widget=forms.Select(attrs={"class": "form-control"}),
     )
 
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        
+        # Filter out groups the user is already a member of
+        if self.user:
+            # Exclude groups where user is already a member or admin
+            user_groups = self.user.api_group_users.all()
+            admin_groups = self.user.api_group_admins.all()
+            excluded_groups = user_groups.union(admin_groups)
+            
+            self.fields['group_name'].queryset = APIGroup.objects.exclude(
+                id__in=excluded_groups.values_list('id', flat=True)
+            )
+
     def clean(self):
         cleaned_data = super().clean()
         group_name = cleaned_data.get("group_name")
@@ -153,6 +169,25 @@ class SendAPIGroupRequestForm(forms.Form):
 
         if not APIGroup.objects.filter(name=group_name).exists():
             raise forms.ValidationError("Group name does not exist")
+
+        # Additional validation if user context is available
+        if self.user and group_name:
+            # Check if user is already a member
+            if self.user.api_group_users.filter(id=group_name.id).exists():
+                raise forms.ValidationError(f"You are already a member of {group_name.name}")
+            
+            # Check if user is already an admin
+            if self.user.api_group_admins.filter(id=group_name.id).exists():
+                raise forms.ValidationError(f"You are already an admin of {group_name.name}")
+            
+            # Check if user already has a pending request
+            if APIGroupJoinRequest.objects.filter(
+                api_group=group_name, 
+                user=self.user,
+                accepted=False,
+                rejected=False
+            ).exists():
+                raise forms.ValidationError(f"You already have a pending request to join {group_name.name}")
 
         return cleaned_data
 

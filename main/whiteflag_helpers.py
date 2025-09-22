@@ -2,7 +2,7 @@ import json
 import os
 from typing import Optional
 
-from silk.profiling.profiler import silk_profile
+from main.decorators import silk_profile
 
 import requests
 
@@ -131,7 +131,7 @@ def create_whiteflag_encoder_response(
     if response.status_code != 200:
         return ({"error": return_value}, False)
     if not response.json()["success"]:
-        return ({"error": return_value["error"]}, False)
+        return ({"error": response.json()["error"]}, False)
     if json_packet["encryptionIndicator"] == "1":
         shared_key, shared_secret_success = generate_shared_secret(
             sender_group, recipient_group
@@ -188,11 +188,25 @@ def whiteflag_encoder_helper(
             "0000000000000000000000000000000000000000000000000000000000000000"
         )
     processed_payload = json.dumps({k: v for k, v in json_packet.items() if v})
+    
+    # Debug logging for encoding issues
+    print(f"Sending to CLI service for encoding: {processed_payload}")
+    
     response = requests.post(
         f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_encode",
         data=processed_payload,
         timeout=5,
     )
+    
+    # Debug logging for CLI response
+    print(f"CLI service response status: {response.status_code}")
+    if response.status_code != 200:
+        print(f"CLI service error response: {response.text}")
+    else:
+        cli_result = response.json()
+        print(f"CLI service success: {cli_result.get('success', False)}")
+        if not cli_result.get('success', False):
+            print(f"CLI service encoding error: {cli_result.get('error', 'Unknown error')}")
     return create_whiteflag_encoder_response(
         json_packet, response, sender_group, recipient_group
     )

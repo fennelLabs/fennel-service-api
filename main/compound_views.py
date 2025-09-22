@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from knox.auth import TokenAuthentication
 
-from silk.profiling.profiler import silk_profile
+from main.decorators import silk_profile
 
 import requests
 from main.decorators import requires_mnemonic_created

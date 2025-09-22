@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 from django.contrib.messages.storage import default_storage
 
-from silk.profiling.profiler import silk_profile
+from main.decorators import silk_profile
 
 from dashboard.decorators import require_admin, require_authentication
 from dashboard.forms import (
@@ -27,15 +27,21 @@ import requests
 @require_authentication
 def index(request):
     request._messages = default_storage(request)
-    if request.user.api_group_admins.all().exists():
-        return redirect(
-            "dashboard:api_group_members",
-            group_id=request.user.api_group_admins.first().id,
+    admin_groups = request.user.api_group_admins.all()
+    
+    if admin_groups.exists():
+        # Always show group selection when user has groups (even if just one)
+        return render(
+            request,
+            "dashboard/group_selection.html",
+            {"admin_groups": admin_groups},
         )
+    
+    # If user is not admin of any groups, show create/join forms
     return render(
         request,
         "dashboard/index.html",
-        {"form": CreateApiGroupForm(), "join_request_form": SendAPIGroupRequestForm()},
+        {"form": CreateApiGroupForm(), "join_request_form": SendAPIGroupRequestForm(user=request.user)},
     )
 
 
@@ -43,7 +49,7 @@ def index(request):
 @require_authentication
 def send_group_join_request(request):
     if request.method == "POST":
-        join_form = SendAPIGroupRequestForm(request.POST)
+        join_form = SendAPIGroupRequestForm(request.POST, user=request.user)
         if not join_form.is_valid():
             return render(
                 request,
@@ -66,7 +72,7 @@ def send_group_join_request(request):
                 messages.success(request, f"Sent join request to {group.name}.")
                 return redirect("dashboard:index")
     else:
-        join_form = SendAPIGroupRequestForm()
+        join_form = SendAPIGroupRequestForm(user=request.user)
     return render(
         request,
         "dashboard/index.html",
@@ -94,7 +100,7 @@ def create_api_group(request):
     return render(
         request,
         "dashboard/index.html",
-        {"form": form, "join_request_form": SendAPIGroupRequestForm()},
+        {"form": form, "join_request_form": SendAPIGroupRequestForm(user=request.user)},
     )
 
 

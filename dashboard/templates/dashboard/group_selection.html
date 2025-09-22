@@ -1,0 +1,85 @@
+{% extends "dashboard/base_no_group.html" %}
+{% load group_tags %}
+{% block content %}
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <h1 class="mb-4"><i class="fas fa-users"></i> Select Group to Manage</h1>
+      <p class="lead">You are an administrator of multiple groups. Choose which group you'd like to manage:</p>
+    </div>
+  </div>
+
+  <div class="row">
+    {% for group in admin_groups %}
+    <div class="col-md-6 col-lg-4 mb-4">
+      <div class="card h-100 shadow-sm {% if group|pending_requests_count > 0 %}border-warning{% endif %}">
+        <div class="card-header {% if group|pending_requests_count > 0 %}bg-warning text-dark{% else %}bg-primary text-white{% endif %}">
+          <h4 class="mb-0">
+            <i class="fas fa-users"></i> {{ group.name }}
+            {% if group|pending_requests_count > 0 %}
+              <span class="badge bg-danger ms-2">{{ group|pending_requests_count }} pending</span>
+            {% endif %}
+          </h4>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <p class="card-text">
+              <strong>Members:</strong> {{ group.user_list.count }}<br>
+              <strong>Admins:</strong> {{ group.admin_list.count }}<br>
+              <strong>Status:</strong> 
+              {% if group.active %}
+                <span class="badge bg-success">Active</span>
+              {% else %}
+                <span class="badge bg-secondary">Inactive</span>
+              {% endif %}
+            </p>
+          </div>
+          
+          {% if group.email %}
+          <p class="text-muted small">
+            <i class="fas fa-envelope"></i> {{ group.email }}
+          </p>
+          {% endif %}
+          
+          <div class="d-grid gap-2">
+            <a href="{% url 'dashboard:api_group_members' group.id %}" 
+               class="btn btn-primary">
+              <i class="fas fa-cog"></i> Manage Group
+            </a>
+            <a href="{% url 'dashboard:api_group_join_requests' group.id %}" 
+               class="btn btn-outline-info btn-sm">
+              <i class="fas fa-user-plus"></i> Join Requests
+            </a>
+          </div>
+        </div>
+        <div class="card-footer text-muted small">
+          <div class="d-flex justify-content-between">
+            <span>
+              <i class="fas fa-clock"></i> Pending: {{ group|pending_requests_count }}
+            </span>
+            <span>
+              <i class="fas fa-check"></i> Approved: {{ group|approved_requests_count }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card bg-light">
+        <div class="card-body text-center">
+          <h5><i class="fas fa-plus-circle"></i> Want to create another group?</h5>
+          <a href="{% url 'dashboard:create_api_group' %}" class="btn btn-success">
+            <i class="fas fa-plus"></i> Create New Group
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

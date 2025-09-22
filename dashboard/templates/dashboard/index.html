@@ -1,31 +1,100 @@
 {% extends "dashboard/base_no_group.html" %}
 {% block content %}
 {% load crispy_forms_tags %}
-Welcome to Fennel.
-<div class="row">
-  <h1>Create Group</h1>
-  <form
-    action="{% url 'dashboard:create_api_group' %}"
-    id="create_api_group"
-    method="post"
-    name="create_api_group"
-  >
-    {% csrf_token %}
-    {{ form|crispy }}
-    <button type="submit" class="btn btn-primary">Create</button>
-  </form>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <h1 class="mb-4">🌐 Fennel Group Management</h1>
+      <p class="lead">Create or join groups to collaborate on Whiteflag messages and token management.</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-success text-white">
+          <h3><i class="fas fa-plus"></i> Create New Group</h3>
+        </div>
+        <div class="card-body">
+          <p>Create a new API group to manage users and Whiteflag message permissions.</p>
+          <form
+            action="{% url 'dashboard:create_api_group' %}"
+            id="create_api_group"
+            method="post"
+            name="create_api_group"
+          >
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit" class="btn btn-success btn-lg w-100">
+              <i class="fas fa-plus"></i> Create Group
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-info text-white">
+          <h3><i class="fas fa-user-plus"></i> Join Existing Group</h3>
+        </div>
+        <div class="card-body">
+          <p>Request to join an existing group to collaborate with other users.</p>
+          <form
+            action="{% url 'dashboard:send_group_join_request' %}"
+            id="send_group_join_request"
+            method="post"
+            name="send_group_join_request"
+          >
+            {% csrf_token %}
+            {{ join_request_form|crispy }}
+            <button type="submit" class="btn btn-info btn-lg w-100">
+              <i class="fas fa-paper-plane"></i> Send Join Request
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h3><i class="fas fa-info-circle"></i> About Groups</h3>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-4">
+              <h5>🔐 Group Permissions</h5>
+              <ul>
+                <li>Control message visibility</li>
+                <li>Manage user access</li>
+                <li>Token distribution</li>
+              </ul>
+            </div>
+            <div class="col-md-4">
+              <h5>🤝 Collaboration Features</h5>
+              <ul>
+                <li>Shared Whiteflag messages</li>
+                <li>Group-specific communications</li>
+                <li>Coordinated responses</li>
+              </ul>
+            </div>
+            <div class="col-md-4">
+              <h5>⚙️ Admin Functions</h5>
+              <ul>
+                <li>Approve join requests</li>
+                <li>Manage member permissions</li>
+                <li>Transfer tokens to members</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-<div class="row">
-  <h1>Request to Join Group</h1>
-  <form
-    action="{% url 'dashboard:send_group_join_request' %}"
-    id="send_group_join_request"
-    method="post"
-    name="send_group_join_request"
-  >
-    {% csrf_token %}
-    {{ join_request_form|crispy }}
-    <button type="submit" class="btn btn-primary">Send</button>
-  </form>
-</div>
+
 {% endblock %}

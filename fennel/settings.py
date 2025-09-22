@@ -26,17 +26,27 @@ SECRET_KEY = os.environ.get("SECRET_KEY", None)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True if os.environ.get("DEBUG") == "True" else False
 
-ALLOWED_HOSTS = [
-    "localhost",
-    "192.168.1.152",
-    "192.168.1.186",
-    "34.148.9.195",
-    "api.fennellabs.com",
-    "10.0.38.110",
-    "api-lb-1539191200.us-east-2.elb.amazonaws.com",
-    os.environ.get("HOST_IP"),
-    os.environ.get("POD_IP"),
-]
+# ALLOWED_HOSTS configuration - support environment variable override
+ALLOWED_HOSTS_ENV = os.environ.get("ALLOWED_HOSTS")
+if ALLOWED_HOSTS_ENV:
+    if ALLOWED_HOSTS_ENV == "*":
+        ALLOWED_HOSTS = ["*"]
+    else:
+        ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_ENV.split(",")]
+else:
+    ALLOWED_HOSTS = [
+        "localhost",
+        "192.168.1.152",
+        "192.168.1.186",
+        "34.148.9.195",
+        "api.fennellabs.com",
+        "10.0.38.110",
+        "api-lb-1539191200.us-east-2.elb.amazonaws.com",
+        "app.fennel.network",
+        "fennel-api-service",
+        os.environ.get("HOST_IP"),
+        os.environ.get("POD_IP"),
+    ]
 
 CORS_ORIGIN_WHITELIST = [
     "http://localhost:3000",
@@ -47,15 +57,25 @@ CORS_ORIGIN_WHITELIST = [
     "http://localhost:1234",
 ]
 
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-    "https://api.fennellabs.com",
-    "http://api:1234",
-    "http://localhost:8081",
-    "http://localhost:8080",
-    "http://localhost:1234",
-    "http://192.168.1.152:8081",
-]
+# Read CSRF trusted origins from environment variable
+CSRF_TRUSTED_ORIGINS_ENV = os.environ.get("CSRF_TRUSTED_ORIGINS")
+if CSRF_TRUSTED_ORIGINS_ENV:
+    CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in CSRF_TRUSTED_ORIGINS_ENV.split(",")]
+else:
+    # Fallback to hardcoded list
+    CSRF_TRUSTED_ORIGINS = [
+        "http://localhost:3000",
+        "https://api.fennellabs.com",
+        "http://api:1234",
+        "http://localhost:8081",
+        "http://localhost:8080",
+        "http://localhost:1234",
+        "http://192.168.1.152:8081",
+        "https://app.fennel.network",
+        "http://app.fennel.network",
+        "http://48.216.159.96:1234",  # Added the missing URL with port
+        "https://48.216.159.96:1234",
+    ]
 
 # Application definition
 
@@ -75,10 +95,13 @@ INSTALLED_APPS = [
     "django_rest_passwordreset",
     "knox",
     "django_nose",
-    "silk",
     "crispy_bootstrap5",
     "anymail",
 ]
+
+# Add Silk profiling only in development/debug mode
+if DEBUG:
+    INSTALLED_APPS.append("silk")
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -90,10 +113,13 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "silk.middleware.SilkyMiddleware",
     "dashboard.user_balance_middleware.user_balance_middleware",
     "dashboard.api_group_middleware.get_api_group_public_key",
 ]
+
+# Add Silk middleware only in development/debug mode
+if DEBUG:
+    MIDDLEWARE.insert(-2, "silk.middleware.SilkyMiddleware")
 
 ROOT_URLCONF = "fennel.urls"
 
@@ -210,6 +236,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "https://whiteflag.fennellabs.com",
+    "https://app.fennel.network",
+    "http://app.fennel.network",
 ]
 
 CSRF_COOKIE_HTTPONLY = True
@@ -307,18 +335,20 @@ def silk_intercept(request):
     return "healthcheck" not in request.path
 
 
-SILKY_PYTHON_PROFILER = True
-SILKY_PYTHON_PROFILER_BINARY = True
-SILKY_AUTHENTICATION = True
-# noinspection PyPep8
-SILKY_PERMISSIONS = silk_permissions
-SILKY_INTERCEPT_FUNC = silk_intercept
-SILKY_MAX_RESPONSE_BODY_SIZE = 1024
-SILKY_META = True
-SILKY_INTERCEPT_PERCENT = 50
-SILKY_MAX_RECORDED_REQUESTS = 10**3
-SILKY_MAX_RECORDED_REQUESTS_CHECK_PERCENT = 10
-SILKY_PYTHON_PROFILER_RESULT_PATH = os.path.join(BASE_DIR, "profile")
+# Silk profiling configuration - only enabled in debug mode
+if DEBUG:
+    SILKY_PYTHON_PROFILER = True
+    SILKY_PYTHON_PROFILER_BINARY = True
+    SILKY_AUTHENTICATION = True
+    # noinspection PyPep8
+    SILKY_PERMISSIONS = silk_permissions
+    SILKY_INTERCEPT_FUNC = silk_intercept
+    SILKY_MAX_RESPONSE_BODY_SIZE = 1024
+    SILKY_META = True
+    SILKY_INTERCEPT_PERCENT = 50
+    SILKY_MAX_RECORDED_REQUESTS = 10**3
+    SILKY_MAX_RECORDED_REQUESTS_CHECK_PERCENT = 10
+    SILKY_PYTHON_PROFILER_RESULT_PATH = os.path.join(BASE_DIR, "profile")
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 

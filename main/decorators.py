@@ -1,7 +1,27 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
+from django.conf import settings
 
 from main.models import APIGroup, UserKeys
+
+
+def silk_profile(name=None):
+    """
+    Conditional silk profiling decorator.
+    Only applies silk profiling when DEBUG=True, otherwise acts as a no-op.
+    """
+    def decorator(func):
+        if settings.DEBUG:
+            try:
+                from silk.profiling.profiler import silk_profile as _silk_profile
+                return _silk_profile(name=name)(func)
+            except ImportError:
+                # Silk not available, return original function
+                return func
+        else:
+            # Production mode - no profiling
+            return func
+    return decorator
 
 
 def fennel_admin_only(view_func):

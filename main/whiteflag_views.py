@@ -11,7 +11,7 @@ from rest_framework.decorators import (
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
-from silk.profiling.profiler import silk_profile
+from main.decorators import silk_profile
 
 from django.http import Http404
 

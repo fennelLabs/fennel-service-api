@@ -26,20 +26,53 @@
             <li class="nav-item">
               <a
                 class="nav-link p-3"
-                href="{% url 'dashboard:api_group_members' group_id %}"
-                >Home</a
+                href="{% url 'dashboard:index' %}"
+                ><i class="fas fa-home"></i> Home</a
               >
             </li>
+            {% if group_id %}
             <li class="nav-item">
               <a
                 class="nav-link p-3"
                 href="{% url 'dashboard:api_group_join_requests' group_id %}"
-                >Join Requests</a
+                ><i class="fas fa-user-plus"></i> Join Requests</a
+              >
+            </li>
+            {% endif %}
+            <li class="nav-item">
+              <a
+                class="nav-link p-3"
+                href="{% url 'dashboard:create_api_group' %}"
+                ><i class="fas fa-plus"></i> Create New Group</a
               >
             </li>
             {% if user.api_group_name %}
-            <li class="nav-item">
-              <div class="nav-link p-3">API Group: {{ user.api_group_name }}</div>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle p-3" href="#" id="groupDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-users"></i> Group: {{ user.api_group_name }}
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="groupDropdown">
+                {% for admin_group in user.api_group_admins.all %}
+                <li>
+                  <a class="dropdown-item {% if admin_group.id == group_id %}active{% endif %}" 
+                     href="{% url 'dashboard:api_group_members' admin_group.id %}">
+                    <i class="fas fa-users"></i> {{ admin_group.name }}
+                    <small class="text-muted">({{ admin_group.user_list.count }} members)</small>
+                  </a>
+                </li>
+                {% endfor %}
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'dashboard:index' %}">
+                    <i class="fas fa-th-large"></i> All Groups
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'dashboard:create_api_group' %}">
+                    <i class="fas fa-plus"></i> Create New Group
+                  </a>
+                </li>
+              </ul>
             </li>
             {% endif %}
             {% if user.has_wallet %}

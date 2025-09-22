@@ -5,7 +5,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from silk.profiling.profiler import silk_profile
+from main.decorators import silk_profile
 
 from dashboard.decorators import require_authentication
 from dashboard.forms import LoginForm, RegistrationForm

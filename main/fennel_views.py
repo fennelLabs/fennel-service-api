@@ -16,7 +16,7 @@ from rest_framework.decorators import (
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
-from silk.profiling.profiler import silk_profile
+from main.decorators import silk_profile
 
 from knox.auth import TokenAuthentication
 
@@ -36,28 +36,81 @@ from main.serializers import SignalSerializer, TransactionSerializer
 
 @silk_profile(name="record_signal_fee")
 def record_signal_fee(payload: dict) -> (dict, bool):
-    response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_new_signal",
-        data=payload,
-        timeout=5,
-    )
     try:
+        # Call the improved subservice for dynamic fee calculation
+        response = requests.post(
+            f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_new_signal",
+            data=payload,
+            timeout=10,  # Increased timeout for blockchain calls
+        )
+        
+        if response.status_code != 200:
+            return (
+                {
+                    "error": "subservice fee calculation failed",
+                    "status_code": response.status_code,
+                    "content": payload["content"],
+                },
+                False,
+            )
+            
+        try:
+            fee_data = response.json()
+        except ValueError as e:
+            return (
+                {
+                    "error": f"subservice returned invalid JSON: {str(e)}",
+                    "response_text": response.text[:200],
+                    "content": payload["content"],
+                },
+                False,
+            )
+        
+        # Check if the response contains a fee
+        if "fee" not in fee_data:
+            return (
+                {
+                    "error": "subservice response missing fee",
+                    "response": fee_data,
+                    "content": payload["content"],
+                },
+                False,
+            )
+        
         Transaction.objects.create(
             function="send_new_signal",
             payload_size=len(payload["content"]),
-            fee=response.json()["fee"],
+            fee=fee_data["fee"],
+        )
+        
+        return fee_data, True
+        
+    except requests.exceptions.Timeout:
+        return (
+            {
+                "error": "subservice timeout - blockchain may be slow",
+                "content": payload["content"],
+            },
+            False,
+        )
+    except requests.exceptions.RequestException as e:
+        return (
+            {
+                "error": f"subservice connection failed: {str(e)}",
+                "content": payload["content"],
+            },
+            False,
         )
     except DataError:
         return (
             {
-                "error": "could not record transaction",
+                "error": "could not record transaction in database",
                 "content": payload["content"],
                 "content_length": len(payload["content"]),
-                "fee": int(response.json()["fee"]),
+                "fee": fee_data.get("fee", 0) if 'fee_data' in locals() else 0,
             },
             False,
         )
-    return response.json(), True
 
 
 @silk_profile(name="check_balance")
@@ -89,6 +142,11 @@ def signal_send_helper(user_key: UserKeys, signal: Signal) -> (dict, bool):
         }
         signal_fee_result, success = record_signal_fee(payload)
         old_balance = int(check_balance(user_key)["balance"])
+        
+        # Check if fee calculation was successful
+        if not success:
+            return (signal_fee_result, False)
+            
         if signal_fee_result["fee"] > old_balance or old_balance == 0:
             return (
                 {
@@ -232,20 +290,50 @@ def get_fee_for_transfer_token(request):
         "to": request.data["to"],
         "amount": request.data["amount"],
     }
-    response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_transfer_token",
-        data=payload,
-        timeout=5,
-    )
-    Transaction.objects.create(
-        function="transfer_token",
-        payload_size=0,
-        fee=response.json()["fee"],
-    )
-    response_json = response.json()
-    response_json["fee"] = response_json["fee"]
-    response_json["balance"] = check_balance(user_key)["balance"]
-    return Response(response_json)
+    
+    try:
+        # Call the improved subservice for dynamic fee calculation
+        response = requests.post(
+            f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_transfer_token",
+            data=payload,
+            timeout=10,  # Increased timeout for blockchain calls
+        )
+        
+        if response.status_code != 200:
+            return Response(
+                {
+                    "error": "subservice fee calculation failed",
+                    "status_code": response.status_code,
+                },
+                status=400,
+            )
+            
+        fee_data = response.json()
+        
+        Transaction.objects.create(
+            function="transfer_token",
+            payload_size=0,
+            fee=fee_data["fee"],
+        )
+        
+        response_json = fee_data
+        response_json["balance"] = check_balance(user_key)["balance"]
+        return Response(response_json)
+        
+    except requests.exceptions.Timeout:
+        return Response(
+            {
+                "error": "subservice timeout - blockchain may be slow",
+            },
+            status=400,
+        )
+    except requests.exceptions.RequestException as e:
+        return Response(
+            {
+                "error": f"subservice connection failed: {str(e)}",
+            },
+            status=400,
+        )
 
 
 @silk_profile(name="transfer_token")
