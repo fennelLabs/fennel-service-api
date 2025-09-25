@@ -6,7 +6,7 @@ metadata:
 data:
   DEBUG: "False"
   ENVIRONMENT: "PRODUCTION"
-  ALLOWED_HOSTS: "whiteflag.network,app.fennel.network,api.fennellabs.com,localhost,fennel-api-service,48.216.159.96,134.33.247.69"
+  ALLOWED_HOSTS: "whiteflag.network,fennel.network,app.fennel.network,api.fennellabs.com,localhost,fennel-api-service,48.216.159.96,134.33.247.69"
   # Fennel blockchain RPC endpoints (connecting to your existing validators)
   FENNEL_RPC: "ws://fennel-validator-0-b4ps-v2.fennel-production.svc.cluster.local:9944"
   FENNEL_VALIDATOR_RPC: "ws://fennel-validator-0-b4ps-v2.fennel-production.svc.cluster.local:9944"
@@ -19,7 +19,8 @@ data:
   POSTGRES_PORT: "5432"
   # External services - use internal cluster services
   FENNEL_CLI_IP: "http://fennel-cli-service.fennel-api.svc.cluster.local:9031"
-  FENNEL_SUBSERVICE_IP: "http://subservice-service.fennel-api.svc.cluster.local:6060"
+  FENNEL_SUBSERVICE_IP: "http://subservice.fennel-api.svc.cluster.local:6060"
+  CSRF_TRUSTED_ORIGINS: "http://localhost:3000,https://api.fennellabs.com,http://api:1234,http://localhost:8081,http://localhost:8080,http://localhost:1234,http://192.168.1.152:8081,https://whiteflag.network,http://whiteflag.network,https://app.fennel.network,http://app.fennel.network,https://fennel.network,http://fennel.network,http://48.216.159.96:1234,https://48.216.159.96:1234"
 ---
 apiVersion: v1
 kind: Secret

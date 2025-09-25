@@ -151,7 +151,7 @@ def whiteflag_encoder_helper(
     datetime_field = payload.get("datetime", None)
     if datetime_field is None:
         datetime_field = payload.get("dateTime", None)
-    encryption_indicator = payload.get("encryptionIndicator", None)
+    encryption_indicator = payload.get("encryptionIndicator", "0")
     if sender_group and recipient_group:
         encryption_indicator = "1"
     if payload.get("text", None):
@@ -160,7 +160,7 @@ def whiteflag_encoder_helper(
         "prefix": "WF",
         "version": "1",
         "encryptionIndicator": encryption_indicator,
-        "duressIndicator": payload.get("duressIndicator", None),
+        "duressIndicator": payload.get("duressIndicator", "0"),
         "messageCode": payload.get("messageCode", None),
         "referenceIndicator": payload.get("referenceIndicator", None),
         "referencedMessage": payload.get("referencedMessage", None),
