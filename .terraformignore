@@ -1,3 +1,4 @@
-# This repository no longer uses Terraform
+# This repository no longer uses Terraform for infrastructure management
 # All Terraform files have been removed
+# Terraform Cloud should not attempt to run plans on this repository
 *
