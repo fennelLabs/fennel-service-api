@@ -6,7 +6,7 @@ from rest_framework.decorators import (
     permission_classes,
 )
 from rest_framework.response import Response
-from rest_framework.authentication import TokenAuthentication
+from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
 from django.shortcuts import get_object_or_404
@@ -234,6 +234,7 @@ def cancel_trust_request(request):
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
+@requires_mnemonic_created
 def get_trust_requests(request):
     return Response(
         [
@@ -253,6 +254,7 @@ def get_trust_requests(request):
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
+@requires_mnemonic_created
 def get_trust_connections(request):
     return Response(
         [
@@ -273,13 +275,16 @@ def get_trust_connections(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def check_if_trust_exists(request):
-    Response(
-        {
-            "trust_exists": TrustConnection.objects.filter(
-                user=get_object_or_404(UserKeys, address=request.data["address"]).user,
-                trusted_user=get_object_or_404(
-                    UserKeys, address=request.data["address"]
-                ).user,
-            ).exists()
-        }
-    )
+    address = request.GET.get("address")
+    if not address:
+        return Response({"error": "address parameter is required"}, status=400)
+    
+    try:
+        target_user = get_object_or_404(UserKeys, address=address).user
+        trust_exists = TrustConnection.objects.filter(
+            user=request.user,
+            trusted_user=target_user
+        ).exists()
+        return Response({"trust_exists": trust_exists})
+    except UserKeys.DoesNotExist:
+        return Response({"error": "user does not exist"}, status=404)

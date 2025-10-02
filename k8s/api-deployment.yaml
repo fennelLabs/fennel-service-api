@@ -45,17 +45,13 @@ spec:
               key: POSTGRES_USER
       containers:
       - name: fennel-api
-        image: python:3.8-slim
+        image: fennelacr531.azurecr.io/fennel-service-api:v1.0.8-group-fixes-arm64
         ports:
         - containerPort: 8080
-        workingDir: /app
         command:
         - sh
         - -c
         - |
-          apt-get update && apt-get install -y git
-          git clone https://github.com/fennellabs/fennel-service-api.git .
-          pip install -r requirements.txt
           echo "Starting Fennel API server..."
           python manage.py runserver 0.0.0.0:8080
         env:
@@ -87,17 +83,35 @@ spec:
             memory: "1Gi"
             cpu: "500m"
         livenessProbe:
-          httpGet:
-            path: /admin/
+          tcpSocket:
             port: 8080
           initialDelaySeconds: 60
           periodSeconds: 30
         readinessProbe:
-          httpGet:
-            path: /admin/
+          tcpSocket:
             port: 8080
           initialDelaySeconds: 30
           periodSeconds: 10
+      tolerations:
+      - key: dedicated
+        operator: Equal
+        value: validator2
+        effect: NoSchedule
+      - key: zone
+        operator: Equal
+        value: api
+        effect: NoSchedule
+      - key: node.kubernetes.io/not-ready
+        operator: Exists
+        effect: NoExecute
+        tolerationSeconds: 300
+      - key: node.kubernetes.io/unreachable
+        operator: Exists
+        effect: NoExecute
+        tolerationSeconds: 300
+      - key: node.kubernetes.io/memory-pressure
+        operator: Exists
+        effect: NoSchedule
 ---
 apiVersion: v1
 kind: Service

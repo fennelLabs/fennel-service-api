@@ -29,7 +29,7 @@ def fennel_admin_only(view_func):
         # Check if request.user is a FennelAdmin
         if request.user.groups.filter(name="FennelAdmin").exists():
             return view_func(request, *args, **kwargs)
-        return Response({"error": "permission denied."}, status=400)
+        return Response({"detail": "You do not have permission to perform this action."}, status=403)
 
     return wrap
 

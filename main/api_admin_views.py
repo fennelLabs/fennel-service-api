@@ -63,38 +63,48 @@ def get_api_group_list(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def create_new_api_group(request):
-    form = APIGroupForm(request.data)
-    if not form.is_valid():
-        return Response({"error": dict(form.errors.items())}, status=400)
-    if APIGroup.objects.filter(user_list__in=[request.user]).exists():
-        return Response({"message": "You already have an api group"}, status=400)
-    if APIGroup.objects.filter(name=form.cleaned_data["api_group_name"]).exists():
-        return Response({"message": "Api Group already exists"}, status=400)
-    api_group = APIGroup.objects.create(
-        name=form.cleaned_data["api_group_name"], email=form.cleaned_data["email"]
-    )
-    if api_group.admin_list.filter(id=request.user.id).exists():
-        return Response(
-            {"message": "You are already admin of this api group"}, status=400
+    try:
+        form = APIGroupForm(request.data)
+        if not form.is_valid():
+            return Response({"error": dict(form.errors.items())}, status=400)
+        if APIGroup.objects.filter(user_list__in=[request.user]).exists():
+            return Response({"message": "You already have an api group"}, status=400)
+        if APIGroup.objects.filter(name=form.cleaned_data["api_group_name"]).exists():
+            return Response({"message": "Api Group already exists"}, status=400)
+        api_group = APIGroup.objects.create(
+            name=form.cleaned_data["api_group_name"], email=form.cleaned_data["email"]
         )
-    api_group.admin_list.add(request.user)
-    api_group.user_list.add(request.user)
-    api_group.api_key = secrets.token_hex(32)
-    api_group.api_secret = secrets.token_hex(32)
-    api_group.save()
-    send_mail(
-        "New API Group",
-        f"A new API Group has been added with the name {api_group.name} and the email {api_group.email}",
-        os.environ.get("SERVER_EMAIL"),
-        [os.environ.get("SERVER_EMAIL")],
-    )
-    return Response(
-        {
-            "api_key": api_group.api_key,
-            "api_secret": api_group.api_secret,
-            "api_group_name": api_group.name,
-        }
-    )
+        if api_group.admin_list.filter(id=request.user.id).exists():
+            return Response(
+                {"message": "You are already admin of this api group"}, status=400
+            )
+        api_group.admin_list.add(request.user)
+        api_group.user_list.add(request.user)
+        api_group.api_key = secrets.token_hex(32)
+        api_group.api_secret = secrets.token_hex(32)
+        api_group.save()
+        
+        # Send email notification with error handling
+        try:
+            send_mail(
+                "New API Group",
+                f"A new API Group has been added with the name {api_group.name} and the email {api_group.email}",
+                os.environ.get("SERVER_EMAIL"),
+                [os.environ.get("SERVER_EMAIL")],
+            )
+        except Exception as e:
+            # Log the email error but don't fail the group creation
+            print(f"Failed to send email notification: {e}")
+        
+        return Response(
+            {
+                "api_key": api_group.api_key,
+                "api_secret": api_group.api_secret,
+                "api_group_name": api_group.name,
+            }
+        )
+    except Exception as e:
+        return Response({"error": f"Failed to create API group: {str(e)}"}, status=500)
 
 
 @silk_profile(name="get_api_group_keys")
