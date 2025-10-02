@@ -1,0 +1,19 @@
+name: Terraform Cleanup Notice
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  terraform-notice:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notice - No Terraform Configuration
+        run: |
+          echo "⚠️  NOTICE: This repository no longer uses Terraform"
+          echo "📁 All Terraform files have been removed"
+          echo "🔧 Please update Terraform Cloud workspace settings"
+          echo "📋 Workspace: fennellabs/fennel-service-api"
+          echo "🛑 Consider disabling auto-plan/auto-apply or deleting the workspace"
