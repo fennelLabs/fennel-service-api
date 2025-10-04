@@ -9,8 +9,8 @@ export EMAIL_USERNAME=""
 export EMAIL_PASSWORD=""
 export DEFAULT_FROM_EMAIL=""
 export SERVER_EMAIL=""
-export FENNEL_CLI_IP=https://bitwise.fennellabs.com
-export FENNEL_SUBSERVICE_IP=https://subservice.fennellabs.com
+export FENNEL_CLI_IP=https://fennel.network/encoder/v1
+export FENNEL_SUBSERVICE_IP=https://fennel.network/subservice
 ./runner.sh check
 coverage report --omit="*/tests/*","*/migrations/*","*/management/*","*/admin.py","*/apps.py","*/urls.py","*/wsgi.py","*/asgi.py","*/settings.py","*/manage.py","*/__init__.py","*/models.py"
 coverage html --omit="*/tests/*","*/migrations/*","*/management/*","*/admin.py","*/apps.py","*/urls.py","*/wsgi.py","*/asgi.py","*/settings.py","*/manage.py","*/__init__.py","*/models.py"
