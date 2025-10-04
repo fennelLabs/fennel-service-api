@@ -1,0 +1,3084 @@
+---
+queries:
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Classes/CallsToInitDel/MissingCallToDel.ql
+  relativeBqrsPath: codeql/python-queries/Classes/CallsToInitDel/MissingCallToDel.bqrs
+  metadata:
+    name: Missing call to superclass `__del__` during object destruction
+    description: An omitted call to a superclass `__del__` method may lead to class
+      instances not being cleaned up properly.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+             performance
+    problem.severity: error
+    sub-severity: low
+    precision: high
+    id: py/missing-call-to-delete
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Classes/CallsToInitDel/MissingCallToInit.ql
+  relativeBqrsPath: codeql/python-queries/Classes/CallsToInitDel/MissingCallToInit.bqrs
+  metadata:
+    name: Missing call to superclass `__init__` during object initialization
+    description: An omitted call to a superclass `__init__` method may lead to objects
+      of this class not being fully initialized.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: low
+    precision: high
+    id: py/missing-call-to-init
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Classes/CallsToInitDel/SuperclassDelCalledMultipleTimes.ql
+  relativeBqrsPath: codeql/python-queries/Classes/CallsToInitDel/SuperclassDelCalledMultipleTimes.bqrs
+  metadata:
+    name: Multiple calls to `__del__` during object destruction
+    description: A duplicated call to a superclass `__del__` method may lead to class
+      instances not be cleaned up properly.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: warning
+    sub-severity: high
+    precision: very-high
+    id: py/multiple-calls-to-delete
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Classes/CallsToInitDel/SuperclassInitCalledMultipleTimes.ql
+  relativeBqrsPath: codeql/python-queries/Classes/CallsToInitDel/SuperclassInitCalledMultipleTimes.bqrs
+  metadata:
+    name: Multiple calls to `__init__` during object initialization
+    description: A duplicated call to a superclass `__init__` method may lead to objects
+      of this class not being properly initialized.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: warning
+    sub-severity: high
+    precision: very-high
+    id: py/multiple-calls-to-init
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Classes/Comparisons/EqualsOrHash.ql
+  relativeBqrsPath: codeql/python-queries/Classes/Comparisons/EqualsOrHash.bqrs
+  metadata:
+    name: Inconsistent equality and hashing
+    description: Defining a hash operation without defining equality may be a mistake.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+             external/cwe/cwe-581
+    problem.severity: warning
+    sub-severity: high
+    precision: very-high
+    id: py/equals-hash-mismatch
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Classes/Comparisons/EqualsOrNotEquals.ql
+  relativeBqrsPath: codeql/python-queries/Classes/Comparisons/EqualsOrNotEquals.bqrs
+  metadata:
+    name: Inconsistent equality and inequality
+    description: Class definitions of equality and inequality operators may be inconsistent.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: warning
+    sub-severity: high
+    precision: very-high
+    id: py/inconsistent-equality
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Classes/Comparisons/IncompleteOrdering.ql
+  relativeBqrsPath: codeql/python-queries/Classes/Comparisons/IncompleteOrdering.bqrs
+  metadata:
+    name: Incomplete ordering
+    description: "Class defines ordering comparison methods, but does not define both\
+      \ strict and nonstrict ordering methods, to ensure all four comparison operators\
+      \ behave as expected."
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: warning
+    sub-severity: low
+    precision: very-high
+    id: py/incomplete-ordering
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Classes/ConflictingAttributesInBaseClasses.ql
+  relativeBqrsPath: codeql/python-queries/Classes/ConflictingAttributesInBaseClasses.bqrs
+  metadata:
+    name: Conflicting attributes in base classes
+    description: "When a class subclasses multiple base classes and more than one\
+      \ base class defines the same attribute, attribute overriding may result in\
+      \ unexpected behavior by instances of this class."
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: warning
+    sub-severity: low
+    precision: high
+    id: py/conflicting-attributes
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Classes/DefineEqualsWhenAddingAttributes.ql
+  relativeBqrsPath: codeql/python-queries/Classes/DefineEqualsWhenAddingAttributes.bqrs
+  metadata:
+    name: '`__eq__` not overridden when adding attributes'
+    description: "When adding new attributes to instances of a class, equality for\
+      \ that class needs to be defined."
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: warning
+    sub-severity: high
+    precision: high
+    id: py/missing-equals
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Classes/InconsistentMRO.ql
+  relativeBqrsPath: codeql/python-queries/Classes/InconsistentMRO.bqrs
+  metadata:
+    name: Inconsistent method resolution order
+    description: Class definition will raise a type error at runtime due to inconsistent
+      method resolution order(MRO)
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: high
+    precision: very-high
+    id: py/inconsistent-mro
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Classes/InitCallsSubclass/InitCallsSubclassMethod.ql
+  relativeBqrsPath: codeql/python-queries/Classes/InitCallsSubclass/InitCallsSubclassMethod.bqrs
+  metadata:
+    name: '`__init__` method calls overridden method'
+    description: |-
+      Calling a method from `__init__` that is overridden by a subclass may result in a partially
+                    initialized instance being observed.
+    kind: problem
+    tags: |-
+      reliability
+             correctness
+             quality
+    problem.severity: warning
+    sub-severity: low
+    precision: high
+    id: py/init-calls-subclass
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Classes/MutatingDescriptor.ql
+  relativeBqrsPath: codeql/python-queries/Classes/MutatingDescriptor.bqrs
+  metadata:
+    name: Mutation of descriptor in `__get__` or `__set__` method.
+    description: Descriptor objects can be shared across many instances. Mutating
+      them can cause strange side effects or race conditions.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: low
+    precision: very-high
+    id: py/mutable-descriptor
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Classes/OverwritingAttributeInSuperClass.ql
+  relativeBqrsPath: codeql/python-queries/Classes/OverwritingAttributeInSuperClass.bqrs
+  metadata:
+    name: Overwriting attribute in super-class or sub-class
+    description: Assignment to self attribute overwrites attribute previously defined
+      in subclass or superclass `__init__` method.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: warning
+    sub-severity: low
+    precision: medium
+    id: py/overwritten-inherited-attribute
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Classes/PropertyInOldStyleClass.ql
+  relativeBqrsPath: codeql/python-queries/Classes/PropertyInOldStyleClass.bqrs
+  metadata:
+    name: Property in old-style class
+    description: Using property descriptors in old-style classes does not work from
+      Python 2.1 onward.
+    kind: problem
+    tags: |-
+      portability
+             correctness
+    problem.severity: error
+    sub-severity: low
+    precision: very-high
+    id: py/property-in-old-style-class
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Classes/SlotsInOldStyleClass.ql
+  relativeBqrsPath: codeql/python-queries/Classes/SlotsInOldStyleClass.bqrs
+  metadata:
+    name: '`__slots__` in old-style class'
+    description: |-
+      Overriding the class dictionary by declaring `__slots__` is not supported by old-style
+                    classes.
+    kind: problem
+    problem.severity: error
+    tags: |-
+      portability
+             correctness
+    sub-severity: low
+    precision: very-high
+    id: py/slots-in-old-style-class
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Classes/SubclassShadowing/SubclassShadowing.ql
+  relativeBqrsPath: codeql/python-queries/Classes/SubclassShadowing/SubclassShadowing.bqrs
+  metadata:
+    name: Superclass attribute shadows subclass method
+    description: |-
+      Defining an attribute in a superclass method with a name that matches a subclass
+                    method, hides the method in the subclass.
+    kind: problem
+    problem.severity: error
+    tags: |-
+      quality
+             reliability
+             correctness
+    sub-severity: low
+    precision: high
+    id: py/attribute-shadows-method
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Classes/SuperInOldStyleClass.ql
+  relativeBqrsPath: codeql/python-queries/Classes/SuperInOldStyleClass.bqrs
+  metadata:
+    name: '''super'' in old style class'
+    description: Using super() to access inherited methods is not supported by old-style
+      classes.
+    kind: problem
+    tags: |-
+      portability
+             correctness
+    problem.severity: error
+    sub-severity: low
+    precision: very-high
+    id: py/super-in-old-style
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Classes/WrongNameForArgumentInClassInstantiation.ql
+  relativeBqrsPath: codeql/python-queries/Classes/WrongNameForArgumentInClassInstantiation.bqrs
+  metadata:
+    name: Wrong name for an argument in a class instantiation
+    description: |-
+      Using a named argument whose name does not correspond to a
+                    parameter of the __init__ method of the class being
+                    instantiated, will result in a TypeError at runtime.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+             external/cwe/cwe-628
+    problem.severity: error
+    sub-severity: low
+    precision: very-high
+    id: py/call/wrong-named-class-argument
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Classes/WrongNumberArgumentsInClassInstantiation.ql
+  relativeBqrsPath: codeql/python-queries/Classes/WrongNumberArgumentsInClassInstantiation.bqrs
+  metadata:
+    name: Wrong number of arguments in a class instantiation
+    description: |-
+      Using too many or too few arguments in a call to the `__init__`
+                    method of a class will result in a TypeError at runtime.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+             external/cwe/cwe-685
+    problem.severity: error
+    sub-severity: low
+    precision: very-high
+    id: py/call/wrong-number-class-arguments
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Diagnostics/ExtractedFiles.ql
+  relativeBqrsPath: codeql/python-queries/Diagnostics/ExtractedFiles.bqrs
+  metadata:
+    name: Extracted Python files
+    description: Lists all Python files in the source code directory that were extracted.
+    kind: diagnostic
+    id: py/diagnostics/successfully-extracted-files
+    tags: successfully-extracted-files
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Diagnostics/ExtractionWarnings.ql
+  relativeBqrsPath: codeql/python-queries/Diagnostics/ExtractionWarnings.bqrs
+  metadata:
+    name: Python extraction warnings
+    description: List all extraction warnings for Python files in the source code
+      directory.
+    kind: diagnostic
+    id: py/diagnostics/extraction-warnings
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Exceptions/CatchingBaseException.ql
+  relativeBqrsPath: codeql/python-queries/Exceptions/CatchingBaseException.bqrs
+  metadata:
+    name: Except block handles 'BaseException'
+    description: Handling 'BaseException' means that system exits and keyboard interrupts
+      may be mis-handled.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             error-handling
+             external/cwe/cwe-396
+    problem.severity: recommendation
+    sub-severity: high
+    precision: very-high
+    id: py/catch-base-exception
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Exceptions/EmptyExcept.ql
+  relativeBqrsPath: codeql/python-queries/Exceptions/EmptyExcept.bqrs
+  metadata:
+    name: Empty except
+    description: Except doesn't do anything and has no comment
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             error-handling
+             external/cwe/cwe-390
+    problem.severity: recommendation
+    sub-severity: high
+    precision: high
+    id: py/empty-except
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Exceptions/IllegalExceptionHandlerType.ql
+  relativeBqrsPath: codeql/python-queries/Exceptions/IllegalExceptionHandlerType.bqrs
+  metadata:
+    name: Non-exception in 'except' clause
+    description: An exception handler specifying a non-exception type will never handle
+      any exception.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             error-handling
+    problem.severity: error
+    sub-severity: low
+    precision: very-high
+    id: py/useless-except
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Exceptions/IllegalRaise.ql
+  relativeBqrsPath: codeql/python-queries/Exceptions/IllegalRaise.bqrs
+  metadata:
+    name: Illegal raise
+    description: Raising a non-exception object or type will result in a TypeError
+      being raised instead.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             error-handling
+    problem.severity: error
+    sub-severity: high
+    precision: very-high
+    id: py/illegal-raise
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Exceptions/IncorrectExceptOrder.ql
+  relativeBqrsPath: codeql/python-queries/Exceptions/IncorrectExceptOrder.bqrs
+  metadata:
+    name: Unreachable `except` block
+    description: |-
+      Handling general exceptions before specific exceptions means that the specific
+                    handlers are never executed.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             error-handling
+             external/cwe/cwe-561
+    problem.severity: error
+    sub-severity: low
+    precision: very-high
+    id: py/unreachable-except
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Exceptions/NotImplementedIsNotAnException.ql
+  relativeBqrsPath: codeql/python-queries/Exceptions/NotImplementedIsNotAnException.bqrs
+  metadata:
+    name: Raising `NotImplemented`
+    description: Using `NotImplemented` as an exception will result in a type error.
+    kind: problem
+    problem.severity: warning
+    sub-severity: high
+    precision: very-high
+    id: py/raise-not-implemented
+    tags: |-
+      quality
+             reliability
+             error-handling
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Exceptions/RaisingTuple.ql
+  relativeBqrsPath: codeql/python-queries/Exceptions/RaisingTuple.bqrs
+  metadata:
+    name: Raising a tuple
+    description: Raising a tuple will result in all but the first element being discarded
+    kind: problem
+    tags: maintainability
+    problem.severity: warning
+    sub-severity: high
+    precision: very-high
+    id: py/raises-tuple
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Exceptions/UnguardedNextInGenerator.ql
+  relativeBqrsPath: codeql/python-queries/Exceptions/UnguardedNextInGenerator.bqrs
+  metadata:
+    name: Unguarded next in generator
+    description: Calling next() in a generator may cause unintended early termination
+      of an iteration.
+    kind: problem
+    tags: |-
+      maintainability
+             portability
+    problem.severity: warning
+    sub-severity: low
+    precision: very-high
+    id: py/unguarded-next-in-generator
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/CallToSuperWrongClass.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/CallToSuperWrongClass.bqrs
+  metadata:
+    name: First argument to super() is not enclosing class
+    description: Calling super with something other than the enclosing class may cause
+      incorrect object initialization.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+             external/cwe/cwe-687
+    problem.severity: error
+    sub-severity: low
+    precision: high
+    id: py/super-not-enclosing-class
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/CompareConstants.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/CompareConstants.bqrs
+  metadata:
+    name: Comparison of constants
+    description: "Comparison of constants is always constant, but is harder to read\
+      \ than a simple constant."
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             useless-code
+             external/cwe/cwe-570
+             external/cwe/cwe-571
+    problem.severity: warning
+    sub-severity: low
+    precision: very-high
+    id: py/comparison-of-constants
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/CompareIdenticalValues.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/CompareIdenticalValues.bqrs
+  metadata:
+    name: Comparison of identical values
+    description: "Comparison of identical values, the intent of which is unclear."
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             readability
+             external/cwe/cwe-570
+             external/cwe/cwe-571
+    problem.severity: warning
+    sub-severity: high
+    precision: very-high
+    id: py/comparison-of-identical-expressions
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/CompareIdenticalValuesMissingSelf.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/CompareIdenticalValuesMissingSelf.bqrs
+  metadata:
+    name: Maybe missing 'self' in comparison
+    description: "Comparison of identical values, the intent of which is unclear."
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+             external/cwe/cwe-570
+             external/cwe/cwe-571
+    problem.severity: warning
+    sub-severity: high
+    precision: very-high
+    id: py/comparison-missing-self
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/Comparisons/UselessComparisonTest.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/Comparisons/UselessComparisonTest.bqrs
+  metadata:
+    name: Redundant comparison
+    description: The result of a comparison is implied by a previous comparison.
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             useless-code
+             external/cwe/cwe-561
+             external/cwe/cwe-570
+             external/cwe/cwe-571
+    problem.severity: warning
+    sub-severity: high
+    precision: high
+    id: py/redundant-comparison
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/ContainsNonContainer.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/ContainsNonContainer.bqrs
+  metadata:
+    name: Membership test with a non-container
+    description: "A membership test, such as 'item in sequence', with a non-container\
+      \ on the right hand side will raise a 'TypeError'."
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: high
+    precision: high
+    id: py/member-test-non-container
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/DuplicateKeyInDictionaryLiteral.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/DuplicateKeyInDictionaryLiteral.bqrs
+  metadata:
+    name: Duplicate key in dict literal
+    description: Duplicate key in dict literal. All but the last will be lost.
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             useless-code
+             external/cwe/cwe-561
+    problem.severity: warning
+    sub-severity: high
+    precision: very-high
+    id: py/duplicate-key-dict-literal
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/EqualsNone.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/EqualsNone.bqrs
+  metadata:
+    name: Testing equality to None
+    description: Testing whether an object is 'None' using the == operator is inefficient
+      and potentially incorrect.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+             performance
+    problem.severity: recommendation
+    sub-severity: high
+    precision: very-high
+    id: py/test-equals-none
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/ExpectedMappingForFormatString.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/ExpectedMappingForFormatString.bqrs
+  metadata:
+    name: Formatted object is not a mapping
+    description: The formatted object must be a mapping when the format includes a
+      named specifier; otherwise a TypeError will be raised."
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: low
+    precision: high
+    id: py/percent-format/not-mapping
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/ExplicitCallToDel.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/ExplicitCallToDel.bqrs
+  metadata:
+    name: '`__del__` is called explicitly'
+    description: The `__del__` special method is called by the virtual machine when
+      an object is being finalized. It should not be called explicitly.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: warning
+    sub-severity: low
+    precision: very-high
+    id: py/explicit-call-to-delete
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/Formatting/MixedExplicitImplicitIn3101Format.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/Formatting/MixedExplicitImplicitIn3101Format.bqrs
+  metadata:
+    name: Formatting string mixes implicitly and explicitly numbered fields
+    description: "Using implicit and explicit numbering in string formatting operations,\
+      \ such as '\"{}: {1}\".format(a,b)', will raise a ValueError."
+    kind: problem
+    problem.severity: error
+    tags: |-
+      quality
+             reliability
+             correctness
+    sub-severity: low
+    precision: high
+    id: py/str-format/mixed-fields
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/Formatting/UnusedArgumentIn3101Format.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/Formatting/UnusedArgumentIn3101Format.bqrs
+  metadata:
+    name: Unused argument in a formatting call
+    description: Including surplus arguments in a formatting call makes code more
+      difficult to read and may indicate an error.
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             useless-code
+    problem.severity: warning
+    sub-severity: high
+    precision: high
+    id: py/str-format/surplus-argument
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/Formatting/UnusedNamedArgumentIn3101Format.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/Formatting/UnusedNamedArgumentIn3101Format.bqrs
+  metadata:
+    name: Unused named argument in formatting call
+    description: Including surplus keyword arguments in a formatting call makes code
+      more difficult to read and may indicate an error.
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             useless-code
+    problem.severity: warning
+    sub-severity: high
+    precision: very-high
+    id: py/str-format/surplus-named-argument
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/Formatting/WrongNameInArgumentsFor3101Format.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/Formatting/WrongNameInArgumentsFor3101Format.bqrs
+  metadata:
+    name: Missing named arguments in formatting call
+    description: |-
+      A string formatting operation, such as '"{name}".format(key=b)',
+                    where the names of format items in the format string differs from the names of the values to be formatted will raise a KeyError.
+    kind: problem
+    problem.severity: error
+    tags: |-
+      quality
+             reliability
+             correctness
+    sub-severity: low
+    precision: high
+    id: py/str-format/missing-named-argument
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/Formatting/WrongNumberArgumentsFor3101Format.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/Formatting/WrongNumberArgumentsFor3101Format.bqrs
+  metadata:
+    name: Too few arguments in formatting call
+    description: |-
+      A string formatting operation, such as '"{0}: {1}, {2}".format(a,b)',
+                    where the number of values to be formatted is too few for the format string will raise an IndexError.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: low
+    precision: high
+    id: py/str-format/missing-argument
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/HashedButNoHash.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/HashedButNoHash.bqrs
+  metadata:
+    name: Unhashable object hashed
+    description: Hashing an object which is not hashable will result in a TypeError
+      at runtime.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: low
+    precision: very-high
+    id: py/hash-unhashable-value
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/IncorrectComparisonUsingIs.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/IncorrectComparisonUsingIs.bqrs
+  metadata:
+    name: Comparison using is when operands support `__eq__`
+    description: Comparison using `is` when equivalence is not the same as identity
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: warning
+    sub-severity: low
+    precision: high
+    id: py/comparison-using-is
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/NonCallableCalled.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/NonCallableCalled.bqrs
+  metadata:
+    name: Non-callable called
+    description: A call to an object which is not a callable will raise a TypeError
+      at runtime.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: high
+    precision: high
+    id: py/call-to-non-callable
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/Regex/BackspaceEscape.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/Regex/BackspaceEscape.bqrs
+  metadata:
+    name: Backspace escape in regular expression
+    description: |-
+      Using '\b' to escape the backspace character in a regular expression is confusing
+                    since it could be mistaken for a word boundary assertion.
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             readability
+    problem.severity: recommendation
+    sub-severity: high
+    precision: very-high
+    id: py/regex/backspace-escape
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/Regex/DuplicateCharacterInSet.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/Regex/DuplicateCharacterInSet.bqrs
+  metadata:
+    name: Duplication in regular expression character class
+    description: Duplicate characters in a class have no effect and may indicate an
+      error in the regular expression.
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             readability
+    problem.severity: warning
+    sub-severity: low
+    precision: very-high
+    id: py/regex/duplicate-in-character-class
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/Regex/MissingPartSpecialGroup.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/Regex/MissingPartSpecialGroup.bqrs
+  metadata:
+    name: Missing part of special group in regular expression
+    description: Incomplete special groups are parsed as normal groups and are unlikely
+      to match the intended strings.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: warning
+    sub-severity: high
+    precision: high
+    id: py/regex/incomplete-special-group
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/Regex/UnmatchableCaret.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/Regex/UnmatchableCaret.bqrs
+  metadata:
+    name: Unmatchable caret in regular expression
+    description: "Regular expressions containing a caret '^' in the middle cannot\
+      \ be matched, whatever the input."
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: low
+    precision: high
+    id: py/regex/unmatchable-caret
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/Regex/UnmatchableDollar.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/Regex/UnmatchableDollar.bqrs
+  metadata:
+    name: Unmatchable dollar in regular expression
+    description: "Regular expressions containing a dollar '$' in the middle cannot\
+      \ be matched, whatever the input."
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: low
+    precision: high
+    id: py/regex/unmatchable-dollar
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/TruncatedDivision.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/TruncatedDivision.bqrs
+  metadata:
+    name: Result of integer division may be truncated
+    description: |-
+      The arguments to a division statement may be integers, which
+                    may cause the result to be truncated in Python 2.
+    kind: problem
+    tags: |-
+      maintainability
+             correctness
+    problem.severity: warning
+    sub-severity: high
+    precision: very-high
+    id: py/truncated-division
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/UnintentionalImplicitStringConcatenation.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/UnintentionalImplicitStringConcatenation.bqrs
+  metadata:
+    name: Implicit string concatenation in a list
+    description: Omitting a comma between strings causes implicit concatenation which
+      is confusing in a list.
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             readability
+             external/cwe/cwe-665
+    problem.severity: warning
+    sub-severity: high
+    precision: high
+    id: py/implicit-string-concatenation-in-list
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/UnnecessaryLambda.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/UnnecessaryLambda.bqrs
+  metadata:
+    name: Unnecessary lambda
+    description: A lambda is used that calls through to a function without modifying
+      any parameters
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             useless-code
+    problem.severity: recommendation
+    sub-severity: high
+    precision: high
+    id: py/unnecessary-lambda
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/UnsupportedFormatCharacter.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/UnsupportedFormatCharacter.bqrs
+  metadata:
+    name: Unsupported format character
+    description: An unsupported format character in a format string
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: low
+    precision: high
+    id: py/percent-format/unsupported-character
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/UseofApply.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/UseofApply.bqrs
+  metadata:
+    name: '''apply'' function used'
+    description: The builtin function 'apply' is obsolete and should not be used.
+    kind: problem
+    tags: maintainability
+    problem.severity: warning
+    sub-severity: high
+    precision: very-high
+    id: py/use-of-apply
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/UseofInput.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/UseofInput.bqrs
+  metadata:
+    name: '''input'' function used in Python 2'
+    description: "The built-in function 'input' is used which, in Python 2, can allow\
+      \ arbitrary code to be run."
+    kind: problem
+    tags: |-
+      security
+             correctness
+             external/cwe/cwe-094
+             external/cwe/cwe-095
+    problem.severity: error
+    security-severity: 9.8
+    sub-severity: high
+    precision: high
+    id: py/use-of-input
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/WrongNameForArgumentInCall.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/WrongNameForArgumentInCall.bqrs
+  metadata:
+    name: Wrong name for an argument in a call
+    description: |-
+      Using a named argument whose name does not correspond to a
+                    parameter of the called function or method, will result in a
+                    TypeError at runtime.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+             external/cwe/cwe-628
+    problem.severity: error
+    sub-severity: low
+    precision: very-high
+    id: py/call/wrong-named-argument
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/WrongNumberArgumentsForFormat.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/WrongNumberArgumentsForFormat.bqrs
+  metadata:
+    name: Wrong number of arguments for format
+    description: |-
+      A string formatting operation, such as '"%s: %s, %s" % (a,b)', where the number of conversion specifiers in the
+                    format string differs from the number of values to be formatted will raise a TypeError.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+             external/cwe/cwe-685
+    problem.severity: error
+    sub-severity: low
+    precision: very-high
+    id: py/percent-format/wrong-arguments
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Expressions/WrongNumberArgumentsInCall.ql
+  relativeBqrsPath: codeql/python-queries/Expressions/WrongNumberArgumentsInCall.bqrs
+  metadata:
+    name: Wrong number of arguments in a call
+    description: Using too many or too few arguments in a call to a function will
+      result in a TypeError at runtime.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+             external/cwe/cwe-685
+    problem.severity: error
+    sub-severity: low
+    precision: very-high
+    id: py/call/wrong-arguments
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Functions/ConsistentReturns.ql
+  relativeBqrsPath: codeql/python-queries/Functions/ConsistentReturns.bqrs
+  metadata:
+    name: Explicit returns mixed with implicit (fall through) returns
+    description: Mixing implicit and explicit returns indicates a likely error as
+      implicit returns always return `None`.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: recommendation
+    sub-severity: high
+    precision: high
+    id: py/mixed-returns
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Functions/DeprecatedSliceMethod.ql
+  relativeBqrsPath: codeql/python-queries/Functions/DeprecatedSliceMethod.bqrs
+  metadata:
+    name: Deprecated slice method
+    description: Defining special methods for slicing has been deprecated since Python
+      2.0.
+    kind: problem
+    tags: maintainability
+    problem.severity: warning
+    sub-severity: high
+    precision: very-high
+    id: py/deprecated-slice-method
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Functions/ExplicitReturnInInit.ql
+  relativeBqrsPath: codeql/python-queries/Functions/ExplicitReturnInInit.bqrs
+  metadata:
+    name: '`__init__` method returns a value'
+    description: Explicitly returning a value from an `__init__` method will raise
+      a TypeError.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: low
+    precision: very-high
+    id: py/explicit-return-in-init
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Functions/IncorrectRaiseInSpecialMethod.ql
+  relativeBqrsPath: codeql/python-queries/Functions/IncorrectRaiseInSpecialMethod.bqrs
+  metadata:
+    name: Non-standard exception raised in special method
+    description: Raising a non-standard exception in a special method alters the expected
+      interface of that method.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             error-handling
+    problem.severity: recommendation
+    sub-severity: high
+    precision: high
+    id: py/unexpected-raise-in-special-method
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Functions/IncorrectlyOverriddenMethod.ql
+  relativeBqrsPath: codeql/python-queries/Functions/IncorrectlyOverriddenMethod.bqrs
+  metadata:
+    deprecated: ""
+    name: Mismatch between signature and use of an overriding method
+    description: "Method has a different signature from the overridden method and,\
+      \ if it were called, would be likely to cause an error."
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: low
+    precision: high
+    id: py/inheritance/incorrect-overriding-signature
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Functions/IncorrectlySpecifiedOverriddenMethod.ql
+  relativeBqrsPath: codeql/python-queries/Functions/IncorrectlySpecifiedOverriddenMethod.bqrs
+  metadata:
+    name: Mismatch between signature and use of an overridden method
+    description: |-
+      Method has a signature that differs from both the signature of its overriding methods and
+                    the arguments with which it is called, and if it were called, would be likely to cause an error.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: recommendation
+    sub-severity: high
+    precision: high
+    id: py/inheritance/incorrect-overridden-signature
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Functions/InitIsGenerator.ql
+  relativeBqrsPath: codeql/python-queries/Functions/InitIsGenerator.bqrs
+  metadata:
+    name: '`__init__` method is a generator'
+    description: '`__init__` method is a generator.'
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: low
+    precision: very-high
+    id: py/init-method-is-generator
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Functions/IterReturnsNonIterator.ql
+  relativeBqrsPath: codeql/python-queries/Functions/IterReturnsNonIterator.bqrs
+  metadata:
+    name: '`__iter__` method returns a non-iterator'
+    description: "The `__iter__` method returns a non-iterator which, if used in a\
+      \ 'for' loop, would raise a 'TypeError'."
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: low
+    precision: high
+    id: py/iter-returns-non-iterator
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Functions/IterReturnsNonSelf.ql
+  relativeBqrsPath: codeql/python-queries/Functions/IterReturnsNonSelf.bqrs
+  metadata:
+    name: Iterator does not return self from `__iter__` method
+    description: "Iterator does not return self from `__iter__` method, violating\
+      \ the iterator protocol."
+    kind: problem
+    tags: |-
+      reliability
+             correctness
+             quality
+    problem.severity: error
+    sub-severity: low
+    precision: high
+    id: py/iter-returns-non-self
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Functions/ModificationOfParameterWithDefault.ql
+  relativeBqrsPath: codeql/python-queries/Functions/ModificationOfParameterWithDefault.bqrs
+  metadata:
+    name: Modification of parameter with default
+    description: |-
+      Modifying the default value of a parameter can lead to unexpected
+                    results.
+    kind: path-problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: low
+    precision: high
+    id: py/modification-of-default-value
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Functions/NonCls.ql
+  relativeBqrsPath: codeql/python-queries/Functions/NonCls.bqrs
+  metadata:
+    name: First parameter of a class method is not named 'cls'
+    description: "By the PEP8 style guide, the first parameter of a class method should\
+      \ be named `cls`."
+    kind: problem
+    tags: |-
+      maintainability
+             readability
+             convention
+             quality
+    problem.severity: recommendation
+    sub-severity: high
+    precision: high
+    id: py/not-named-cls
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Functions/NonSelf.ql
+  relativeBqrsPath: codeql/python-queries/Functions/NonSelf.bqrs
+  metadata:
+    name: First parameter of a method is not named 'self'
+    description: "By the PEP8 style guide, the first parameter of a normal method\
+      \ should be named `self`."
+    kind: problem
+    tags: |-
+      maintainability
+             readability
+             convention
+             quality
+    problem.severity: recommendation
+    sub-severity: high
+    precision: very-high
+    id: py/not-named-self
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Functions/OverlyComplexDelMethod.ql
+  relativeBqrsPath: codeql/python-queries/Functions/OverlyComplexDelMethod.bqrs
+  metadata:
+    name: Overly complex `__del__` method
+    description: "`__del__` methods may be called at arbitrary times, perhaps never\
+      \ called at all, and should be simple."
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             complexity
+    problem.severity: recommendation
+    sub-severity: low
+    precision: high
+    id: py/overly-complex-delete
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Functions/ReturnConsistentTupleSizes.ql
+  relativeBqrsPath: codeql/python-queries/Functions/ReturnConsistentTupleSizes.bqrs
+  metadata:
+    name: Returning tuples with varying lengths
+    description: A function that potentially returns tuples of different lengths may
+      indicate a problem.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: recommendation
+    sub-severity: high
+    precision: high
+    id: py/mixed-tuple-returns
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Functions/SignatureOverriddenMethod.ql
+  relativeBqrsPath: codeql/python-queries/Functions/SignatureOverriddenMethod.bqrs
+  metadata:
+    name: Signature mismatch in overriding method
+    description: |-
+      Overriding a method without ensuring that both methods accept the same
+                    number and type of parameters has the potential to cause an error when there is a mismatch.
+    kind: problem
+    problem.severity: warning
+    tags: |-
+      quality
+             reliability
+             correctness
+    sub-severity: high
+    precision: very-high
+    id: py/inheritance/signature-mismatch
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Functions/SignatureSpecialMethods.ql
+  relativeBqrsPath: codeql/python-queries/Functions/SignatureSpecialMethods.bqrs
+  metadata:
+    name: Special method has incorrect signature
+    description: Special method has incorrect signature
+    kind: problem
+    tags: |-
+      reliability
+             correctness
+             quality
+    problem.severity: error
+    sub-severity: low
+    precision: high
+    id: py/special-method-wrong-signature
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Functions/UseImplicitNoneReturnValue.ql
+  relativeBqrsPath: codeql/python-queries/Functions/UseImplicitNoneReturnValue.bqrs
+  metadata:
+    name: Use of the return value of a procedure
+    description: The return value of a procedure (a function that does not return
+      a value) is used. This is confusing to the reader as the value (None) has no
+      meaning.
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             readability
+    problem.severity: warning
+    sub-severity: low
+    precision: high
+    id: py/procedure-return-value-used
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Imports/CyclicImport.ql
+  relativeBqrsPath: codeql/python-queries/Imports/CyclicImport.bqrs
+  metadata:
+    name: Cyclic import
+    description: "Module forms part of an import cycle, thereby indirectly importing\
+      \ itself."
+    kind: problem
+    tags: |-
+      reliability
+             maintainability
+             modularity
+    problem.severity: recommendation
+    sub-severity: low
+    precision: high
+    id: py/cyclic-import
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Imports/DeprecatedModule.ql
+  relativeBqrsPath: codeql/python-queries/Imports/DeprecatedModule.bqrs
+  metadata:
+    name: Import of deprecated module
+    description: Import of a deprecated module
+    kind: problem
+    tags: |-
+      maintainability
+             external/cwe/cwe-477
+    problem.severity: warning
+    sub-severity: high
+    precision: very-high
+    id: py/import-deprecated-module
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Imports/EncodingError.ql
+  relativeBqrsPath: codeql/python-queries/Imports/EncodingError.bqrs
+  metadata:
+    name: Encoding error
+    description: Encoding errors cause failures at runtime and prevent analysis of
+      the code.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: low
+    precision: high
+    id: py/encoding-error
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Imports/FromImportOfMutableAttribute.ql
+  relativeBqrsPath: codeql/python-queries/Imports/FromImportOfMutableAttribute.bqrs
+  metadata:
+    name: Importing value of mutable attribute
+    description: Importing the value of a mutable attribute directly means that changes
+      in global state will not be observed locally.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: warning
+    sub-severity: high
+    precision: medium
+    id: py/import-of-mutable-attribute
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Imports/ImportandImportFrom.ql
+  relativeBqrsPath: codeql/python-queries/Imports/ImportandImportFrom.bqrs
+  metadata:
+    name: Module is imported with 'import' and 'import from'
+    description: A module is imported with the "import" and "import from" statements
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             readability
+    problem.severity: recommendation
+    sub-severity: low
+    precision: very-high
+    id: py/import-and-import-from
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Imports/ModuleImportsItself.ql
+  relativeBqrsPath: codeql/python-queries/Imports/ModuleImportsItself.bqrs
+  metadata:
+    name: Module imports itself
+    description: A module imports itself
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             useless-code
+    problem.severity: recommendation
+    sub-severity: high
+    precision: very-high
+    id: py/import-own-module
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Imports/ModuleLevelCyclicImport.ql
+  relativeBqrsPath: codeql/python-queries/Imports/ModuleLevelCyclicImport.bqrs
+  metadata:
+    name: Module-level cyclic import
+    description: "Module uses member of cyclically imported module, which can lead\
+      \ to failure at import time."
+    kind: problem
+    tags: |-
+      reliability
+             correctness
+             types
+    problem.severity: error
+    sub-severity: low
+    precision: high
+    comprehension: 0.5
+    id: py/unsafe-cyclic-import
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Imports/MultipleImports.ql
+  relativeBqrsPath: codeql/python-queries/Imports/MultipleImports.bqrs
+  metadata:
+    name: Module is imported more than once
+    description: Importing a module a second time has no effect and impairs readability
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             useless-code
+    problem.severity: recommendation
+    sub-severity: high
+    precision: very-high
+    id: py/repeated-import
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Imports/SyntaxError.ql
+  relativeBqrsPath: codeql/python-queries/Imports/SyntaxError.bqrs
+  metadata:
+    name: Syntax error
+    description: Syntax errors cause failures at runtime and prevent analysis of the
+      code.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: high
+    precision: high
+    id: py/syntax-error
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Imports/UnintentionalImport.ql
+  relativeBqrsPath: codeql/python-queries/Imports/UnintentionalImport.bqrs
+  metadata:
+    name: '''import *'' may pollute namespace'
+    description: |-
+      Importing a module using 'import *' may unintentionally pollute the global
+                    namespace if the module does not define `__all__`
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             readability
+    problem.severity: recommendation
+    sub-severity: high
+    precision: very-high
+    id: py/polluting-import
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Imports/UnusedImport.ql
+  relativeBqrsPath: codeql/python-queries/Imports/UnusedImport.bqrs
+  metadata:
+    name: Unused import
+    description: Import is not required as it is not used
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             useless-code
+    problem.severity: recommendation
+    sub-severity: high
+    precision: very-high
+    id: py/unused-import
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Lexical/CommentedOutCode.ql
+  relativeBqrsPath: codeql/python-queries/Lexical/CommentedOutCode.bqrs
+  metadata:
+    name: Commented-out code
+    description: Commented-out code makes the remaining code more difficult to read.
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             readability
+    problem.severity: recommendation
+    sub-severity: high
+    precision: high
+    id: py/commented-out-code
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Lexical/OldOctalLiteral.ql
+  relativeBqrsPath: codeql/python-queries/Lexical/OldOctalLiteral.bqrs
+  metadata:
+    name: Confusing octal literal
+    description: Octal literal with a leading 0 is easily misread as a decimal value
+    kind: problem
+    tags: readability
+    problem.severity: recommendation
+    sub-severity: low
+    precision: high
+    id: py/old-style-octal-literal
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Numerics/Pythagorean.ql
+  relativeBqrsPath: codeql/python-queries/Numerics/Pythagorean.bqrs
+  metadata:
+    name: Pythagorean calculation with sub-optimal numerics
+    description: Calculating the length of the hypotenuse using the standard formula
+      may lead to overflow.
+    kind: problem
+    tags: accuracy
+    problem.severity: warning
+    sub-severity: low
+    precision: medium
+    id: py/pythagorean
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Resources/FileNotAlwaysClosed.ql
+  relativeBqrsPath: codeql/python-queries/Resources/FileNotAlwaysClosed.bqrs
+  metadata:
+    name: File is not always closed
+    description: Opening a file without ensuring that it is always closed may lead
+      to data loss or resource leaks.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+             performance
+             external/cwe/cwe-772
+    problem.severity: warning
+    sub-severity: high
+    precision: high
+    id: py/file-not-closed
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CVE-2018-1281/BindToAllInterfaces.ql
+  relativeBqrsPath: codeql/python-queries/Security/CVE-2018-1281/BindToAllInterfaces.bqrs
+  metadata:
+    name: Binding a socket to all network interfaces
+    description: |-
+      Binding a socket to all interfaces opens it up to traffic from any IPv4 address
+       and is therefore associated with security risks.
+    kind: problem
+    tags: |-
+      security
+             external/cwe/cwe-200
+    problem.severity: error
+    security-severity: 6.5
+    sub-severity: low
+    precision: high
+    id: py/bind-socket-all-network-interfaces
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-020/CookieInjection.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-020/CookieInjection.bqrs
+  metadata:
+    name: Construction of a cookie using user-supplied input
+    description: Constructing cookies from user input may allow an attacker to perform
+      a Cookie Poisoning attack.
+    kind: path-problem
+    problem.severity: warning
+    precision: high
+    security-severity: 5.0
+    id: py/cookie-injection
+    tags: |-
+      security
+             external/cwe/cwe-020
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-020/IncompleteHostnameRegExp.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-020/IncompleteHostnameRegExp.bqrs
+  metadata:
+    name: Incomplete regular expression for hostnames
+    description: Matching a URL or hostname against a regular expression that contains
+      an unescaped dot as part of the hostname might match more hostnames than expected.
+    kind: problem
+    problem.severity: warning
+    security-severity: 7.8
+    precision: high
+    id: py/incomplete-hostname-regexp
+    tags: |-
+      correctness
+             security
+             external/cwe/cwe-020
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-020/IncompleteUrlSubstringSanitization.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-020/IncompleteUrlSubstringSanitization.bqrs
+  metadata:
+    name: Incomplete URL substring sanitization
+    description: Security checks on the substrings of an unparsed URL are often vulnerable
+      to bypassing.
+    kind: problem
+    problem.severity: warning
+    security-severity: 7.8
+    precision: high
+    id: py/incomplete-url-substring-sanitization
+    tags: |-
+      correctness
+             security
+             external/cwe/cwe-020
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-020/OverlyLargeRange.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-020/OverlyLargeRange.bqrs
+  metadata:
+    name: Overly permissive regular expression range
+    description: |-
+      Overly permissive regular expression ranges match a wider range of characters than intended.
+                    This may allow an attacker to bypass a filter or sanitizer.
+    kind: problem
+    problem.severity: warning
+    security-severity: 5.0
+    precision: high
+    id: py/overly-large-range
+    tags: |-
+      correctness
+             security
+             external/cwe/cwe-020
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-022/PathInjection.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-022/PathInjection.bqrs
+  metadata:
+    name: Uncontrolled data used in path expression
+    description: Accessing paths influenced by users can allow an attacker to access
+      unexpected resources.
+    kind: path-problem
+    problem.severity: error
+    security-severity: 7.5
+    sub-severity: high
+    precision: high
+    id: py/path-injection
+    tags: |-
+      correctness
+             security
+             external/cwe/cwe-022
+             external/cwe/cwe-023
+             external/cwe/cwe-036
+             external/cwe/cwe-073
+             external/cwe/cwe-099
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-022/TarSlip.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-022/TarSlip.bqrs
+  metadata:
+    name: Arbitrary file write during tarfile extraction
+    description: |-
+      Extracting files from a malicious tar archive without validating that the
+                    destination file path is within the destination directory can cause files outside
+                    the destination directory to be overwritten.
+    kind: path-problem
+    id: py/tarslip
+    problem.severity: error
+    security-severity: 7.5
+    precision: medium
+    tags: |-
+      security
+             external/cwe/cwe-022
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-074/TemplateInjection.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-074/TemplateInjection.bqrs
+  metadata:
+    name: Server Side Template Injection
+    description: Using user-controlled data to create a template can lead to remote
+      code execution or cross site scripting.
+    kind: path-problem
+    problem.severity: error
+    precision: high
+    security-severity: 9.3
+    id: py/template-injection
+    tags: |-
+      security
+             external/cwe/cwe-074
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-078/CommandInjection.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-078/CommandInjection.bqrs
+  metadata:
+    name: Uncontrolled command line
+    description: |-
+      Using externally controlled strings in a command line may allow a malicious
+                    user to change the meaning of the command.
+    kind: path-problem
+    problem.severity: error
+    security-severity: 9.8
+    sub-severity: high
+    precision: high
+    id: py/command-line-injection
+    tags: |-
+      correctness
+             security
+             external/cwe/cwe-078
+             external/cwe/cwe-088
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-078/UnsafeShellCommandConstruction.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-078/UnsafeShellCommandConstruction.bqrs
+  metadata:
+    name: Unsafe shell command constructed from library input
+    description: |-
+      Using externally controlled strings in a command line may allow a malicious
+                    user to change the meaning of the command.
+    kind: path-problem
+    problem.severity: error
+    security-severity: 6.3
+    precision: medium
+    id: py/shell-command-constructed-from-input
+    tags: |-
+      correctness
+             security
+             external/cwe/cwe-078
+             external/cwe/cwe-088
+             external/cwe/cwe-073
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-079/Jinja2WithoutEscaping.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-079/Jinja2WithoutEscaping.bqrs
+  metadata:
+    name: Jinja2 templating with autoescape=False
+    description: |-
+      Using jinja2 templates with 'autoescape=False' can
+                    cause a cross-site scripting vulnerability.
+    kind: problem
+    problem.severity: error
+    security-severity: 6.1
+    precision: medium
+    id: py/jinja2/autoescape-false
+    tags: |-
+      security
+             external/cwe/cwe-079
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-079/ReflectedXss.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-079/ReflectedXss.bqrs
+  metadata:
+    name: Reflected server-side cross-site scripting
+    description: |-
+      Writing user input directly to a web page
+                    allows for a cross-site scripting vulnerability.
+    kind: path-problem
+    problem.severity: error
+    security-severity: 6.1
+    sub-severity: high
+    precision: high
+    id: py/reflective-xss
+    tags: |-
+      security
+             external/cwe/cwe-079
+             external/cwe/cwe-116
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-089/SqlInjection.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-089/SqlInjection.bqrs
+  metadata:
+    name: SQL query built from user-controlled sources
+    description: |-
+      Building a SQL query from user-controlled sources is vulnerable to insertion of
+                    malicious SQL code by the user.
+    kind: path-problem
+    problem.severity: error
+    security-severity: 8.8
+    precision: high
+    id: py/sql-injection
+    tags: |-
+      security
+             external/cwe/cwe-089
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-090/LdapInjection.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-090/LdapInjection.bqrs
+  metadata:
+    name: LDAP query built from user-controlled sources
+    description: |-
+      Building an LDAP query from user-controlled sources is vulnerable to insertion of
+                    malicious LDAP code by the user.
+    kind: path-problem
+    problem.severity: error
+    security-severity: 9.8
+    precision: high
+    id: py/ldap-injection
+    tags: |-
+      security
+             external/cwe/cwe-090
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-094/CodeInjection.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-094/CodeInjection.bqrs
+  metadata:
+    name: Code injection
+    description: |-
+      Interpreting unsanitized user input as code allows a malicious user to perform arbitrary
+                    code execution.
+    kind: path-problem
+    problem.severity: error
+    security-severity: 9.3
+    sub-severity: high
+    precision: high
+    id: py/code-injection
+    tags: |-
+      security
+             external/cwe/cwe-094
+             external/cwe/cwe-095
+             external/cwe/cwe-116
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-113/HeaderInjection.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-113/HeaderInjection.bqrs
+  metadata:
+    name: HTTP Response Splitting
+    description: |-
+      Writing user input directly to an HTTP header
+                    makes code vulnerable to attack by header splitting.
+    kind: path-problem
+    problem.severity: error
+    security-severity: 6.1
+    precision: high
+    id: py/http-response-splitting
+    tags: |-
+      security
+             external/cwe/cwe-113
+             external/cwe/cwe-079
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-116/BadTagFilter.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-116/BadTagFilter.bqrs
+  metadata:
+    name: Bad HTML filtering regexp
+    description: "Matching HTML tags using regular expressions is hard to do right,\
+      \ and can easily lead to security issues."
+    kind: problem
+    problem.severity: warning
+    security-severity: 7.8
+    precision: high
+    id: py/bad-tag-filter
+    tags: |-
+      correctness
+             security
+             external/cwe/cwe-116
+             external/cwe/cwe-020
+             external/cwe/cwe-185
+             external/cwe/cwe-186
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-117/LogInjection.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-117/LogInjection.bqrs
+  metadata:
+    name: Log Injection
+    description: |-
+      Building log entries from user-controlled data is vulnerable to
+                    insertion of forged log entries by a malicious user.
+    kind: path-problem
+    problem.severity: error
+    security-severity: 7.8
+    precision: medium
+    id: py/log-injection
+    tags: |-
+      security
+             external/cwe/cwe-117
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-209/StackTraceExposure.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-209/StackTraceExposure.bqrs
+  metadata:
+    name: Information exposure through an exception
+    description: |-
+      Leaking information about an exception, such as messages and stack traces, to an
+                    external user can expose implementation details that are useful to an attacker for
+                    developing a subsequent exploit.
+    kind: path-problem
+    problem.severity: error
+    security-severity: 5.4
+    precision: high
+    id: py/stack-trace-exposure
+    tags: |-
+      security
+             external/cwe/cwe-209
+             external/cwe/cwe-497
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-215/FlaskDebug.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-215/FlaskDebug.bqrs
+  metadata:
+    name: Flask app is run in debug mode
+    description: Running a Flask app in debug mode may allow an attacker to run arbitrary
+      code through the Werkzeug debugger.
+    kind: problem
+    problem.severity: error
+    security-severity: 7.5
+    precision: high
+    id: py/flask-debug
+    tags: |-
+      security
+             external/cwe/cwe-215
+             external/cwe/cwe-489
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-285/PamAuthorization.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-285/PamAuthorization.bqrs
+  metadata:
+    name: PAM authorization bypass due to incorrect usage
+    description: Not using `pam_acct_mgmt` after `pam_authenticate` to check the validity
+      of a login can lead to authorization bypass.
+    kind: path-problem
+    problem.severity: warning
+    security-severity: 8.1
+    precision: high
+    id: py/pam-auth-bypass
+    tags: |-
+      security
+             external/cwe/cwe-285
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-295/MissingHostKeyValidation.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-295/MissingHostKeyValidation.bqrs
+  metadata:
+    name: Accepting unknown SSH host keys when using Paramiko
+    description: Accepting unknown host keys can allow man-in-the-middle attacks.
+    kind: problem
+    problem.severity: error
+    security-severity: 7.5
+    precision: high
+    id: py/paramiko-missing-host-key-validation
+    tags: |-
+      security
+             external/cwe/cwe-295
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-295/RequestWithoutValidation.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-295/RequestWithoutValidation.bqrs
+  metadata:
+    name: Request without certificate validation
+    description: Making a request without certificate validation can allow man-in-the-middle
+      attacks.
+    kind: problem
+    problem.severity: error
+    security-severity: 7.5
+    precision: medium
+    id: py/request-without-cert-validation
+    tags: |-
+      security
+             external/cwe/cwe-295
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-312/CleartextLogging.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-312/CleartextLogging.bqrs
+  metadata:
+    name: Clear-text logging of sensitive information
+    description: |-
+      Logging sensitive information without encryption or hashing can
+                    expose it to an attacker.
+    kind: path-problem
+    problem.severity: error
+    security-severity: 7.5
+    precision: high
+    id: py/clear-text-logging-sensitive-data
+    tags: |-
+      security
+             external/cwe/cwe-312
+             external/cwe/cwe-359
+             external/cwe/cwe-532
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-312/CleartextStorage.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-312/CleartextStorage.bqrs
+  metadata:
+    name: Clear-text storage of sensitive information
+    description: |-
+      Sensitive information stored without encryption or hashing can expose it to an
+                    attacker.
+    kind: path-problem
+    problem.severity: error
+    security-severity: 7.5
+    precision: high
+    id: py/clear-text-storage-sensitive-data
+    tags: |-
+      security
+             external/cwe/cwe-312
+             external/cwe/cwe-315
+             external/cwe/cwe-359
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-326/WeakCryptoKey.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-326/WeakCryptoKey.bqrs
+  metadata:
+    name: Use of weak cryptographic key
+    description: Use of a cryptographic key that is too small may allow the encryption
+      to be broken.
+    kind: problem
+    problem.severity: error
+    security-severity: 7.5
+    precision: high
+    id: py/weak-crypto-key
+    tags: |-
+      security
+             external/cwe/cwe-326
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-327/BrokenCryptoAlgorithm.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-327/BrokenCryptoAlgorithm.bqrs
+  metadata:
+    name: Use of a broken or weak cryptographic algorithm
+    description: Using broken or weak cryptographic algorithms can compromise security.
+    kind: problem
+    problem.severity: warning
+    security-severity: 7.5
+    precision: high
+    id: py/weak-cryptographic-algorithm
+    tags: |-
+      security
+             external/cwe/cwe-327
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-327/InsecureDefaultProtocol.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-327/InsecureDefaultProtocol.bqrs
+  metadata:
+    name: Default version of SSL/TLS may be insecure
+    description: |-
+      Leaving the SSL/TLS version unspecified may result in an insecure
+                    default protocol being used.
+    id: py/insecure-default-protocol
+    kind: problem
+    problem.severity: warning
+    security-severity: 7.5
+    precision: high
+    tags: |-
+      security
+             external/cwe/cwe-327
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-327/InsecureProtocol.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-327/InsecureProtocol.bqrs
+  metadata:
+    name: Use of insecure SSL/TLS version
+    description: Using an insecure SSL/TLS version may leave the connection vulnerable
+      to attacks.
+    id: py/insecure-protocol
+    kind: problem
+    problem.severity: warning
+    security-severity: 7.5
+    precision: high
+    tags: |-
+      security
+             external/cwe/cwe-327
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-327/WeakSensitiveDataHashing.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-327/WeakSensitiveDataHashing.bqrs
+  metadata:
+    name: Use of a broken or weak cryptographic hashing algorithm on sensitive data
+    description: Using broken or weak cryptographic hashing algorithms can compromise
+      security.
+    kind: path-problem
+    problem.severity: warning
+    security-severity: 7.5
+    precision: high
+    id: py/weak-sensitive-data-hashing
+    tags: |-
+      security
+             external/cwe/cwe-327
+             external/cwe/cwe-328
+             external/cwe/cwe-916
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-352/CSRFProtectionDisabled.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-352/CSRFProtectionDisabled.bqrs
+  metadata:
+    name: CSRF protection weakened or disabled
+    description: |-
+      Disabling or weakening CSRF protection may make the application
+                    vulnerable to a Cross-Site Request Forgery (CSRF) attack.
+    kind: problem
+    problem.severity: warning
+    security-severity: 8.8
+    precision: high
+    id: py/csrf-protection-disabled
+    tags: |-
+      security
+             external/cwe/cwe-352
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-377/InsecureTemporaryFile.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-377/InsecureTemporaryFile.bqrs
+  metadata:
+    name: Insecure temporary file
+    description: Creating a temporary file using this method may be insecure.
+    kind: problem
+    id: py/insecure-temporary-file
+    problem.severity: error
+    security-severity: 7.0
+    sub-severity: high
+    precision: high
+    tags: |-
+      external/cwe/cwe-377
+             security
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-502/UnsafeDeserialization.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-502/UnsafeDeserialization.bqrs
+  metadata:
+    name: Deserialization of user-controlled data
+    description: Deserializing user-controlled data may allow attackers to execute
+      arbitrary code.
+    kind: path-problem
+    id: py/unsafe-deserialization
+    problem.severity: error
+    security-severity: 9.8
+    sub-severity: high
+    precision: high
+    tags: |-
+      external/cwe/cwe-502
+             security
+             serialization
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-601/UrlRedirect.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-601/UrlRedirect.bqrs
+  metadata:
+    name: URL redirection from remote source
+    description: |-
+      URL redirection based on unvalidated user input
+                    may cause redirection to malicious web sites.
+    kind: path-problem
+    problem.severity: error
+    security-severity: 6.1
+    sub-severity: low
+    id: py/url-redirection
+    tags: |-
+      security
+             external/cwe/cwe-601
+    precision: high
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-611/Xxe.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-611/Xxe.bqrs
+  metadata:
+    name: XML external entity expansion
+    description: |-
+      Parsing user input as an XML document with external
+                    entity expansion is vulnerable to XXE attacks.
+    kind: path-problem
+    problem.severity: error
+    security-severity: 9.1
+    precision: high
+    id: py/xxe
+    tags: |-
+      security
+             external/cwe/cwe-611
+             external/cwe/cwe-827
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-614/InsecureCookie.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-614/InsecureCookie.bqrs
+  metadata:
+    name: Failure to use secure cookies
+    description: |-
+      Insecure cookies may be sent in cleartext, which makes them vulnerable to
+                    interception.
+    kind: problem
+    problem.severity: warning
+    security-severity: 5.0
+    precision: high
+    id: py/insecure-cookie
+    tags: |-
+      security
+             external/cwe/cwe-614
+             external/cwe/cwe-1004
+             external/cwe/cwe-1275
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-643/XpathInjection.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-643/XpathInjection.bqrs
+  metadata:
+    name: XPath query built from user-controlled sources
+    description: |-
+      Building a XPath query from user-controlled sources is vulnerable to insertion of
+                    malicious Xpath code by the user.
+    kind: path-problem
+    problem.severity: error
+    security-severity: 9.8
+    precision: high
+    id: py/xpath-injection
+    tags: |-
+      security
+             external/cwe/cwe-643
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-730/PolynomialReDoS.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-730/PolynomialReDoS.bqrs
+  metadata:
+    name: Polynomial regular expression used on uncontrolled data
+    description: |-
+      A regular expression that can require polynomial time
+                    to match may be vulnerable to denial-of-service attacks.
+    kind: path-problem
+    problem.severity: warning
+    security-severity: 7.5
+    precision: high
+    id: py/polynomial-redos
+    tags: |-
+      security
+             external/cwe/cwe-1333
+             external/cwe/cwe-730
+             external/cwe/cwe-400
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-730/ReDoS.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-730/ReDoS.bqrs
+  metadata:
+    name: Inefficient regular expression
+    description: |-
+      A regular expression that requires exponential time to match certain inputs
+                    can be a performance bottleneck, and may be vulnerable to denial-of-service
+                    attacks.
+    kind: problem
+    problem.severity: error
+    security-severity: 7.5
+    precision: high
+    id: py/redos
+    tags: |-
+      security
+             external/cwe/cwe-1333
+             external/cwe/cwe-730
+             external/cwe/cwe-400
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-730/RegexInjection.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-730/RegexInjection.bqrs
+  metadata:
+    name: Regular expression injection
+    description: |-
+      User input should not be used in regular expressions without first being escaped,
+                    otherwise a malicious user may be able to inject an expression that could require
+                    exponential time on certain inputs.
+    kind: path-problem
+    problem.severity: error
+    security-severity: 7.5
+    precision: high
+    id: py/regex-injection
+    tags: |-
+      security
+             external/cwe/cwe-730
+             external/cwe/cwe-400
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-732/WeakFilePermissions.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-732/WeakFilePermissions.bqrs
+  metadata:
+    name: Overly permissive file permissions
+    description: Allowing files to be readable or writable by users other than the
+      owner may allow sensitive information to be accessed.
+    kind: problem
+    id: py/overly-permissive-file
+    problem.severity: warning
+    security-severity: 7.8
+    sub-severity: high
+    precision: medium
+    tags: |-
+      external/cwe/cwe-732
+             security
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-776/XmlBomb.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-776/XmlBomb.bqrs
+  metadata:
+    name: XML internal entity expansion
+    description: |-
+      Parsing user input as an XML document with arbitrary internal
+                    entity expansion is vulnerable to denial-of-service attacks.
+    kind: path-problem
+    problem.severity: warning
+    security-severity: 7.5
+    precision: high
+    id: py/xml-bomb
+    tags: |-
+      security
+             external/cwe/cwe-776
+             external/cwe/cwe-400
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-918/FullServerSideRequestForgery.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-918/FullServerSideRequestForgery.bqrs
+  metadata:
+    name: Full server-side request forgery
+    description: Making a network request to a URL that is fully user-controlled allows
+      for request forgery attacks.
+    kind: path-problem
+    problem.severity: error
+    security-severity: 9.1
+    precision: high
+    id: py/full-ssrf
+    tags: |-
+      security
+             external/cwe/cwe-918
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-918/PartialServerSideRequestForgery.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-918/PartialServerSideRequestForgery.bqrs
+  metadata:
+    name: Partial server-side request forgery
+    description: Making a network request to a URL that is partially user-controlled
+      allows for request forgery attacks.
+    kind: path-problem
+    problem.severity: error
+    security-severity: 9.1
+    precision: medium
+    id: py/partial-ssrf
+    tags: |-
+      security
+             external/cwe/cwe-918
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Security/CWE-943/NoSqlInjection.ql
+  relativeBqrsPath: codeql/python-queries/Security/CWE-943/NoSqlInjection.bqrs
+  metadata:
+    name: NoSQL Injection
+    description: |-
+      Building a NoSQL query from user-controlled sources is vulnerable to insertion of
+                    malicious NoSQL code by the user.
+    kind: path-problem
+    precision: high
+    problem.severity: error
+    security-severity: 8.8
+    id: py/nosql-injection
+    tags: |-
+      security
+             external/cwe/cwe-943
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Statements/AssertOnTuple.ql
+  relativeBqrsPath: codeql/python-queries/Statements/AssertOnTuple.bqrs
+  metadata:
+    name: Asserting a tuple
+    description: Using an assert statement to test a tuple provides no validity checking.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+             external/cwe/cwe-670
+    problem.severity: error
+    sub-severity: low
+    precision: very-high
+    id: py/asserts-tuple
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Statements/BreakOrReturnInFinally.ql
+  relativeBqrsPath: codeql/python-queries/Statements/BreakOrReturnInFinally.bqrs
+  metadata:
+    name: '''break'' or ''return'' statement in finally'
+    description: |-
+      Using a Break or Return statement in a finally block causes the
+                    Try-finally block to exit, discarding the exception.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             error-handling
+             correctness
+             external/cwe/cwe-584
+    problem.severity: warning
+    sub-severity: low
+    precision: medium
+    id: py/exit-from-finally
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Statements/ConstantInConditional.ql
+  relativeBqrsPath: codeql/python-queries/Statements/ConstantInConditional.bqrs
+  metadata:
+    name: Constant in conditional expression or statement
+    description: The conditional is always true or always false
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             useless-code
+             external/cwe/cwe-561
+             external/cwe/cwe-570
+             external/cwe/cwe-571
+    problem.severity: warning
+    sub-severity: low
+    precision: very-high
+    id: py/constant-conditional-expression
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Statements/IterableStringOrSequence.ql
+  relativeBqrsPath: codeql/python-queries/Statements/IterableStringOrSequence.bqrs
+  metadata:
+    name: Iterable can be either a string or a sequence
+    description: Iteration over either a string or a sequence in the same loop can
+      cause errors that are hard to find.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: low
+    precision: high
+    id: py/iteration-string-and-sequence
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Statements/MismatchInMultipleAssignment.ql
+  relativeBqrsPath: codeql/python-queries/Statements/MismatchInMultipleAssignment.bqrs
+  metadata:
+    name: Mismatch in multiple assignment
+    description: |-
+      Assigning multiple variables without ensuring that you define a
+                    value for each variable causes an exception at runtime.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: low
+    precision: very-high
+    id: py/mismatched-multiple-assignment
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Statements/ModificationOfLocals.ql
+  relativeBqrsPath: codeql/python-queries/Statements/ModificationOfLocals.bqrs
+  metadata:
+    name: Modification of dictionary returned by locals()
+    description: Modifications of the dictionary returned by locals() are not propagated
+      to the local variables of a function.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: warning
+    sub-severity: low
+    precision: very-high
+    id: py/modification-of-locals
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Statements/NestedLoopsSameVariable.ql
+  relativeBqrsPath: codeql/python-queries/Statements/NestedLoopsSameVariable.bqrs
+  metadata:
+    name: Nested loops with same variable
+    description: |-
+      Nested loops in which the target variable is the same for each loop make
+                    the behavior of the loops difficult to understand.
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             readability
+    problem.severity: recommendation
+    sub-severity: high
+    precision: very-high
+    id: py/nested-loops-with-same-variable
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Statements/NestedLoopsSameVariableWithReuse.ql
+  relativeBqrsPath: codeql/python-queries/Statements/NestedLoopsSameVariableWithReuse.bqrs
+  metadata:
+    name: Nested loops with same variable reused after inner loop body
+    description: |-
+      Redefining a variable in an inner loop and then using
+                    the variable in an outer loop causes unexpected behavior.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: low
+    precision: very-high
+    id: py/nested-loops-with-same-variable-reused
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Statements/NonIteratorInForLoop.ql
+  relativeBqrsPath: codeql/python-queries/Statements/NonIteratorInForLoop.bqrs
+  metadata:
+    name: Non-iterable used in for loop
+    description: Using a non-iterable as the object in a 'for' loop causes a TypeError.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: low
+    precision: high
+    id: py/non-iterable-in-for-loop
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Statements/RedundantAssignment.ql
+  relativeBqrsPath: codeql/python-queries/Statements/RedundantAssignment.bqrs
+  metadata:
+    name: Redundant assignment
+    description: Assigning a variable to itself is useless and very likely indicates
+      an error in the code.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+             external/cwe/cwe-563
+    problem.severity: error
+    sub-severity: low
+    precision: very-high
+    id: py/redundant-assignment
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Statements/ReturnOrYieldOutsideFunction.ql
+  relativeBqrsPath: codeql/python-queries/Statements/ReturnOrYieldOutsideFunction.bqrs
+  metadata:
+    name: Use of 'return' or 'yield' outside a function
+    description: Using 'return' or 'yield' outside a function causes a 'SyntaxError'
+      at runtime.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: low
+    precision: medium
+    id: py/return-or-yield-outside-function
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Statements/ShouldUseWithStatement.ql
+  relativeBqrsPath: codeql/python-queries/Statements/ShouldUseWithStatement.bqrs
+  metadata:
+    name: Should use a 'with' statement
+    description: |-
+      Using a 'try-finally' block to ensure only that a resource is closed makes code more
+                    difficult to read.
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             readability
+    problem.severity: recommendation
+    sub-severity: high
+    precision: very-high
+    id: py/should-use-with
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Statements/SideEffectInAssert.ql
+  relativeBqrsPath: codeql/python-queries/Statements/SideEffectInAssert.bqrs
+  metadata:
+    name: An assert statement has a side-effect
+    description: |-
+      Side-effects in assert statements result in differences between normal
+                    and optimized behavior.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: low
+    precision: high
+    id: py/side-effect-in-assert
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Statements/StatementNoEffect.ql
+  relativeBqrsPath: codeql/python-queries/Statements/StatementNoEffect.bqrs
+  metadata:
+    name: Statement has no effect
+    description: A statement has no effect
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             useless-code
+             external/cwe/cwe-561
+    problem.severity: recommendation
+    sub-severity: high
+    precision: high
+    id: py/ineffectual-statement
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Statements/TopLevelPrint.ql
+  relativeBqrsPath: codeql/python-queries/Statements/TopLevelPrint.bqrs
+  metadata:
+    name: Use of a print statement at module level
+    description: Using a print statement at module scope (except when guarded by `if
+      __name__ == '__main__'`) will cause surprising output when the module is imported.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: recommendation
+    sub-severity: high
+    precision: high
+    id: py/print-during-import
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Statements/UnnecessaryDelete.ql
+  relativeBqrsPath: codeql/python-queries/Statements/UnnecessaryDelete.bqrs
+  metadata:
+    name: Unnecessary delete statement in function
+    description: |-
+      Using a 'delete' statement to delete a local variable is
+                    unnecessary, because the variable is deleted automatically when
+                    the function exits.
+    kind: problem
+    tags: |-
+      maintainability
+             useless-code
+    problem.severity: warning
+    sub-severity: low
+    precision: high
+    id: py/unnecessary-delete
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Statements/UnnecessaryElseClause.ql
+  relativeBqrsPath: codeql/python-queries/Statements/UnnecessaryElseClause.bqrs
+  metadata:
+    name: Unnecessary 'else' clause in loop
+    description: An 'else' clause in a 'for' or 'while' statement that does not contain
+      a 'break' is redundant.
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             useless-code
+    problem.severity: warning
+    sub-severity: low
+    precision: very-high
+    id: py/redundant-else
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Statements/UnnecessaryPass.ql
+  relativeBqrsPath: codeql/python-queries/Statements/UnnecessaryPass.bqrs
+  metadata:
+    name: Unnecessary pass
+    description: Unnecessary 'pass' statement
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             useless-code
+    problem.severity: warning
+    sub-severity: low
+    precision: very-high
+    id: py/unnecessary-pass
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Statements/UnreachableCode.ql
+  relativeBqrsPath: codeql/python-queries/Statements/UnreachableCode.bqrs
+  metadata:
+    name: Unreachable code
+    description: Code is unreachable
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             useless-code
+             external/cwe/cwe-561
+    problem.severity: warning
+    sub-severity: low
+    precision: very-high
+    id: py/unreachable-statement
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Statements/UnusedExceptionObject.ql
+  relativeBqrsPath: codeql/python-queries/Statements/UnusedExceptionObject.bqrs
+  metadata:
+    name: Unused exception object
+    description: "An exception object is created, but is not used."
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             error-handling
+    problem.severity: error
+    sub-severity: low
+    precision: very-high
+    id: py/unused-exception-object
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Statements/UseOfExit.ql
+  relativeBqrsPath: codeql/python-queries/Statements/UseOfExit.bqrs
+  metadata:
+    name: Use of exit() or quit()
+    description: exit() or quit() may fail if the interpreter is run with the -S option.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: warning
+    sub-severity: low
+    precision: very-high
+    id: py/use-of-exit-or-quit
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Summary/LinesOfCode.ql
+  relativeBqrsPath: codeql/python-queries/Summary/LinesOfCode.bqrs
+  metadata:
+    name: Total lines of Python code in the database
+    description: |-
+      The total number of lines of Python code across all files, including
+         external libraries and auto-generated files. This is a useful metric of the size of a
+         database. This query counts the lines of code, excluding whitespace or comments.
+    kind: metric
+    tags: |-
+      summary
+             telemetry
+    id: py/summary/lines-of-code
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Summary/LinesOfUserCode.ql
+  relativeBqrsPath: codeql/python-queries/Summary/LinesOfUserCode.bqrs
+  metadata:
+    name: Total lines of user written Python code in the database
+    description: |-
+      The total number of lines of Python code from the source code directory,
+         excluding auto-generated files. This query counts the lines of code, excluding
+         whitespace or comments. Note: If external libraries are included in the codebase
+         either in a checked-in virtual environment or as vendored code, that will currently
+         be counted as user written code.
+    kind: metric
+    tags: |-
+      summary
+             lines-of-code
+             debug
+    id: py/summary/lines-of-user-code
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Testing/ImpreciseAssert.ql
+  relativeBqrsPath: codeql/python-queries/Testing/ImpreciseAssert.bqrs
+  metadata:
+    name: Imprecise assert
+    description: Using 'assertTrue' or 'assertFalse' rather than a more specific assertion
+      can give uninformative failure messages.
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             readability
+    problem.severity: recommendation
+    sub-severity: high
+    precision: very-high
+    id: py/imprecise-assert
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Variables/GlobalAtModuleLevel.ql
+  relativeBqrsPath: codeql/python-queries/Variables/GlobalAtModuleLevel.bqrs
+  metadata:
+    name: Use of 'global' at module level
+    description: Use of the 'global' statement at module level
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             useless-code
+    problem.severity: warning
+    sub-severity: low
+    precision: very-high
+    id: py/redundant-global-declaration
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Variables/LeakingListComprehension.ql
+  relativeBqrsPath: codeql/python-queries/Variables/LeakingListComprehension.bqrs
+  metadata:
+    name: List comprehension variable used in enclosing scope
+    description: Using the iteration variable of a list comprehension in the enclosing
+      scope will result in different behavior between Python 2 and 3 and is confusing.
+    kind: problem
+    tags: |-
+      portability
+             correctness
+    problem.severity: warning
+    sub-severity: high
+    precision: very-high
+    id: py/leaking-list-comprehension
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Variables/LoopVariableCapture/LoopVariableCapture.ql
+  relativeBqrsPath: codeql/python-queries/Variables/LoopVariableCapture/LoopVariableCapture.bqrs
+  metadata:
+    name: Loop variable capture
+    description: "Capturing a loop variable is not the same as capturing its value,\
+      \ and can lead to unexpected behavior or bugs."
+    kind: path-problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: low
+    precision: high
+    id: py/loop-variable-capture
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Variables/MultiplyDefined.ql
+  relativeBqrsPath: codeql/python-queries/Variables/MultiplyDefined.bqrs
+  metadata:
+    name: Variable defined multiple times
+    description: Assignment to a variable occurs multiple times without any intermediate
+      use of that variable
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             useless-code
+             external/cwe/cwe-563
+    problem.severity: warning
+    sub-severity: low
+    precision: very-high
+    id: py/multiple-definition
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Variables/SuspiciousUnusedLoopIterationVariable.ql
+  relativeBqrsPath: codeql/python-queries/Variables/SuspiciousUnusedLoopIterationVariable.bqrs
+  metadata:
+    name: Suspicious unused loop iteration variable
+    description: "A loop iteration variable is unused, which suggests an error."
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: low
+    precision: high
+    id: py/unused-loop-variable
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Variables/UndefinedExport.ql
+  relativeBqrsPath: codeql/python-queries/Variables/UndefinedExport.bqrs
+  metadata:
+    name: Explicit export is not defined
+    description: |-
+      Including an undefined attribute in `__all__` causes an exception when
+                    the module is imported using '*'
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: low
+    precision: high
+    id: py/undefined-export
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Variables/UndefinedPlaceHolder.ql
+  relativeBqrsPath: codeql/python-queries/Variables/UndefinedPlaceHolder.bqrs
+  metadata:
+    name: Use of an undefined placeholder variable
+    description: Using a variable before it is initialized causes an exception.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: low
+    precision: medium
+    id: py/undefined-placeholder-variable
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Variables/UninitializedLocal.ql
+  relativeBqrsPath: codeql/python-queries/Variables/UninitializedLocal.bqrs
+  metadata:
+    name: Potentially uninitialized local variable
+    description: Using a local variable before it is initialized causes an UnboundLocalError.
+    kind: problem
+    tags: |-
+      quality
+             reliability
+             correctness
+    problem.severity: error
+    sub-severity: low
+    precision: medium
+    id: py/uninitialized-local-variable
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Variables/UnusedLocalVariable.ql
+  relativeBqrsPath: codeql/python-queries/Variables/UnusedLocalVariable.bqrs
+  metadata:
+    name: Unused local variable
+    description: Local variable is defined but not used
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             useless-code
+             external/cwe/cwe-563
+    problem.severity: recommendation
+    sub-severity: high
+    precision: very-high
+    id: py/unused-local-variable
+ -
+  pack: codeql/python-queries#1
+  relativeQueryPath: Variables/UnusedModuleVariable.ql
+  relativeBqrsPath: codeql/python-queries/Variables/UnusedModuleVariable.bqrs
+  metadata:
+    name: Unused global variable
+    description: Global variable is defined but not used
+    kind: problem
+    tags: |-
+      quality
+             maintainability
+             useless-code
+             external/cwe/cwe-563
+    problem.severity: recommendation
+    sub-severity: low
+    precision: high
+    id: py/unused-global-variable
+extensionPacks: []
+packs:
+  codeql/threat-models#2:
+    name: codeql/threat-models
+    version: 1.0.33-dev
+    isLibrary: true
+    isExtensionPack: false
+    localPath: file:///home/neurosx/DEVSPACE/codeql-repo/shared/threat-models/
+    localPackDefinitionFile: file:///home/neurosx/DEVSPACE/codeql-repo/shared/threat-models/qlpack.yml
+    headSha: cbe34f101b71ae1bf7c15ba10c7784d2cd89e060
+    runDataExtensions: []
+  codeql/python-all#0:
+    name: codeql/python-all
+    version: 4.0.17-dev
+    isLibrary: true
+    isExtensionPack: false
+    localPath: file:///home/neurosx/DEVSPACE/codeql-repo/python/ql/lib/
+    localPackDefinitionFile: file:///home/neurosx/DEVSPACE/codeql-repo/python/ql/lib/qlpack.yml
+    headSha: cbe34f101b71ae1bf7c15ba10c7784d2cd89e060
+    runDataExtensions: []
+  codeql/python-queries#1:
+    name: codeql/python-queries
+    version: 1.6.7-dev
+    isLibrary: false
+    isExtensionPack: false
+    localPath: file:///home/neurosx/DEVSPACE/codeql-repo/python/ql/src/
+    localPackDefinitionFile: file:///home/neurosx/DEVSPACE/codeql-repo/python/ql/src/qlpack.yml
+    headSha: cbe34f101b71ae1bf7c15ba10c7784d2cd89e060
+    runDataExtensions:
+     -
+      pack: codeql/python-all#0
+      relativePath: ext/default-threat-models-fixup.model.yml
+      index: 0
+      firstRowId: 0
+      rowCount: 1
+      locations:
+        lineNumbers: A=8
+        columnNumbers: A=9
+     -
+      pack: codeql/python-all#0
+      relativePath: semmle/python/frameworks/Asyncpg.model.yml
+      index: 0
+      firstRowId: 1
+      rowCount: 5
+      locations:
+        lineNumbers: A=7+1+2+1+2
+        columnNumbers: A=9*5
+     -
+      pack: codeql/python-all#0
+      relativePath: semmle/python/frameworks/Asyncpg.model.yml
+      index: 1
+      firstRowId: 6
+      rowCount: 6
+      locations:
+        lineNumbers: A=20+4+1*2+2+1
+        columnNumbers: A=9*6
+     -
+      pack: codeql/python-all#0
+      relativePath: semmle/python/frameworks/Stdlib.model.yml
+      index: 0
+      firstRowId: 12
+      rowCount: 12
+      locations:
+        lineNumbers: A=6+1*4+2+1+2+1*2+4+2
+        columnNumbers: A=9*12
+     -
+      pack: codeql/python-all#0
+      relativePath: semmle/python/frameworks/Stdlib.model.yml
+      index: 1
+      firstRowId: 24
+      rowCount: 1
+      locations:
+        lineNumbers: A=29
+        columnNumbers: A=9
+     -
+      pack: codeql/python-all#0
+      relativePath: semmle/python/frameworks/Stdlib.model.yml
+      index: 2
+      firstRowId: 25
+      rowCount: 66
+      locations:
+        lineNumbers: A=37+1+2+4+2*2+4+2*3+1+2+1+2+1+2+4+2+4+2*2+3+2*2+3+1+2*4+4+1+4+1+4+1*5+2*4+4+1+2*11+3+2+3+4+1+2*2+1+2
+        columnNumbers: A=9*66
+     -
+      pack: codeql/python-all#0
+      relativePath: semmle/python/frameworks/builtins.model.yml
+      index: 0
+      firstRowId: 91
+      rowCount: 244
+      locations:
+        lineNumbers: A=7+3*243
+        columnNumbers: A=5*244
+     -
+      pack: codeql/python-all#0
+      relativePath: semmle/python/frameworks/data/internal/subclass-capture/ALL.model.yml
+      index: 0
+      firstRowId: 335
+      rowCount: 58275
+      locations:
+        lineNumbers: A=7+3*58274
+        columnNumbers: A=5*58275
+     -
+      pack: codeql/threat-models#2
+      relativePath: ext/supported-threat-models.model.yml
+      index: 0
+      firstRowId: 58610
+      rowCount: 1
+      locations:
+        lineNumbers: A=6
+        columnNumbers: A=9
+     -
+      pack: codeql/threat-models#2
+      relativePath: ext/threat-model-grouping.model.yml
+      index: 0
+      firstRowId: 58611
+      rowCount: 15
+      locations:
+        lineNumbers: A=8+3+1+3+1*5+3+1+5+1*3
+        columnNumbers: A=9*15
+  codeql/util#3:
+    name: codeql/util
+    version: 2.0.20-dev
+    isLibrary: true
+    isExtensionPack: false
+    localPath: file:///home/neurosx/DEVSPACE/codeql-repo/shared/util/
+    localPackDefinitionFile: file:///home/neurosx/DEVSPACE/codeql-repo/shared/util/qlpack.yml
+    headSha: cbe34f101b71ae1bf7c15ba10c7784d2cd89e060
+    runDataExtensions: []

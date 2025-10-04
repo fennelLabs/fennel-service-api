@@ -1,0 +1,14 @@
+[2025-10-02 17:52:17] This is codeql database analyze codeql-db /home/neurosx/DEVSPACE/codeql-repo/python/ql/src/codeql-suites/python-security-and-quality.qls --format=sarif-latest --output=codeql-results.sarif
+[2025-10-02 17:52:17] Log file was started late.
+[2025-10-02 17:52:17] [PROGRESS] database analyze> Running queries.
+[2025-10-02 17:52:17] Running plumbing command: codeql database run-queries --evaluator-log-level=5 --warnings=show --qlconfig-file=/home/neurosx/DEVSPACE/fennel-deploy/fennel-service-api/qlconfig.yml --dynamic-join-order-mode=none --no-rerun --interpret-passthrough=null,--format=sarif-latest,-o=/home/neurosx/DEVSPACE/fennel-deploy/fennel-service-api/codeql-results.sarif,--max-paths=4,--csv-location-format=line-column,--print-diagnostics-summary,--print-metrics-summary,--qlconfig-file=/home/neurosx/DEVSPACE/fennel-deploy/fennel-service-api/qlconfig.yml,--,/home/neurosx/DEVSPACE/fennel-deploy/fennel-service-api/codeql-db,/home/neurosx/DEVSPACE/codeql-repo/python/ql/src/codeql-suites/python-security-and-quality.qls -- /home/neurosx/DEVSPACE/fennel-deploy/fennel-service-api/codeql-db /home/neurosx/DEVSPACE/codeql-repo/python/ql/src/codeql-suites/python-security-and-quality.qls
+[2025-10-02 17:52:17] Calling plumbing command: codeql resolve ram --dataset=/home/neurosx/DEVSPACE/fennel-deploy/fennel-service-api/codeql-db/db-python --format=json
+[2025-10-02 17:52:17] [PROGRESS] resolve ram> Stringpool size measured as 2326938
+[2025-10-02 17:52:17] Plumbing command codeql resolve ram completed:
+                      [
+                        "-J-Xmx3365M",
+                        "--off-heap-ram=3833"
+                      ]
+[2025-10-02 17:52:17] Chaining via /tmp/codeql.KayhESCC to plumbing: execute queries -J-Xmx3365M --off-heap-ram=3833 --verbosity=progress --logdir=/home/neurosx/DEVSPACE/fennel-deploy/fennel-service-api/codeql-db/log --evaluator-log-level=5 --warnings=show --qlconfig-file=/home/neurosx/DEVSPACE/fennel-deploy/fennel-service-api/qlconfig.yml --dynamic-join-order-mode=none --no-rerun --interpret-passthrough=null,--format=sarif-latest,-o=/home/neurosx/DEVSPACE/fennel-deploy/fennel-service-api/codeql-results.sarif,--max-paths=4,--csv-location-format=line-column,--print-diagnostics-summary,--print-metrics-summary,--qlconfig-file=/home/neurosx/DEVSPACE/fennel-deploy/fennel-service-api/qlconfig.yml,--,/home/neurosx/DEVSPACE/fennel-deploy/fennel-service-api/codeql-db,/home/neurosx/DEVSPACE/codeql-repo/python/ql/src/codeql-suites/python-security-and-quality.qls --output=/home/neurosx/DEVSPACE/fennel-deploy/fennel-service-api/codeql-db/results -- /home/neurosx/DEVSPACE/fennel-deploy/fennel-service-api/codeql-db/db-python /home/neurosx/DEVSPACE/codeql-repo/python/ql/src/codeql-suites/python-security-and-quality.qls
+[2025-10-02 17:52:17] Plumbing command codeql database run-queries completed with status 70.
+[2025-10-02 17:52:17] Exiting with code 70

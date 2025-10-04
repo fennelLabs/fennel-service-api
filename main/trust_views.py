@@ -278,7 +278,7 @@ def check_if_trust_exists(request):
     address = request.GET.get("address")
     if not address:
         return Response({"error": "address parameter is required"}, status=400)
-    
+
     try:
         target_user = get_object_or_404(UserKeys, address=address).user
         trust_exists = TrustConnection.objects.filter(

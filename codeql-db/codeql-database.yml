@@ -1,0 +1,13 @@
+---
+sourceLocationPrefix: /home/neurosx/DEVSPACE/fennel-deploy/fennel-service-api
+baselineLinesOfCode: 11015
+unicodeNewlines: false
+columnKind: utf32
+primaryLanguage: python
+creationMetadata:
+  sha: 6ebfa7005a51ca6e2d81edf928007e53cbd19a2f
+  cliVersion: 2.23.2
+  creationTime: 2025-10-02T21:38:00.643430783Z
+overlayBaseDatabase: false
+overlayDatabase: false
+finalised: true
