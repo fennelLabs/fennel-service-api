@@ -1,10 +1,69 @@
+# Python
 venv/
-.idea/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
 .coverage
+.pytest_cache/
+
+# Environment variables
+*.env
+.env*
+!env.template
+
+# Configuration and secrets
+config/
+secrets/
+
+# Database
+*.db
+*.sqlite*
 db.sqlite3
+
+# Logs
+*.log
+logs/
+log/
+
+# IDE
+.idea/
 .vscode/
-**/__pycache__/**
-static/
-*.prof
 .DS_Store
+Thumbs.db
 .hintrc
+
+# Node modules
+node_modules/
+
+# Profiling
+*.prof
+
+# Static files
+static/
+
+# Certificates and keys
+*.key
+*.pem
+*.p12
+*.crt
+*.csr
+*.pfx
+
+# Infrastructure (keep private)
+k8s/
+terraform/
+
+# Docker overrides
+docker-compose.override.yml
+
+# Local development
+*.local.*
+*.local
+local/
+
+# CodeQL analysis results (keep private)
+codeql-db/
+codeql-results.sarif
