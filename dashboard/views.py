@@ -19,8 +19,6 @@ from dashboard.blockchain_helpers import (
     transfer_token,
 )
 
-
-
 @silk_profile(name="index")
 @require_authentication
 def index(request):
