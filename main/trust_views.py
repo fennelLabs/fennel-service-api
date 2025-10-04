@@ -30,7 +30,7 @@ def get_fee_for_issue_trust(request):
         "address": request.data["address"],
     }
     response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_issue_trust",
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_issue_trust/",
         data=payload,
         timeout=5,
     )
@@ -64,7 +64,7 @@ def issue_trust(request):
         user=request.user, trusted_user=trust_target
     )
     response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/issue_trust",
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/issue_trust/",
         data=payload,
         timeout=5,
     )
@@ -84,7 +84,7 @@ def get_fee_for_remove_trust(request):
         "address": request.data["address"],
     }
     response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_remove_trust",
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_remove_trust/",
         data=payload,
         timeout=5,
     )
@@ -118,7 +118,7 @@ def remove_trust(request):
         user=request.user, trusted_user=trust_target
     ).delete()
     response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/remove_trust",
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/remove_trust/",
         data=payload,
         timeout=5,
     )
@@ -138,7 +138,7 @@ def get_fee_for_request_trust(request):
         "address": request.data["address"],
     }
     response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_request_trust",
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_request_trust/",
         data=payload,
         timeout=5,
     )
@@ -170,7 +170,7 @@ def request_trust(request):
         return Response({"error": "user does not exist"})
     TrustRequest.objects.update_or_create(user=request.user, trusted_user=trust_target)
     response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/request_trust",
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/request_trust/",
         data=payload,
         timeout=5,
     )
@@ -190,7 +190,7 @@ def get_fee_for_cancel_trust_request(request):
         "address": request.data["address"],
     }
     response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_cancel_trust_request",
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_cancel_trust_request/",
         data=payload,
         timeout=5,
     )
@@ -222,7 +222,7 @@ def cancel_trust_request(request):
         return Response({"error": "user does not exist"})
     TrustRequest.objects.filter(user=request.user, trusted_user=trust_target).delete()
     response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/cancel_trust_request",
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/cancel_trust_request/",
         data=payload,
         timeout=5,
     )

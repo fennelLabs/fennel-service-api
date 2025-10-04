@@ -31,7 +31,7 @@ from main.whiteflag_helpers import (
 @api_view(["GET"])
 def fennel_cli_healthcheck(request):
     response = requests.get(
-        f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/hello_there/", timeout=5
+        f"{os.environ.get('FENNEL_CLI_IP', None)}/", timeout=5
     )
     if response.status_code == 200:
         return Response("Ok")

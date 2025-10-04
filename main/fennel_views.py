@@ -36,7 +36,7 @@ from main.serializers import SignalSerializer, TransactionSerializer
 @silk_profile(name="record_signal_fee")
 def record_signal_fee(payload: dict) -> (dict, bool):
     response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_new_signal",
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_new_signal/",
         data=payload,
         timeout=5,
     )
@@ -64,7 +64,7 @@ def check_balance(key):
     try:
         payload = {"mnemonic": key.mnemonic}
         response = requests.post(
-            f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_account_balance",
+            f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_account_balance/",
             data=payload,
             timeout=5,
         )
@@ -103,7 +103,7 @@ def signal_send_helper(user_key: UserKeys, signal: Signal) -> (dict, bool):
         if not success:
             return (signal_fee_result, False)
         response_json = requests.post(
-            f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/send_new_signal",
+            f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/send_new_signal/",
             data=payload,
             timeout=5,
         ).json()
@@ -158,15 +158,11 @@ def create_account(request):
         keys = UserKeys.objects.get(user=request.user)
     else:
         keys = UserKeys.objects.create(user=request.user)
-    # Mock response for testing
-    if os.environ.get('TESTING') == 'Github Actions':
-        mnemonic = "test mnemonic phrase for testing purposes only"
-    else:
-        response = requests.get(
-            f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/create_account",
-            timeout=5,
-        )
-        mnemonic = response.json()["mnemonic"]
+    response = requests.get(
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/create_account/",
+        timeout=5,
+    )
+    mnemonic = response.json()["mnemonic"]
     keys.mnemonic = mnemonic
     keys.save()
     return Response(mnemonic == keys.mnemonic)
@@ -182,7 +178,7 @@ def download_account_as_json(request):
     try:
         payload = {"mnemonic": key.mnemonic}
         response = requests.post(
-            f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/download_account_as_json",
+            f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/download_account_as_json/",
             data=payload,
             timeout=5,
         )
@@ -214,7 +210,7 @@ def get_address(request):
         return Response({"address": key.address})
     payload = {"mnemonic": key.mnemonic}
     response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_address",
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_address/",
         data=payload,
         timeout=5,
     )
@@ -236,7 +232,7 @@ def get_fee_for_transfer_token(request):
         "amount": request.data["amount"],
     }
     response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_transfer_token",
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_transfer_token/",
         data=payload,
         timeout=5,
     )
@@ -264,7 +260,7 @@ def transfer_token(request):
         "amount": request.data["amount"],
     }
     response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/transfer_token",
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/transfer_token/",
         data=payload,
         timeout=5,
     )

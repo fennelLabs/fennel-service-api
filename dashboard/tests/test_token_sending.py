@@ -178,7 +178,7 @@ class TestTokenSending(TestCase):
 
     def test_big_multiply_call(self):
         math_response = requests.post(
-            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/big_multiply",
+            f"{os.environ.get('FENNEL_CLI_IP', None)}/big_multiply/",
             json={"a": "50", "b": "1000000000000"},
             timeout=5,
         )

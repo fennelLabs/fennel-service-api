@@ -270,7 +270,7 @@ def generate_group_encryption_keys(request, group_id=None):
         )
         return redirect("dashboard:api_group_members", group_id=group_id)
     response = requests.post(
-        f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/generate_encryption_channel",
+        f"{os.environ.get('FENNEL_CLI_IP', None)}/generate_keypair/",
         timeout=5,
     )
     group.public_diffie_hellman_key = response.json()["secret"]

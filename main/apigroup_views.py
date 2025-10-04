@@ -34,7 +34,7 @@ def get_group_list(request):
 def generate_apigroup_keypair(request):
     try:
         response = requests.post(
-            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/generate_encryption_channel",
+            f"{os.environ.get('FENNEL_CLI_IP', None)}/generate_keypair/",
             timeout=5,
         )
         group = APIGroup.objects.get(api_key=request.data.get("api_key", None))

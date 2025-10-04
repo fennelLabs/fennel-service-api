@@ -9,7 +9,7 @@ export EMAIL_USERNAME=""
 export EMAIL_PASSWORD=""
 export DEFAULT_FROM_EMAIL=""
 export SERVER_EMAIL=""
-export FENNEL_CLI_IP=https://fennel.network/encoder/v1
-export FENNEL_SUBSERVICE_IP=https://fennel.network/subservice
+export FENNEL_CLI_IP=https://fennel.network/api/v1/crypto/dh
+export FENNEL_SUBSERVICE_IP=https://fennel.network/api/v1/fennel
 python -m black .
 ./runner.sh all

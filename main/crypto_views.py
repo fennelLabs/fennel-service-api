@@ -67,7 +67,7 @@ def get_my_keypair(request):
 def get_diffie_hellman_shared_secret(request):
     try:
         response = requests.post(
-            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/accept_encryption_channel",
+            f"{os.environ.get('FENNEL_CLI_IP', None)}/get_shared_secret/",
             json={"secret": request.data["secret"], "public": request.data["public"]},
             timeout=5,
         )
@@ -87,7 +87,7 @@ def get_diffie_hellman_shared_secret(request):
 def dh_encrypt_message(request):
     try:
         response = requests.post(
-            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/dh_encrypt",
+            f"{os.environ.get('FENNEL_CLI_IP', None)}/dm/encrypt_message/",
             json={
                 "plaintext": request.data["message"],
                 "shared_secret": request.data["shared_secret"],
@@ -105,7 +105,7 @@ def dh_encrypt_message(request):
 def dh_decrypt_message(request):
     try:
         response = requests.post(
-            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/dh_decrypt",
+            f"{os.environ.get('FENNEL_CLI_IP', None)}/dm/decrypt_message/",
             json={
                 "ciphertext": request.data["message"],
                 "shared_secret": request.data["shared_secret"],

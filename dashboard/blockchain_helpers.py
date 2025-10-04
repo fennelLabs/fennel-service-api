@@ -118,7 +118,7 @@ def get_fee_for_transfer_token(recipient: str, amount: int, user_key: UserKeys) 
 @silk_profile(name="transfer_token")
 def transfer_token(recipient: str, amount: int, user_key: UserKeys) -> {int, str}:
     math_response = requests.post(
-        f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/big_multiply",
+        f"{os.environ.get('FENNEL_CLI_IP', None)}/big_multiply/",
         json={"a": str(amount), "b": "1000000000000"},
         timeout=5,
     )
