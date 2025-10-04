@@ -1,4 +1,3 @@
-import os
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 from django.contrib.messages.storage import default_storage
@@ -20,7 +19,6 @@ from dashboard.blockchain_helpers import (
     transfer_token,
 )
 
-import requests
 
 
 @silk_profile(name="index")
