@@ -378,7 +378,7 @@ def get_fee_for_new_signal(request):
     try:
         response, success = record_signal_fee(payload)
         code = 400 if not success else 200
-        
+
         # Sanitize the response to only include safe fields
         if success:
             sanitized_response = {
@@ -390,7 +390,7 @@ def get_fee_for_new_signal(request):
                 "error": "Fee calculation failed",
                 "balance": check_balance(user_key)["balance"],
             }
-        
+
         return Response(sanitized_response, status=code)
     except requests.HTTPError:
         return Response({"error": "could not get fee"})
@@ -414,7 +414,7 @@ def send_new_signal(request):
             APIGroup.objects.get(name=form.cleaned_data["recipient_group"])
         )
     result, success = signal_send_helper(user_key, signal)
-    
+
     # Sanitize the response to only include safe fields
     if success:
         # In success case, extract only essential fields to avoid exposing sensitive data
@@ -422,7 +422,7 @@ def send_new_signal(request):
         balance_value = result.get("balance") if result and "balance" in result else None
         signal_id_value = result.get("signal_id") if result and "signal_id" in result else None
         synced_value = result.get("synced", True) if result else True
-        
+
         sanitized_response = {
             "hash": hash_value,
             "balance": balance_value,
@@ -434,14 +434,14 @@ def send_new_signal(request):
         balance_value = result.get("balance") if result and "balance" in result else None
         signal_id_value = result.get("signal_id") if result and "signal_id" in result else None
         synced_value = result.get("synced", False) if result else False
-        
+
         sanitized_response = {
             "error": "Signal sending failed",
             "balance": balance_value,
             "signal_id": signal_id_value,
             "synced": synced_value,
         }
-    
+
     return Response(
         sanitized_response,
         status=200 if success else 400,
@@ -564,12 +564,12 @@ def get_signals(request, count=None):
     )
     start = request.GET.get("start", None)
     end = request.GET.get("end", None)
-    
+
     groups = request.user.api_group_users.all()
     queryset = Signal.objects.filter(
         (Q(viewers=None) | Q(viewers__in=groups))
     ).order_by("-timestamp")
-    
+
     if not show_inactive:
         queryset = queryset.filter(active=True)
     if title is not None:
@@ -587,7 +587,7 @@ def get_signals(request, count=None):
         queryset = queryset[:count]
     if start is not None and end is not None:
         queryset = queryset.filter(pk__range=(start, end))
-    
+
     serializer = SignalSerializer(queryset, many=True)
     return Response(serializer.data)
 

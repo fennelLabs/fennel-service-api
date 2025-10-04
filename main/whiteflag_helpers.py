@@ -128,17 +128,17 @@ def create_whiteflag_encoder_response(
         return_value = response.json()
     except requests.JSONDecodeError:
         # Log the actual error for debugging but don't expose it to the client
-        print(f"CLI service returned invalid JSON")
+        print("CLI service returned invalid JSON")
         return ({"error": "Whiteflag encoding service returned invalid response"}, False)
-    
+
     if response.status_code != 200:
         # Log the actual error for debugging but don't expose it to the client
         print(f"CLI service error {response.status_code}")
         return ({"error": "Whiteflag encoding service error"}, False)
-    
+
     if not response.json()["success"]:
         # Log the actual error for debugging but don't expose it to the client
-        print(f"CLI service encoding failed")
+        print("CLI service encoding failed")
         return ({"error": "Whiteflag encoding failed"}, False)
     if json_packet["encryptionIndicator"] == "1":
         shared_key, shared_secret_success = generate_shared_secret(
@@ -215,9 +215,9 @@ def whiteflag_encoder_helper(
             cli_result = response.json()
             print(f"CLI service success: {cli_result.get('success', False)}")
             if not cli_result.get('success', False):
-                print(f"CLI service encoding error: encoding failed")
-        except:
-            print(f"CLI service response: invalid JSON")
+                print("CLI service encoding error: encoding failed")
+        except Exception:
+            print("CLI service response: invalid JSON")
     return create_whiteflag_encoder_response(
         json_packet, response, sender_group, recipient_group
     )
@@ -236,7 +236,7 @@ def send_decode_final_request(signal: str) -> (dict, bool):
         return ({"error": "could not decode signal"}, False)
     if not response.json()["success"]:
         # Log the actual error for debugging but don't expose it to the client
-        print(f"CLI service decode error")
+        print("CLI service decode error")
         return ({"error": "Whiteflag decoding failed"}, False)
     decoded = json.loads(response.json()["decoded"])
     if decoded.get("text", None):
