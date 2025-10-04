@@ -127,11 +127,19 @@ def create_whiteflag_encoder_response(
     try:
         return_value = response.json()
     except requests.JSONDecodeError:
-        return_value = response.text
+        # Log the actual error for debugging but don't expose it to the client
+        print(f"CLI service returned invalid JSON")
+        return ({"error": "Whiteflag encoding service returned invalid response"}, False)
+    
     if response.status_code != 200:
-        return ({"error": return_value}, False)
+        # Log the actual error for debugging but don't expose it to the client
+        print(f"CLI service error {response.status_code}")
+        return ({"error": "Whiteflag encoding service error"}, False)
+    
     if not response.json()["success"]:
-        return ({"error": response.json()["error"]}, False)
+        # Log the actual error for debugging but don't expose it to the client
+        print(f"CLI service encoding failed")
+        return ({"error": "Whiteflag encoding failed"}, False)
     if json_packet["encryptionIndicator"] == "1":
         shared_key, shared_secret_success = generate_shared_secret(
             sender_group, recipient_group
@@ -188,25 +196,28 @@ def whiteflag_encoder_helper(
             "0000000000000000000000000000000000000000000000000000000000000000"
         )
     processed_payload = json.dumps({k: v for k, v in json_packet.items() if v})
-    
-    # Debug logging for encoding issues
-    print(f"Sending to CLI service for encoding: {processed_payload}")
-    
+
+    # Debug logging for encoding issues (sanitized)
+    print(f"Sending to CLI service for encoding: {len(processed_payload)} characters")
+
     response = requests.post(
         f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_encode",
         data=processed_payload,
         timeout=5,
     )
-    
-    # Debug logging for CLI response
+
+    # Debug logging for CLI response (sanitized)
     print(f"CLI service response status: {response.status_code}")
     if response.status_code != 200:
-        print(f"CLI service error response: {response.text}")
+        print(f"CLI service error response: {response.status_code} error")
     else:
-        cli_result = response.json()
-        print(f"CLI service success: {cli_result.get('success', False)}")
-        if not cli_result.get('success', False):
-            print(f"CLI service encoding error: {cli_result.get('error', 'Unknown error')}")
+        try:
+            cli_result = response.json()
+            print(f"CLI service success: {cli_result.get('success', False)}")
+            if not cli_result.get('success', False):
+                print(f"CLI service encoding error: encoding failed")
+        except:
+            print(f"CLI service response: invalid JSON")
     return create_whiteflag_encoder_response(
         json_packet, response, sender_group, recipient_group
     )
@@ -224,7 +235,9 @@ def send_decode_final_request(signal: str) -> (dict, bool):
     if response.status_code != 200:
         return ({"error": "could not decode signal"}, False)
     if not response.json()["success"]:
-        return ({"error": response.json()["error"]}, False)
+        # Log the actual error for debugging but don't expose it to the client
+        print(f"CLI service decode error")
+        return ({"error": "Whiteflag decoding failed"}, False)
     decoded = json.loads(response.json()["decoded"])
     if decoded.get("text", None):
         decoded["text"] = bytes.fromhex(decoded["text"]).decode("utf-8")

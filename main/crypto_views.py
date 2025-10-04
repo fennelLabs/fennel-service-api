@@ -78,7 +78,7 @@ def get_diffie_hellman_shared_secret(request):
             },
             status=400
         )
-    
+
     try:
         response = requests.post(
             f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/accept_encryption_channel",
@@ -92,7 +92,7 @@ def get_diffie_hellman_shared_secret(request):
                 "shared_secret": response.json()["shared_secret"],
             }
         )
-    except (requests.HTTPError, requests.RequestException, KeyError) as e:
+    except (requests.HTTPError, requests.RequestException, KeyError):
         return Response({"error": "shared secret not created"}, status=400)
 
 
@@ -182,7 +182,7 @@ def get_dh_public_key_by_username(request):
             {"error": {"username": ["This field is required."]}},
             status=400
         )
-    
+
     try:
         if UserKeys.objects.filter(user__username=request.data["username"]).exists():
             public_key = UserKeys.objects.get(
@@ -207,7 +207,7 @@ def get_dh_public_key_by_address(request):
             {"error": {"address": ["This field is required."]}},
             status=400
         )
-    
+
     try:
         if UserKeys.objects.filter(address=request.data["address"]).exists():
             public_key = UserKeys.objects.get(

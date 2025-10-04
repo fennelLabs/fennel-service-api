@@ -1,5 +1,3 @@
-from functools import reduce
-import operator
 import os
 import datetime
 
@@ -43,7 +41,7 @@ def record_signal_fee(payload: dict) -> (dict, bool):
             data=payload,
             timeout=10,  # Increased timeout for blockchain calls
         )
-        
+
         if response.status_code != 200:
             return (
                 {
@@ -53,61 +51,63 @@ def record_signal_fee(payload: dict) -> (dict, bool):
                 },
                 False,
             )
-            
+
         try:
             fee_data = response.json()
         except ValueError as e:
+            # Log the actual error for debugging but don't expose it to the client
+            print(f"Subservice returned invalid JSON: {str(e)}")
+            print(f"Response text: {response.text[:200]}")
             return (
                 {
-                    "error": f"subservice returned invalid JSON: {str(e)}",
-                    "response_text": response.text[:200],
-                    "content": payload["content"],
+                    "error": "Fee calculation service returned invalid response",
                 },
                 False,
             )
-        
+
         # Check if the response contains a fee
         if "fee" not in fee_data:
+            # Log the actual response for debugging but don't expose it to the client
+            print(f"Subservice response missing fee: {fee_data}")
             return (
                 {
-                    "error": "subservice response missing fee",
-                    "response": fee_data,
-                    "content": payload["content"],
+                    "error": "Fee calculation service response incomplete",
                 },
                 False,
             )
-        
+
         Transaction.objects.create(
             function="send_new_signal",
             payload_size=len(payload["content"]),
             fee=fee_data["fee"],
         )
-        
+
         return fee_data, True
-        
+
     except requests.exceptions.Timeout:
+        # Log the actual error for debugging but don't expose it to the client
+        print(f"Subservice timeout for content length: {len(payload['content'])}")
         return (
             {
-                "error": "subservice timeout - blockchain may be slow",
-                "content": payload["content"],
+                "error": "Fee calculation service timeout",
             },
             False,
         )
     except requests.exceptions.RequestException as e:
+        # Log the actual error for debugging but don't expose it to the client
+        print(f"Subservice connection failed: {str(e)}")
         return (
             {
-                "error": f"subservice connection failed: {str(e)}",
-                "content": payload["content"],
+                "error": "Fee calculation service unavailable",
             },
             False,
         )
     except DataError:
+        # Log the actual error for debugging but don't expose it to the client
+        print(f"Could not record transaction in database for content length: {len(payload['content'])}")
         return (
             {
-                "error": "could not record transaction in database",
-                "content": payload["content"],
-                "content_length": len(payload["content"]),
-                "fee": fee_data.get("fee", 0) if 'fee_data' in locals() else 0,
+                "error": "Failed to record transaction",
             },
             False,
         )
@@ -142,11 +142,11 @@ def signal_send_helper(user_key: UserKeys, signal: Signal) -> (dict, bool):
         }
         signal_fee_result, success = record_signal_fee(payload)
         old_balance = int(check_balance(user_key)["balance"])
-        
+
         # Check if fee calculation was successful
         if not success:
             return (signal_fee_result, False)
-            
+
         if signal_fee_result["fee"] > old_balance or old_balance == 0:
             return (
                 {
@@ -290,7 +290,7 @@ def get_fee_for_transfer_token(request):
         "to": request.data["to"],
         "amount": request.data["amount"],
     }
-    
+
     try:
         # Call the improved subservice for dynamic fee calculation
         response = requests.post(
@@ -298,7 +298,7 @@ def get_fee_for_transfer_token(request):
             data=payload,
             timeout=10,  # Increased timeout for blockchain calls
         )
-        
+
         if response.status_code != 200:
             return Response(
                 {
@@ -307,19 +307,19 @@ def get_fee_for_transfer_token(request):
                 },
                 status=400,
             )
-            
+
         fee_data = response.json()
-        
+
         Transaction.objects.create(
             function="transfer_token",
             payload_size=0,
             fee=fee_data["fee"],
         )
-        
+
         response_json = fee_data
         response_json["balance"] = check_balance(user_key)["balance"]
         return Response(response_json)
-        
+
     except requests.exceptions.Timeout:
         return Response(
             {
@@ -328,9 +328,11 @@ def get_fee_for_transfer_token(request):
             status=400,
         )
     except requests.exceptions.RequestException as e:
+        # Log the actual error for debugging but don't expose it to the client
+        print(f"Subservice connection failed: {str(e)}")
         return Response(
             {
-                "error": f"subservice connection failed: {str(e)}",
+                "error": "subservice connection failed",
             },
             status=400,
         )
@@ -376,9 +378,20 @@ def get_fee_for_new_signal(request):
     try:
         response, success = record_signal_fee(payload)
         code = 400 if not success else 200
-        response["fee"] = response["fee"]
-        response["balance"] = check_balance(user_key)["balance"]
-        return Response(response, status=code)
+        
+        # Sanitize the response to only include safe fields
+        if success:
+            sanitized_response = {
+                "fee": response.get("fee", 0) if response and "fee" in response else 0,
+                "balance": check_balance(user_key)["balance"],
+            }
+        else:
+            sanitized_response = {
+                "error": "Fee calculation failed",
+                "balance": check_balance(user_key)["balance"],
+            }
+        
+        return Response(sanitized_response, status=code)
     except requests.HTTPError:
         return Response({"error": "could not get fee"})
 
@@ -401,8 +414,36 @@ def send_new_signal(request):
             APIGroup.objects.get(name=form.cleaned_data["recipient_group"])
         )
     result, success = signal_send_helper(user_key, signal)
+    
+    # Sanitize the response to only include safe fields
+    if success:
+        # In success case, extract only essential fields to avoid exposing sensitive data
+        hash_value = result.get("hash") if result and "hash" in result else None
+        balance_value = result.get("balance") if result and "balance" in result else None
+        signal_id_value = result.get("signal_id") if result and "signal_id" in result else None
+        synced_value = result.get("synced", True) if result else True
+        
+        sanitized_response = {
+            "hash": hash_value,
+            "balance": balance_value,
+            "signal_id": signal_id_value,
+            "synced": synced_value,
+        }
+    else:
+        # In error case, extract only essential fields to avoid exposing sensitive data
+        balance_value = result.get("balance") if result and "balance" in result else None
+        signal_id_value = result.get("signal_id") if result and "signal_id" in result else None
+        synced_value = result.get("synced", False) if result else False
+        
+        sanitized_response = {
+            "error": "Signal sending failed",
+            "balance": balance_value,
+            "signal_id": signal_id_value,
+            "synced": synced_value,
+        }
+    
     return Response(
-        result,
+        sanitized_response,
         status=200 if success else 400,
     )
 
@@ -482,6 +523,30 @@ def search_signals(request):
     return Response(serializer.data)
 
 
+def _build_author_query(authors, author):
+    """Build query for author filtering."""
+    query = Q()
+    for item in authors:
+        query = query | Q(sender__username__icontains=item)
+    return query | Q(sender__username__icontains=author)
+
+
+def _build_message_type_query(message_types):
+    """Build query for message type filtering."""
+    query = Q()
+    for item in message_types:
+        query = query | Q(signal_body__icontains=item)
+    return query
+
+
+def _build_infrastructure_type_query(infrastructure_types):
+    """Build query for infrastructure type filtering."""
+    query = Q()
+    for item in infrastructure_types:
+        query = query | Q(signal_body__icontains=item)
+    return query
+
+
 @silk_profile(name="get_signals")
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
@@ -499,33 +564,30 @@ def get_signals(request, count=None):
     )
     start = request.GET.get("start", None)
     end = request.GET.get("end", None)
+    
     groups = request.user.api_group_users.all()
     queryset = Signal.objects.filter(
         (Q(viewers=None) | Q(viewers__in=groups))
     ).order_by("-timestamp")
+    
     if not show_inactive:
         queryset = queryset.filter(active=True)
     if title is not None:
-        queryset = queryset.filter(Q(signal_text__icontains=title)| Q(signal_body__icontains=title))
+        queryset = queryset.filter(Q(signal_text__icontains=title) | Q(signal_body__icontains=title))
     if author is not None:
-        query = Q()
-        for item in authors:
-            query = query | Q(sender__username__icontains=item)
-        queryset = queryset.filter(query | Q(sender__username__icontains=author))
+        query = _build_author_query(authors, author)
+        queryset = queryset.filter(query)
     if message_type is not None:
-        query = Q()
-        for item in message_types:
-            query = query | Q(signal_body__icontains=item)
+        query = _build_message_type_query(message_types)
         queryset = queryset.filter(query | Q(message_code__in=message_types))
     if infrastructure_type is not None:
-        query = Q()
-        for item in infrastructure_types:
-            query = query | Q(signal_body__icontains=item)
+        query = _build_infrastructure_type_query(infrastructure_types)
         queryset = queryset.filter(query | Q(subject_code__in=infrastructure_types))
     if count is not None:
         queryset = queryset[:count]
     if start is not None and end is not None:
         queryset = queryset.filter(pk__range=(start, end))
+    
     serializer = SignalSerializer(queryset, many=True)
     return Response(serializer.data)
 

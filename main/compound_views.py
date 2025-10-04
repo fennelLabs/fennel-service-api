@@ -56,9 +56,15 @@ def get_fee_for_encode_and_send_signal(request):
                 },
                 status=400,
             )
+        
+        # Sanitize the response to only include safe fields
+        sanitized_response = {
+            "fee": response.get("fee") if isinstance(response, dict) else None,
+        }
+        
         return Response(
             {
-                "signal_response": response,
+                "signal_response": sanitized_response,
                 "balance": balance,
             },
             status=200,
@@ -116,12 +122,33 @@ def encode_and_send_signal(request):
         UserKeys.objects.get(user=request.user), signal
     )
     if not signal_success:
+        # Sanitize the response to only include safe fields
+        sanitized_response = {
+            "error": "Signal sending failed",
+            "signal_id": signal_sent_response.get("signal_id"),
+            "synced": signal_sent_response.get("synced", False),
+        }
+        # Only include balance and fee if they exist and are safe
+        if "balance" in signal_sent_response:
+            sanitized_response["balance"] = signal_sent_response["balance"]
+        if "fee" in signal_sent_response:
+            sanitized_response["fee"] = signal_sent_response["fee"]
+        
         return Response(
-            signal_sent_response,
+            sanitized_response,
             status=400,
         )
+    
+    # Sanitize the successful response to only include safe fields
+    sanitized_success_response = {
+        "hash": signal_sent_response.get("hash"),
+        "balance": signal_sent_response.get("balance"),
+        "signal_id": signal_sent_response.get("signal_id"),
+        "synced": signal_sent_response.get("synced", True),
+    }
+    
     return Response(
-        signal_sent_response,
+        sanitized_success_response,
         status=200,
     )
 
@@ -193,7 +220,16 @@ def get_fee_for_send_signal_with_annotations(request):
         return Response(serializer.errors, status=400)
     mnemonic = user_key.mnemonic
     signal_body = serializer.validated_data["signal_body"]
-    signal_text_encoded = whiteflag_encoder_helper(signal_body)
+    signal_text_encoded, signal_encode_success = whiteflag_encoder_helper(signal_body)
+    if not signal_encode_success:
+        return Response(
+            {
+                "error": "Failed to encode signal",
+                "step": "signal_encode"
+            },
+            status=400,
+        )
+    
     annotations_signal = {
         "prefix": "WF",
         "version": "1",
@@ -204,7 +240,15 @@ def get_fee_for_send_signal_with_annotations(request):
         "referenceIndicator": "3",
         "referencedMessage": "0000000000000000000000000000000000000000000000000000000000000000",
     }
-    annotation_text_encoded = whiteflag_encoder_helper(annotations_signal)
+    annotation_text_encoded, annotation_encode_success = whiteflag_encoder_helper(annotations_signal)
+    if not annotation_encode_success:
+        return Response(
+            {
+                "error": "Failed to encode annotation",
+                "step": "annotation_encode"
+            },
+            status=400,
+        )
     payload = {
         "mnemonic": mnemonic,
         "content": signal_text_encoded,
@@ -218,20 +262,46 @@ def get_fee_for_send_signal_with_annotations(request):
         response_two, success_two = record_signal_fee(payload_two)
         balance = check_balance(user_key)["balance"]
         if not success or not success_two:
+            # Sanitize responses to only include safe fields
+            # Extract only the fee fields to avoid exposing sensitive data
+            signal_fee = response.get("fee", 0) if response and "fee" in response else 0
+            annotation_fee = response_two.get("fee", 0) if response_two and "fee" in response_two else 0
+            
+            sanitized_signal_response = {
+                "error": "Signal fee calculation failed" if not success else None,
+                "fee": signal_fee,
+            }
+            sanitized_annotation_response = {
+                "error": "Annotation fee calculation failed" if not success_two else None,
+                "fee": annotation_fee,
+            }
+            
             return Response(
                 {
-                    "signal_response": response,
-                    "annotation_response": response_two,
-                    "total_fee": response["fee"] + response_two["fee"],
+                    "signal_response": sanitized_signal_response,
+                    "annotation_response": sanitized_annotation_response,
+                    "total_fee": signal_fee + annotation_fee,
                     "balance": balance,
                 },
                 status=400,
             )
+        # Sanitize successful responses to only include safe fields
+        # Extract only the fee fields to avoid exposing sensitive data
+        signal_fee_success = response.get("fee", 0) if response and "fee" in response else 0
+        annotation_fee_success = response_two.get("fee", 0) if response_two and "fee" in response_two else 0
+        
+        sanitized_signal_success = {
+            "fee": signal_fee_success,
+        }
+        sanitized_annotation_success = {
+            "fee": annotation_fee_success,
+        }
+        
         return Response(
             {
-                "signal_response": response,
-                "annotation_response": response_two,
-                "total_fee": response["fee"] + response_two["fee"],
+                "signal_response": sanitized_signal_success,
+                "annotation_response": sanitized_annotation_success,
+                "total_fee": response.get("fee", 0) + response_two.get("fee", 0),
                 "balance": balance,
             },
             status=200,
@@ -274,10 +344,14 @@ def send_signal_with_annotations(request):
         serializer.validated_data["signal_body"], sender_group, recipient_group
     )
     if not signal_encode_success:
-        signal_text_encoded["step"] = "signal_encode"
+        # Sanitize the response to only include safe fields
+        sanitized_response = {
+            "error": "Failed to encode signal",
+            "step": "signal_encode"
+        }
         return Response(
             {
-                "signal_response": signal_text_encoded,
+                "signal_response": sanitized_response,
             },
             status=400,
         )
@@ -305,10 +379,22 @@ def send_signal_with_annotations(request):
         annotations_signal, sender_group, recipient_group
     )
     if not annotation_encode_success:
+        # Sanitize the annotation response to only include safe fields
+        sanitized_annotation_response = {
+            "error": "Failed to encode annotation",
+            "step": "annotation_encode"
+        }
+        # Sanitize the signal response to only include safe fields
+        sanitized_signal_response = {
+            "error": "Signal sending failed" if signal_sent_response else "Signal failed",
+            "signal_id": signal_sent_response.get("signal_id") if signal_sent_response else None,
+            "synced": signal_sent_response.get("synced", False) if signal_sent_response else False,
+        }
+        
         return Response(
             {
-                "signal_response": signal_sent_response,
-                "annotation_response": annotation_text_encoded,
+                "signal_response": sanitized_signal_response,
+                "annotation_response": sanitized_annotation_response,
             },
             status=400,
         )
@@ -327,17 +413,54 @@ def send_signal_with_annotations(request):
             UserKeys.objects.get(user=request.user), annotation
         )
     if not annotation_success or not signal_success:
+        # Sanitize responses to only include safe fields
+        sanitized_signal_response = {
+            "error": "Signal sending failed" if signal_sent_response else "Signal failed",
+            "signal_id": signal_sent_response.get("signal_id") if signal_sent_response else None,
+            "synced": signal_sent_response.get("synced", False) if signal_sent_response else False,
+        }
+        sanitized_annotation_response = {
+            "error": "Annotation sending failed" if annotation_sent_response else "Annotation failed",
+            "signal_id": annotation_sent_response.get("signal_id") if annotation_sent_response else None,
+            "synced": annotation_sent_response.get("synced", False) if annotation_sent_response else False,
+        }
+        
         return Response(
             {
-                "signal_response": signal_sent_response,
-                "annotation_response": annotation_sent_response,
+                "signal_response": sanitized_signal_response,
+                "annotation_response": sanitized_annotation_response,
             },
             status=400,
         )
+    # Sanitize successful responses to only include safe fields
+    # Extract only the specific fields we need to avoid exposing sensitive data
+    signal_hash = signal_sent_response.get("hash") if signal_sent_response and "hash" in signal_sent_response else None
+    signal_balance = signal_sent_response.get("balance") if signal_sent_response and "balance" in signal_sent_response else None
+    signal_id = signal_sent_response.get("signal_id") if signal_sent_response and "signal_id" in signal_sent_response else None
+    signal_synced = signal_sent_response.get("synced", True) if signal_sent_response else True
+    
+    annotation_hash = annotation_sent_response.get("hash") if annotation_sent_response and "hash" in annotation_sent_response else None
+    annotation_balance = annotation_sent_response.get("balance") if annotation_sent_response and "balance" in annotation_sent_response else None
+    annotation_id = annotation_sent_response.get("signal_id") if annotation_sent_response and "signal_id" in annotation_sent_response else None
+    annotation_synced = annotation_sent_response.get("synced", True) if annotation_sent_response else True
+    
+    sanitized_signal_success = {
+        "hash": signal_hash,
+        "balance": signal_balance,
+        "signal_id": signal_id,
+        "synced": signal_synced,
+    }
+    sanitized_annotation_success = {
+        "hash": annotation_hash,
+        "balance": annotation_balance,
+        "signal_id": annotation_id,
+        "synced": annotation_synced,
+    }
+    
     return Response(
         {
-            "signal_response": signal_sent_response,
-            "annotation_response": annotation_sent_response,
+            "signal_response": sanitized_signal_success,
+            "annotation_response": sanitized_annotation_success,
         },
         status=200,
     )
@@ -355,6 +478,10 @@ def get_fee_for_send_signal_list(request):
     if signals is None:
         return Response({"message": "No signals given"}, status=400)
     processed = []
+    # Get user key once to avoid repeated database queries and potential exposure
+    user_key = UserKeys.objects.get(user=request.user)
+    user_mnemonic = user_key.mnemonic
+    
     for signal in signals:
         form = SignalForm({"signal": signal})
         if not form.is_valid():
@@ -367,26 +494,33 @@ def get_fee_for_send_signal_list(request):
                 }
             )
         else:
+            # Create payload with extracted mnemonic to minimize exposure risk
             payload = {
-                "mnemonic": UserKeys.objects.get(user=request.user).mnemonic,
+                "mnemonic": user_mnemonic,
                 "content": form.cleaned_data["signal"],
             }
             fee_response, fee_success = record_signal_fee(payload)
+            # Sanitize the fee response to only include safe fields
+            # Extract only the fee field to avoid exposing sensitive data
+            fee_amount = fee_response.get("fee", 0) if fee_response and "fee" in fee_response else 0
+            sanitized_message = {
+                "error": "Fee calculation failed" if not fee_success else None,
+                "fee": fee_amount,
+            }
+            
             processed.append(
                 {
                     "signal": signal,
                     "success": fee_success,
-                    "message": fee_response,
-                    "fee": fee_response["fee"],
+                    "message": sanitized_message,
+                    "fee": fee_amount,
                 }
             )
     return Response(
         {
             "signals": processed,
             "total_fee": sum(signal["fee"] for signal in processed),
-            "balance": check_balance(UserKeys.objects.get(user=request.user))[
-                "balance"
-            ],
+            "balance": check_balance(user_key)["balance"],
         },
         status=200,
     )
@@ -412,16 +546,27 @@ def send_signal_list(request):
             # we can parse it as JSON.
             signal = signal.replace("'", '"')
             signal = json.loads(signal)
-        form = SignalForm(
-            {
-                "signal": signal["signal"],
+        # Validate and sanitize signal data before form processing
+        if not isinstance(signal, dict):
+            # If signal is not a dict, create a safe representation
+            signal_data = {
+                "signal": str(signal)[:100] + "..." if len(str(signal)) > 100 else str(signal),
+                "recipient_group": None,
+            }
+        else:
+            # Extract only safe fields from the signal data
+            signal_data = {
+                "signal": signal.get("signal", ""),
                 "recipient_group": signal.get("recipient_group", None),
             }
-        )
+        
+        form = SignalForm(signal_data)
         if not form.is_valid():
+            # Use the already sanitized signal data
+            sanitized_signal = signal_data
             processed.append(
                 {
-                    "signal": signal,
+                    "signal": sanitized_signal,
                     "success": False,
                     "message": form.errors,
                 }
@@ -434,11 +579,23 @@ def send_signal_list(request):
             signal_sent_response, signal_success = signal_send_helper(
                 UserKeys.objects.get(user=request.user), signal_object
             )
+            # Sanitize the response to only include safe fields
+            sanitized_message = {
+                "error": "Signal sending failed" if not signal_success else None,
+                "hash": signal_sent_response.get("hash") if signal_success else None,
+                "balance": signal_sent_response.get("balance"),
+                "signal_id": signal_sent_response.get("signal_id"),
+                "synced": signal_sent_response.get("synced", signal_success),
+            }
+            
+            # Use the already sanitized signal data
+            sanitized_signal_success = signal_data
+            
             processed.append(
                 {
-                    "signal": signal,
+                    "signal": sanitized_signal_success,
                     "success": signal_success,
-                    "message": signal_sent_response,
+                    "message": sanitized_message,
                 }
             )
     return Response(
@@ -482,16 +639,31 @@ def get_fee_for_discontinue_signal(request, signal_id=None):
         response, success = record_signal_fee(payload)
         balance = check_balance(user_key)["balance"]
         if not success:
+            # Sanitize the error response to only include safe fields
+            # Extract only the fee field to avoid exposing sensitive data
+            fee_amount_error = response.get("fee", 0) if response and "fee" in response else 0
+            sanitized_error_response = {
+                "error": "Fee calculation failed",
+                "fee": fee_amount_error,
+            }
             return Response(
                 {
-                    "signal_response": response,
+                    "signal_response": sanitized_error_response,
                     "balance": balance,
                 },
                 status=400,
             )
+        
+        # Sanitize the successful response to only include safe fields
+        # Extract only the fee field to avoid exposing sensitive data
+        fee_amount_success = response.get("fee", 0) if response and "fee" in response else 0
+        sanitized_success_response = {
+            "fee": fee_amount_success,
+        }
+        
         return Response(
             {
-                "signal_response": response,
+                "signal_response": sanitized_success_response,
                 "balance": balance,
             },
             status=200,
@@ -540,13 +712,29 @@ def discontinue_signal(request, signal_id=None):
         UserKeys.objects.get(user=request.user), discontinue_signal
     )
     if not signal_success:
+        # Sanitize the error response to only include safe fields
+        sanitized_error_response = {
+            "error": "Signal sending failed",
+            "signal_id": signal_sent_response.get("signal_id"),
+            "synced": signal_sent_response.get("synced", False),
+        }
         return Response(
-            signal_sent_response,
+            sanitized_error_response,
             status=400,
         )
+    
     signal.active = False
     signal.save()
+    
+    # Sanitize the successful response to only include safe fields
+    sanitized_success_response = {
+        "hash": signal_sent_response.get("hash"),
+        "balance": signal_sent_response.get("balance"),
+        "signal_id": signal_sent_response.get("signal_id"),
+        "synced": signal_sent_response.get("synced", True),
+    }
+    
     return Response(
-        signal_sent_response,
+        sanitized_success_response,
         status=200,
     )

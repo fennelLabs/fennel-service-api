@@ -8,7 +8,8 @@ on:
 
 jobs:
   terraform-notice:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    permissions: {}
     steps:
       - name: Notice - No Terraform Configuration
         run: |

@@ -3,7 +3,6 @@ from django.http import Http404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import requests
-from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 
 

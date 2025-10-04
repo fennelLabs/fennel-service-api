@@ -83,7 +83,7 @@ def create_new_api_group(request):
         api_group.api_key = secrets.token_hex(32)
         api_group.api_secret = secrets.token_hex(32)
         api_group.save()
-        
+
         # Send email notification with error handling
         try:
             send_mail(
@@ -95,7 +95,7 @@ def create_new_api_group(request):
         except Exception as e:
             # Log the email error but don't fail the group creation
             print(f"Failed to send email notification: {e}")
-        
+
         return Response(
             {
                 "api_key": api_group.api_key,
@@ -104,7 +104,9 @@ def create_new_api_group(request):
             }
         )
     except Exception as e:
-        return Response({"error": f"Failed to create API group: {str(e)}"}, status=500)
+        # Log the actual error for debugging but don't expose it to the client
+        print(f"Failed to create API group: {str(e)}")
+        return Response({"error": "Failed to create API group. Please try again."}, status=500)
 
 
 @silk_profile(name="get_api_group_keys")
