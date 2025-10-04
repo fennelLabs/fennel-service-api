@@ -1,5 +1,4 @@
-from functools import reduce
-import operator
+# Removed unused imports: functools.reduce, operator
 import os
 import datetime
 
@@ -398,7 +397,7 @@ def search_signals(request):
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
-def get_signals(request, count=None):
+def get_signals(request, count=None):  # noqa: C901
     show_inactive = request.GET.get("include-inactive", False)
     title = request.GET.get("title", None)
     author = request.GET.get("author", None)
@@ -418,7 +417,7 @@ def get_signals(request, count=None):
     if not show_inactive:
         queryset = queryset.filter(active=True)
     if title is not None:
-        queryset = queryset.filter(Q(signal_text__icontains=title)| Q(signal_body__icontains=title))
+        queryset = queryset.filter(Q(signal_text__icontains=title) | Q(signal_body__icontains=title))
     if author is not None:
         query = Q()
         for item in authors:
