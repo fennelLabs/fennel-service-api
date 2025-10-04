@@ -38,7 +38,7 @@ class AdminViewsTests(TestCase):
         User.objects.create_user(
             username="testuser2", password="testpass", email="testuser2@test.com"
         )
-        join = APIGroupJoinRequest.objects.create(
+        APIGroupJoinRequest.objects.create(
             api_group=APIGroup.objects.get(name="testgroup"),
             user=User.objects.get(username="testuser2"),
         )

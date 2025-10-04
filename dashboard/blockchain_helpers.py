@@ -97,7 +97,7 @@ def get_fee_for_transfer_token(recipient: str, amount: int, user_key: UserKeys) 
         "to": recipient,
         "amount": amount,
     }
-    
+
     try:
         # Call the improved subservice for dynamic fee calculation
         response = requests.post(
@@ -105,20 +105,20 @@ def get_fee_for_transfer_token(recipient: str, amount: int, user_key: UserKeys) 
             data=payload,
             timeout=10,  # Increased timeout for blockchain calls
         )
-        
+
         if response.status_code != 200:
             return -1
-            
+
         fee_data = response.json()
-        
+
         Transaction.objects.create(
             function="transfer_token",
             payload_size=0,
             fee=fee_data["fee"],
         )
-        
+
         return round(int(fee_data["fee"]) / 1000000000000, 4)
-        
+
     except requests.exceptions.ReadTimeout:
         return -1
     except requests.exceptions.RequestException:

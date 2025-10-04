@@ -1,4 +1,3 @@
-import os
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 from django.contrib.messages.storage import default_storage
@@ -20,15 +19,13 @@ from dashboard.blockchain_helpers import (
     transfer_token,
 )
 
-import requests
-
 
 @silk_profile(name="index")
 @require_authentication
 def index(request):
     request._messages = default_storage(request)
     admin_groups = request.user.api_group_admins.all()
-    
+
     if admin_groups.exists():
         # Always show group selection when user has groups (even if just one)
         return render(
@@ -36,7 +33,7 @@ def index(request):
             "dashboard/group_selection.html",
             {"admin_groups": admin_groups},
         )
-    
+
     # If user is not admin of any groups, show create/join forms
     return render(
         request,

@@ -148,14 +148,14 @@ class SendAPIGroupRequestForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
-        
+
         # Filter out groups the user is already a member of
         if self.user:
             # Exclude groups where user is already a member or admin
             user_groups = self.user.api_group_users.all()
             admin_groups = self.user.api_group_admins.all()
             excluded_groups = user_groups.union(admin_groups)
-            
+
             self.fields['group_name'].queryset = APIGroup.objects.exclude(
                 id__in=excluded_groups.values_list('id', flat=True)
             )
@@ -175,14 +175,14 @@ class SendAPIGroupRequestForm(forms.Form):
             # Check if user is already a member
             if self.user.api_group_users.filter(id=group_name.id).exists():
                 raise forms.ValidationError(f"You are already a member of {group_name.name}")
-            
+
             # Check if user is already an admin
             if self.user.api_group_admins.filter(id=group_name.id).exists():
                 raise forms.ValidationError(f"You are already an admin of {group_name.name}")
-            
+
             # Check if user already has a pending request
             if APIGroupJoinRequest.objects.filter(
-                api_group=group_name, 
+                api_group=group_name,
                 user=self.user,
                 accepted=False,
                 rejected=False
