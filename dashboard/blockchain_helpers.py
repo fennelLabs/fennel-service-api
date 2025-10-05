@@ -37,7 +37,7 @@ def create_wallet_with_userkeys(request, keys: UserKeys) -> None:
             f"Failed to create Fennel wallet: {str(e)}",
         )
         return
-    
+
     keys.mnemonic = mnemonic
     try:
         response = requests.post(
