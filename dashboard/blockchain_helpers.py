@@ -17,29 +17,54 @@ def create_wallet_with_userkeys(request, keys: UserKeys) -> None:
             "Fennel wallet already exists.",
         )
         return
-    response = requests.get(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/create_account",
-        timeout=5,
-    )
-    mnemonic = response.json()["mnemonic"]
-    keys.mnemonic = mnemonic
-    response = requests.post(
-        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_address",
-        data={"mnemonic": mnemonic},
-        timeout=5,
-    )
-    keys.address = response.json()["address"]
-    keys.save()
-    if response.status_code != 200:
+    try:
+        response = requests.get(
+            f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/create_account",
+            timeout=5,
+        )
+        response.raise_for_status()
+        response_data = response.json()
+        if "mnemonic" not in response_data:
+            messages.error(
+                request,
+                "Failed to create Fennel wallet: mnemonic not returned from service.",
+            )
+            return
+        mnemonic = response_data["mnemonic"]
+    except (requests.RequestException, requests.JSONDecodeError, KeyError) as e:
         messages.error(
             request,
-            "Failed to create Fennel wallet.",
+            f"Failed to create Fennel wallet: {str(e)}",
         )
-    else:
+        return
+    
+    keys.mnemonic = mnemonic
+    try:
+        response = requests.post(
+            f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_address",
+            data={"mnemonic": mnemonic},
+            timeout=5,
+        )
+        response.raise_for_status()
+        response_data = response.json()
+        if "address" not in response_data:
+            messages.error(
+                request,
+                "Failed to get wallet address: address not returned from service.",
+            )
+            return
+        keys.address = response_data["address"]
+        keys.save()
         messages.success(
             request,
             "Fennel wallet created.",
         )
+    except (requests.RequestException, requests.JSONDecodeError, KeyError) as e:
+        messages.error(
+            request,
+            f"Failed to get wallet address: {str(e)}",
+        )
+        return
 
 
 @silk_profile(name="import_account_with_mnemonic")
@@ -118,7 +143,7 @@ def get_fee_for_transfer_token(recipient: str, amount: int, user_key: UserKeys) 
 @silk_profile(name="transfer_token")
 def transfer_token(recipient: str, amount: int, user_key: UserKeys) -> {int, str}:
     math_response = requests.post(
-        f"{os.environ.get('FENNEL_CLI_IP', None)}/big_multiply/",
+        f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/big_multiply",
         json={"a": str(amount), "b": "1000000000000"},
         timeout=5,
     )

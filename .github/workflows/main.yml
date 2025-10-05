@@ -17,8 +17,8 @@ jobs:
       DEBUG: True
       ENVIRONMENT: CI-CD
       TESTING: Github Actions
-        FENNEL_CLI_IP: https://fennel.network/api/v1/crypto/dh
-        FENNEL_SUBSERVICE_IP: https://fennel.network/api/v1/fennel
+      FENNEL_CLI_IP: https://fennel.network/encoder
+      FENNEL_SUBSERVICE_IP: https://fennel.network/subservice
 
     steps:
       - name: Checkout with Submodules

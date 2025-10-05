@@ -9,7 +9,8 @@ export EMAIL_USERNAME=""
 export EMAIL_PASSWORD=""
 export DEFAULT_FROM_EMAIL=""
 export SERVER_EMAIL=""
-export FENNEL_CLI_IP=https://fennel.network/api/v1/crypto/dh
+export FENNEL_ENCODER_IP=https://fennel.network/encoder/v1
+export FENNEL_CLI_IP=https://fennel.network/encoder/v1
 export FENNEL_SUBSERVICE_IP=https://fennel.network/api/v1/fennel
 ./runner.sh check
 coverage report --omit="*/tests/*","*/migrations/*","*/management/*","*/admin.py","*/apps.py","*/urls.py","*/wsgi.py","*/asgi.py","*/settings.py","*/manage.py","*/__init__.py","*/models.py"

@@ -74,6 +74,7 @@ def apigroup_admin_only(view_func):
                     {"error": "you don't have admin access to this api group"},
                     status=400,
                 )
-        return view_func(request, *args, **kwargs)
+            return view_func(request, *args, **kwargs)
+        return Response({"error": "API key and secret required."}, status=400)
 
     return wrap

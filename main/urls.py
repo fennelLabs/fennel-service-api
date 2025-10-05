@@ -117,14 +117,6 @@ urlpatterns = [
         message_views.get_sent_messages,
     ),
     path(
-        "messages/get_messages/",
-        message_views.get_messages,
-    ),
-    path(
-        "messages/get_sent_messages/",
-        message_views.get_sent_messages,
-    ),
-    path(
         "messages/get_message_by_id/<int:message_id>/",
         message_views.get_message_by_id,
     ),

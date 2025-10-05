@@ -34,16 +34,23 @@ def get_group_list(request):
 def generate_apigroup_keypair(request):
     try:
         response = requests.post(
-            f"{os.environ.get('FENNEL_CLI_IP', None)}/generate_keypair/",
+            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/generate_encryption_channel",
             timeout=5,
         )
+        response.raise_for_status()
+        response_data = response.json()
+        if "secret" not in response_data or "public" not in response_data:
+            return Response(
+                {"error": "keypair not created: incomplete response from service"},
+                status=400
+            )
         group = APIGroup.objects.get(api_key=request.data.get("api_key", None))
-        group.public_diffie_hellman_key = response.json()["secret"]
-        group.private_diffie_hellman_key = response.json()["public"]
+        group.public_diffie_hellman_key = response_data["secret"]
+        group.private_diffie_hellman_key = response_data["public"]
         group.save()
-        return Response(response.json())
-    except requests.HTTPError:
-        return Response({"error": "keypair not created"}, status=400)
+        return Response(response_data)
+    except (requests.RequestException, requests.JSONDecodeError, KeyError) as e:
+        return Response({"error": f"keypair not created: {str(e)}"}, status=400)
 
 
 @api_view(["POST"])

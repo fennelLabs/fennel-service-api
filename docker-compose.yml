@@ -42,7 +42,7 @@ services:
       - ENVIRONMENT="LOCAL"
       - SECRET_KEY=2HY>fXi!dQ&(9Vf.XghCa;L6G=Ul4r-Bwqh>ae0RG3vIh1ZJ%T
       - FENNEL_SUBSERVICE_IP=https://fennel.network/api/v1/fennel
-      - FENNEL_CLI_IP=https://fennel.network/api/v1/crypto/dh
+      - FENNEL_CLI_IP=https://bitwise.fennellabs.com
       - POSTGRES_DB=database
       - POSTGRES_USER=postgres
       - POSTGRES_PASS=postgres

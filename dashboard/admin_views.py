@@ -269,11 +269,25 @@ def generate_group_encryption_keys(request, group_id=None):
             "This API Group already has encryption keys.",
         )
         return redirect("dashboard:api_group_members", group_id=group_id)
-    response = requests.post(
-        f"{os.environ.get('FENNEL_CLI_IP', None)}/generate_keypair/",
-        timeout=5,
-    )
-    group.public_diffie_hellman_key = response.json()["secret"]
-    group.private_diffie_hellman_key = response.json()["public"]
-    group.save()
+    try:
+        response = requests.post(
+            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/generate_encryption_channel",
+            timeout=5,
+        )
+        response.raise_for_status()
+        response_data = response.json()
+        if "secret" not in response_data or "public" not in response_data:
+            messages.error(
+                request,
+                "Failed to generate encryption keys: incomplete response from service.",
+            )
+            return redirect("dashboard:api_group_members", group_id=group_id)
+        group.public_diffie_hellman_key = response_data["secret"]
+        group.private_diffie_hellman_key = response_data["public"]
+        group.save()
+    except (requests.RequestException, requests.JSONDecodeError, KeyError) as e:
+        messages.error(
+            request,
+            f"Failed to generate encryption keys: {str(e)}",
+        )
     return redirect("dashboard:api_group_members", group_id=group_id)

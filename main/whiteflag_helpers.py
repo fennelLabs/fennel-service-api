@@ -18,7 +18,7 @@ def generate_group_keys(group: APIGroup) -> bool:
         return True
     try:
         response = requests.post(
-            f"{os.environ.get('FENNEL_CLI_IP', None)}/generate_keypair/",
+            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/generate_encryption_channel",
             timeout=5,
         )
     except requests.HTTPError:
@@ -33,7 +33,7 @@ def generate_group_keys(group: APIGroup) -> bool:
 def generate_diffie_hellman_keys() -> dict:
     try:
         response = requests.post(
-            f"{os.environ.get('FENNEL_CLI_IP', None)}/generate_keypair/",
+            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/generate_encryption_channel",
             timeout=5,
         )
         return {
@@ -66,25 +66,27 @@ def generate_shared_secret(our_group: APIGroup, their_group: APIGroup) -> (str, 
             return ({"error": "their API group has no keypair"}, False)
     try:
         response = requests.post(
-            f"{os.environ.get('FENNEL_CLI_IP', None)}/get_shared_secret/",
+            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/accept_encryption_channel",
             json={
                 "secret": our_group.private_diffie_hellman_key,
                 "public": their_group.public_diffie_hellman_key,
             },
             timeout=5,
         )
-        if response.status_code != 200:
-            return ({"error": "shared secret not generated"}), False
-        return response.json()["shared_secret"], True
-    except requests.HTTPError:
-        return ({"error": "shared secret not generated"}), False
+        response.raise_for_status()
+        response_data = response.json()
+        if "shared_secret" not in response_data:
+            return ({"error": "shared secret not generated: missing shared_secret in response"}), False
+        return response_data["shared_secret"], True
+    except (requests.RequestException, requests.JSONDecodeError, KeyError) as e:
+        return ({"error": f"shared secret not generated: {str(e)}"}), False
 
 
 @silk_profile(name="whiteflag_encrypt_helper")
 def whiteflag_encrypt_helper(message: str, shared_secret: str) -> (str, bool):
     try:
         response = requests.post(
-            f"{os.environ.get('FENNEL_CLI_IP', None)}/dm/encrypt_message/",
+            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/dh_encrypt",
             json={
                 "plaintext": message[9:],
                 "shared_secret": shared_secret,
@@ -100,7 +102,7 @@ def whiteflag_encrypt_helper(message: str, shared_secret: str) -> (str, bool):
 def whiteflag_decrypt_helper(message: str, shared_secret: str) -> (str, bool):
     try:
         response = requests.post(
-            f"{os.environ.get('FENNEL_CLI_IP', None)}/dm/decrypt_message/",
+            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/dh_decrypt",
             json={
                 "ciphertext": message[9:],
                 "shared_secret": shared_secret,
@@ -189,7 +191,7 @@ def whiteflag_encoder_helper(
         )
     processed_payload = json.dumps({k: v for k, v in json_packet.items() if v})
     response = requests.post(
-        f"https://fennel.network/api/v1/whiteflag/encode/",
+        f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_encode",
         data=processed_payload,
         timeout=5,
     )
@@ -201,7 +203,7 @@ def whiteflag_encoder_helper(
 def send_decode_final_request(signal: str) -> (dict, bool):
     try:
         response = requests.post(
-            f"https://fennel.network/api/v1/whiteflag/decode/",
+            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_decode",
             data=signal,
             timeout=5,
         )
@@ -226,6 +228,9 @@ def decode(
     sender_group: Optional[APIGroup] = None,
     recipient_group: Optional[APIGroup] = None,
 ) -> (dict, bool):
+    # Ensure signal is a string
+    if not isinstance(signal, str):
+        return ({"error": "signal must be a string"}, False)
     if signal[0:2] != "57":
         return ({"error": "not a whiteflag signal"}, False)
     if signal[7] == "1":
