@@ -141,6 +141,94 @@ def signal_send_helper(user_key: UserKeys, signal: Signal) -> (dict, bool):
         )
 
 
+def signal_send_with_blockchain_data_helper(user_key: UserKeys, signal: Signal) -> (dict, bool):
+    """
+    Enhanced signal send helper that collects and stores blockchain indexing data.
+    Waits for transaction to be included in a block before returning.
+    """
+    try:
+        payload = {
+            "mnemonic": user_key.mnemonic,
+            "content": signal.signal_text,
+        }
+        signal_fee_result, success = record_signal_fee(payload)
+        old_balance = int(check_balance(user_key)["balance"])
+        if signal_fee_result["fee"] > old_balance or old_balance == 0:
+            return (
+                {
+                    "error": "insufficient balance",
+                    "balance": check_balance(user_key)["balance"],
+                    "fee": signal_fee_result["fee"],
+                    "signal_id": signal.id,
+                    "synced": False,
+                    "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
+                },
+                False,
+            )
+        if not success:
+            return (signal_fee_result, False)
+        
+        # Use new endpoint that waits for block inclusion (timeout increased to 15s)
+        response_json = requests.post(
+            f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/send_new_signal_with_blockchain_data/",
+            data=payload,
+            timeout=15,
+        ).json()
+        
+        if "txHash" not in response_json:
+            return (
+                {
+                    "error": "transaction hash couldn't be retrieved from the chain",
+                    "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
+                    "fee": signal_fee_result["fee"],
+                    "balance": check_balance(user_key)["balance"],
+                    "signal_id": signal.id,
+                    "synced": False,
+                },
+                False,
+            )
+        
+        # Update signal with all blockchain data
+        signal.synced = True
+        signal.tx_hash = response_json["txHash"][2:] if response_json["txHash"].startswith("0x") else response_json["txHash"]
+        signal.mempool_timestamp = datetime.datetime.now()
+        signal.block_number = response_json.get("blockNumber")
+        signal.block_hash = response_json.get("blockHash")
+        signal.extrinsic_index = response_json.get("extrinsicIndex")
+        signal.execution_success = response_json.get("executionSuccess", True)
+        signal.save()
+        
+        response_json["balance"] = check_balance(user_key)["balance"]
+        response_json["signal_id"] = signal.id
+        response_json["synced"] = True
+        response_json["hash"] = response_json["txHash"]  # For backward compatibility
+        return response_json, True
+    except requests.Timeout:
+        return (
+            {
+                "error": "request timed out waiting for block inclusion",
+                "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
+                "fee": signal_fee_result["fee"],
+                "balance": check_balance(user_key)["balance"],
+                "signal_id": signal.id,
+                "synced": False,
+            },
+            False,
+        )
+    except requests.HTTPError:
+        return (
+            {
+                "error": "subservice was unavailable",
+                "signal": "saved as unsynced. call /v1/fennel/sync_signal to complete the transaction",
+                "fee": signal_fee_result["fee"],
+                "balance": check_balance(user_key)["balance"],
+                "signal_id": signal.id,
+                "synced": False,
+            },
+            False,
+        )
+
+
 @silk_profile(name="create_account")
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
@@ -311,7 +399,7 @@ def send_new_signal(request):
         signal.viewers.add(
             APIGroup.objects.get(name=form.cleaned_data["recipient_group"])
         )
-    result, success = signal_send_helper(user_key, signal)
+    result, success = signal_send_with_blockchain_data_helper(user_key, signal)
     return Response(
         result,
         status=200 if success else 400,
@@ -349,7 +437,7 @@ def sync_signal(request):
     signal = get_object_or_404(Signal, id=signal_id)
     if signal.sender != request.user:
         return Response({"error": "sender is not current user"}, status=400)
-    result, success = signal_send_helper(user_key, signal)
+    result, success = signal_send_with_blockchain_data_helper(user_key, signal)
     return Response(
         result,
         status=200 if success else 400,

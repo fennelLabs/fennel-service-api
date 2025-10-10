@@ -68,6 +68,13 @@ class Signal(models.Model):
         "APIGroup", related_name="viewable_signals", blank=True
     )
     active = models.BooleanField(default=True)
+    
+    # Blockchain indexing fields (P0 - Must Have)
+    block_number = models.BigIntegerField(null=True, blank=True, db_index=True)
+    block_hash = models.CharField(max_length=66, null=True, blank=True)
+    extrinsic_index = models.IntegerField(null=True, blank=True)
+    finalized = models.BooleanField(default=False, db_index=True)
+    execution_success = models.BooleanField(null=True, blank=True)
 
     def __str__(self):
         return str(self.signal_text)

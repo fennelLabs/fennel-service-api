@@ -111,6 +111,12 @@ class SignalSerializer(serializers.ModelSerializer):
             "synced",
             "references",
             "confirmations",
+            # Blockchain indexing fields
+            "block_number",
+            "block_hash",
+            "extrinsic_index",
+            "finalized",
+            "execution_success",
         ]
 
 

@@ -14,7 +14,7 @@ from silk.profiling.profiler import silk_profile
 
 import requests
 from main.decorators import requires_mnemonic_created
-from main.fennel_views import check_balance, record_signal_fee, signal_send_helper
+from main.fennel_views import check_balance, record_signal_fee, signal_send_helper, signal_send_with_blockchain_data_helper
 from main.serializers import (
     AnnotatedWhiteflagSignalSerializer,
     DecodeListSerializer,
@@ -112,7 +112,7 @@ def encode_and_send_signal(request):
     )
     if recipient_group:
         signal.viewers.add(recipient_group)
-    signal_sent_response, signal_success = signal_send_helper(
+    signal_sent_response, signal_success = signal_send_with_blockchain_data_helper(
         UserKeys.objects.get(user=request.user), signal
     )
     if not signal_success:
@@ -287,7 +287,7 @@ def send_signal_with_annotations(request):
     )
     if recipient_group:
         signal.viewers.add(recipient_group)
-    signal_sent_response, signal_success = signal_send_helper(
+    signal_sent_response, signal_success = signal_send_with_blockchain_data_helper(
         UserKeys.objects.get(user=request.user), signal
     )
     signal = Signal.objects.get(pk=signal.id)
@@ -323,7 +323,7 @@ def send_signal_with_annotations(request):
     annotation_sent_response = None
     annotation_success = False
     if signal_success:
-        annotation_sent_response, annotation_success = signal_send_helper(
+        annotation_sent_response, annotation_success = signal_send_with_blockchain_data_helper(
             UserKeys.objects.get(user=request.user), annotation
         )
     if not annotation_success or not signal_success:
@@ -431,7 +431,7 @@ def send_signal_list(request):
                 signal_text=form.cleaned_data["signal"],
                 sender=request.user,
             )
-            signal_sent_response, signal_success = signal_send_helper(
+            signal_sent_response, signal_success = signal_send_with_blockchain_data_helper(
                 UserKeys.objects.get(user=request.user), signal_object
             )
             processed.append(
@@ -536,7 +536,7 @@ def discontinue_signal(request, signal_id=None):
     )
     discontinue_signal.references.add(signal)
     discontinue_signal.save()
-    signal_sent_response, signal_success = signal_send_helper(
+    signal_sent_response, signal_success = signal_send_with_blockchain_data_helper(
         UserKeys.objects.get(user=request.user), discontinue_signal
     )
     if not signal_success:
