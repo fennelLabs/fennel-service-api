@@ -42,7 +42,7 @@ class Command(BaseCommand):
 
         try:
             substrate = SubstrateInterface(url=rpc_url)
-            self.stdout.write(self.style.SUCCESS('✓ Connected to blockchain'))
+            self.stdout.write(self.style.SUCCESS('Connected to blockchain'))
 
             # Get finalized head
             finalized_hash = substrate.get_finalized_head()
