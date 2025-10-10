@@ -167,14 +167,14 @@ def signal_send_with_blockchain_data_helper(user_key: UserKeys, signal: Signal) 
             )
         if not success:
             return (signal_fee_result, False)
-        
+
         # Use new endpoint that waits for block inclusion (timeout increased to 15s)
         response_json = requests.post(
             f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/send_new_signal_with_blockchain_data/",
             data=payload,
             timeout=15,
         ).json()
-        
+
         if "txHash" not in response_json:
             return (
                 {
@@ -187,7 +187,7 @@ def signal_send_with_blockchain_data_helper(user_key: UserKeys, signal: Signal) 
                 },
                 False,
             )
-        
+
         # Update signal with all blockchain data
         signal.synced = True
         signal.tx_hash = response_json["txHash"][2:] if response_json["txHash"].startswith("0x") else response_json["txHash"]
@@ -197,7 +197,7 @@ def signal_send_with_blockchain_data_helper(user_key: UserKeys, signal: Signal) 
         signal.extrinsic_index = response_json.get("extrinsicIndex")
         signal.execution_success = response_json.get("executionSuccess", True)
         signal.save()
-        
+
         response_json["balance"] = check_balance(user_key)["balance"]
         response_json["signal_id"] = signal.id
         response_json["synced"] = True
