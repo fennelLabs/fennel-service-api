@@ -145,6 +145,31 @@ def create_whiteflag_encoder_response(
 
 
 @silk_profile(name="whiteflag_encoder_helper")
+def _validate_whiteflag_payload_for_test(payload: dict) -> (str, bool):
+    """Validate payload for test environment mock."""
+    # Basic validation - check for required fields
+    required_fields = ['messageCode', 'encryptionIndicator', 'duressIndicator']
+    if not all(field in payload for field in required_fields):
+        return ({"error": "missing required fields"}, False)
+
+    # Validate latitude/longitude format if present
+    if 'objectLatitude' in payload:
+        lat = payload['objectLatitude']
+        if lat and (not lat.startswith('+') and not lat.startswith('-')):
+            return ({"error": "invalid latitude format"}, False)
+    if 'objectLongitude' in payload:
+        lon = payload['objectLongitude']
+        if lon and (not lon.startswith('+') and not lon.startswith('-')):
+            return ({"error": "invalid longitude format"}, False)
+
+    # Return mock encoded signal for valid payloads
+    mock_encoded = (
+        "5746313024a00000000000000000000000000000000000000000000000000000"
+        "0000000000029101188080188a2000000115460461600ae2caa00000000000"
+    )
+    return (mock_encoded, True)
+
+
 def whiteflag_encoder_helper(
     payload: dict,
     sender_group: Optional[APIGroup] = None,
@@ -152,27 +177,7 @@ def whiteflag_encoder_helper(
 ) -> (str, bool):
     # Mock response for testing - return success for valid-looking payloads
     if os.environ.get('TESTING') == 'Github Actions':
-        # Basic validation - check for required fields
-        required_fields = ['messageCode', 'encryptionIndicator', 'duressIndicator']
-        if not all(field in payload for field in required_fields):
-            return ({"error": "missing required fields"}, False)
-        
-        # Validate latitude/longitude format if present
-        if 'objectLatitude' in payload:
-            lat = payload['objectLatitude']
-            if lat and (not lat.startswith('+') and not lat.startswith('-')):
-                return ({"error": "invalid latitude format"}, False)
-        if 'objectLongitude' in payload:
-            lon = payload['objectLongitude']
-            if lon and (not lon.startswith('+') and not lon.startswith('-')):
-                return ({"error": "invalid longitude format"}, False)
-        
-        # Return mock encoded signal for valid payloads
-        mock_encoded = (
-            "5746313024a00000000000000000000000000000000000000000000000000000"
-            "0000000000029101188080188a2000000115460461600ae2caa00000000000"
-        )
-        return (mock_encoded, True)
+        return _validate_whiteflag_payload_for_test(payload)
 
     datetime_field = payload.get("datetime", None)
     if datetime_field is None:
