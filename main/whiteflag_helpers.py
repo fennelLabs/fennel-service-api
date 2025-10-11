@@ -153,9 +153,12 @@ def whiteflag_encoder_helper(
     # Mock response for testing
     if os.environ.get('TESTING') == 'Github Actions':
         # Return a valid encoded signal for tests
-        mock_encoded = "5746313024a000000000000000000000000000000000000000000000000000000000000000029101188080188a2000000115460461600ae2caa00000000000"
+        mock_encoded = (
+            "5746313024a00000000000000000000000000000000000000000000000000000"
+            "0000000000029101188080188a2000000115460461600ae2caa00000000000"
+        )
         return (mock_encoded, True)
-    
+
     datetime_field = payload.get("datetime", None)
     if datetime_field is None:
         datetime_field = payload.get("dateTime", None)
