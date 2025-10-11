@@ -159,11 +159,13 @@ def signal_send_with_blockchain_data_helper(user_key: UserKeys, signal: Signal) 
     """
     # Mock response for testing
     if os.environ.get('TESTING') == 'Github Actions':
+        import uuid
         signal.synced = True
-        signal.tx_hash = "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+        # Generate unique tx_hash using signal ID and UUID to avoid UNIQUE constraint violations
+        signal.tx_hash = f"0x{uuid.uuid4().hex}{str(signal.id).zfill(8)}"[:66]
         signal.mempool_timestamp = datetime.datetime.now()
-        signal.block_number = 12345
-        signal.block_hash = "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
+        signal.block_number = 12345 + signal.id  # Unique block number per signal
+        signal.block_hash = f"0x{uuid.uuid4().hex}{uuid.uuid4().hex}"[:66]
         signal.extrinsic_index = 2
         signal.execution_success = True
         signal.save()
