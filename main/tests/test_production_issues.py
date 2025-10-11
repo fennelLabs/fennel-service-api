@@ -230,35 +230,11 @@ class TestProductionIssues(TestCase):
         assert len(response.json()) == 20
         assert response.json()[0]["sender"]["keys"]["address"] == "test"
 
-    @patch('main.fennel_views.requests.post')
-    def test_signal_datetime_break(self, mock_post):
+    def test_signal_datetime_break(self):
         """
         Test signal sending with datetime field.
-        Mocks subservice calls to avoid requiring live blockchain connection.
+        Uses environment-based mocks when TESTING='Github Actions'.
         """
-        # Mock the subservice responses
-        def mock_subservice_response(*args, **kwargs):
-            url = args[0]
-            mock_response = Mock()
-            mock_response.json.return_value = {}
-
-            if 'get_fee_for_new_signal' in url:
-                mock_response.json.return_value = {"fee": 1000}
-            elif 'get_account_balance' in url:
-                mock_response.json.return_value = {"balance": "1000000000"}
-            elif 'send_new_signal_with_blockchain_data' in url:
-                mock_response.json.return_value = {
-                    "txHash": "0x1234567890abcdef",
-                    "blockNumber": 12345,
-                    "blockHash": "0xabcdef1234567890",
-                    "extrinsicIndex": 2,
-                    "executionSuccess": True
-                }
-
-            return mock_response
-
-        mock_post.side_effect = mock_subservice_response
-
         client = Client()
         user_model = get_user_model()
         auth_response = client.post(
@@ -277,6 +253,7 @@ class TestProductionIssues(TestCase):
             mnemonic="bottom drive obey lake curtain smoke basket hold race lonely fit walk//Alice",
             address="5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
         )
+        user_keys.balance = "1000000000"  # Set balance for successful signal sending
         user_keys.save()
         payload = {
             "signal_body": json.dumps(
