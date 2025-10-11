@@ -35,10 +35,6 @@ from main.serializers import SignalSerializer, TransactionSerializer
 
 @silk_profile(name="record_signal_fee")
 def record_signal_fee(payload: dict) -> (dict, bool):
-    # Mock response for testing
-    if os.environ.get('TESTING') == 'Github Actions':
-        return ({"fee": 1000}, True)
-
     response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_new_signal/",
         data=payload,
@@ -65,13 +61,6 @@ def record_signal_fee(payload: dict) -> (dict, bool):
 
 @silk_profile(name="check_balance")
 def check_balance(key):
-    # Mock response for testing
-    if os.environ.get('TESTING') == 'Github Actions':
-        if not key.balance:
-            key.balance = "1000000000"  # Mock sufficient balance for tests
-            key.save()
-        return {"balance": int(key.balance)}
-
     try:
         payload = {"mnemonic": key.mnemonic}
         response = requests.post(
@@ -157,30 +146,6 @@ def signal_send_with_blockchain_data_helper(user_key: UserKeys, signal: Signal) 
     Enhanced signal send helper that collects and stores blockchain indexing data.
     Waits for transaction to be included in a block before returning.
     """
-    # Mock response for testing
-    if os.environ.get('TESTING') == 'Github Actions':
-        import uuid
-        signal.synced = True
-        # Generate unique tx_hash using signal ID and UUID to avoid UNIQUE constraint violations
-        signal.tx_hash = f"0x{uuid.uuid4().hex}{str(signal.id).zfill(8)}"[:66]
-        signal.mempool_timestamp = datetime.datetime.now()
-        signal.block_number = 12345 + signal.id  # Unique block number per signal
-        signal.block_hash = f"0x{uuid.uuid4().hex}{uuid.uuid4().hex}"[:66]
-        signal.extrinsic_index = 2
-        signal.execution_success = True
-        signal.save()
-        return ({
-            "txHash": signal.tx_hash,
-            "blockNumber": signal.block_number,
-            "blockHash": signal.block_hash,
-            "extrinsicIndex": signal.extrinsic_index,
-            "executionSuccess": signal.execution_success,
-            "balance": "1000000000",
-            "signal_id": signal.id,
-            "synced": True,
-            "hash": signal.tx_hash
-        }, True)
-
     try:
         payload = {
             "mnemonic": user_key.mnemonic,
