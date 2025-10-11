@@ -1,5 +1,7 @@
 import json
+import os
 
+from unittest import skipIf
 from django.test import TestCase
 from django.test.client import Client
 from django.contrib.auth import get_user_model
@@ -57,6 +59,8 @@ class TestEncodeAndSendViews(TestCase):
         assert response.status_code == 200
         assert response.json()["signal_response"]["fee"] is not None
 
+    @skipIf(os.environ.get('TESTING') == 'Github Actions',
+            "Test expects subservice unavailability, skipped in mocked environment")
     def test_encode_and_send_signal(self):
         client = Client()
         user_model = get_user_model()
@@ -105,6 +109,8 @@ class TestEncodeAndSendViews(TestCase):
         )
         assert response.status_code == 400
 
+    @skipIf(os.environ.get('TESTING') == 'Github Actions',
+            "Test expects subservice unavailability, skipped in mocked environment")
     def test_encode_and_send_signal_with_recipient_group(self):
         client = Client()
         user_model = get_user_model()
