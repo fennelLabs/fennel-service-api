@@ -38,7 +38,7 @@ def record_signal_fee(payload: dict) -> (dict, bool):
     # Mock response for testing
     if os.environ.get('TESTING') == 'Github Actions':
         return ({"fee": 1000}, True)
-    
+
     response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_new_signal/",
         data=payload,
@@ -71,7 +71,7 @@ def check_balance(key):
             key.balance = "1000000000"  # Mock sufficient balance for tests
             key.save()
         return {"balance": int(key.balance)}
-    
+
     try:
         payload = {"mnemonic": key.mnemonic}
         response = requests.post(
@@ -178,7 +178,7 @@ def signal_send_with_blockchain_data_helper(user_key: UserKeys, signal: Signal) 
             "synced": True,
             "hash": signal.tx_hash
         }, True)
-    
+
     try:
         payload = {
             "mnemonic": user_key.mnemonic,
