@@ -167,7 +167,7 @@ def signal_send_with_blockchain_data_helper(user_key: UserKeys, signal: Signal) 
             )
         if not success:
             return (signal_fee_result, False)
-        
+
         # Use new endpoint that waits for block inclusion
         # Timeout increased to 30s to allow for block finalization (typically 6-12 seconds per block)
         # Real-world observations show transactions can take 20-25 seconds to be included in a block
@@ -176,7 +176,7 @@ def signal_send_with_blockchain_data_helper(user_key: UserKeys, signal: Signal) 
             data=payload,
             timeout=30,
         ).json()
-        
+
         if "txHash" not in response_json:
             return (
                 {
@@ -189,7 +189,7 @@ def signal_send_with_blockchain_data_helper(user_key: UserKeys, signal: Signal) 
                 },
                 False,
             )
-        
+
         # Update signal with all blockchain data
         signal.synced = True
         signal.tx_hash = response_json["txHash"][2:] if response_json["txHash"].startswith("0x") else response_json["txHash"]
@@ -199,7 +199,7 @@ def signal_send_with_blockchain_data_helper(user_key: UserKeys, signal: Signal) 
         signal.extrinsic_index = response_json.get("extrinsicIndex")
         signal.execution_success = response_json.get("executionSuccess", True)
         signal.save()
-        
+
         response_json["balance"] = check_balance(user_key)["balance"]
         response_json["signal_id"] = signal.id
         response_json["synced"] = True
