@@ -26,17 +26,24 @@ SECRET_KEY = os.environ.get("SECRET_KEY", None)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True if os.environ.get("DEBUG") == "True" else False
 
-ALLOWED_HOSTS = [
-    "localhost",
-    "192.168.1.152",
-    "192.168.1.186",
-    "34.148.9.195",
-    "api.fennellabs.com",
-    "10.0.38.110",
-    "api-lb-1539191200.us-east-2.elb.amazonaws.com",
-    os.environ.get("HOST_IP"),
-    os.environ.get("POD_IP"),
-]
+# Build ALLOWED_HOSTS from environment variable if present, otherwise use defaults
+if os.environ.get("ALLOWED_HOSTS"):
+    # Production: Use hosts from ConfigMap
+    ALLOWED_HOSTS = [host.strip() for host in os.environ.get("ALLOWED_HOSTS").split(",")]
+else:
+    # Development: Use hardcoded defaults
+    ALLOWED_HOSTS = [
+        "localhost",
+        "192.168.1.152",
+        "192.168.1.186",
+        "10.0.38.110",
+    ]
+
+# Add dynamic IPs if present
+if os.environ.get("HOST_IP"):
+    ALLOWED_HOSTS.append(os.environ.get("HOST_IP"))
+if os.environ.get("POD_IP"):
+    ALLOWED_HOSTS.append(os.environ.get("POD_IP"))
 
 CORS_ORIGIN_WHITELIST = [
     "http://localhost:3000",
@@ -47,15 +54,21 @@ CORS_ORIGIN_WHITELIST = [
     "http://localhost:1234",
 ]
 
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-    "https://api.fennellabs.com",
-    "http://api:1234",
-    "http://localhost:8081",
-    "http://localhost:8080",
-    "http://localhost:1234",
-    "http://192.168.1.152:8081",
-]
+# Build CSRF_TRUSTED_ORIGINS from environment variable if present, otherwise use defaults
+if os.environ.get("CSRF_TRUSTED_ORIGINS"):
+    # Production: Use origins from ConfigMap
+    CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.environ.get("CSRF_TRUSTED_ORIGINS").split(",")]
+else:
+    # Development: Use hardcoded defaults
+    CSRF_TRUSTED_ORIGINS = [
+        "http://localhost:3000",
+        "https://api.fennellabs.com",
+        "http://api:1234",
+        "http://localhost:8081",
+        "http://localhost:8080",
+        "http://localhost:1234",
+        "http://192.168.1.152:8081",
+    ]
 
 # Application definition
 
@@ -137,8 +150,8 @@ elif "POSTGRES_USER" in os.environ:
             "ENGINE": "django.db.backends.postgresql_psycopg2",
             "NAME": os.environ["POSTGRES_NAME"],
             "USER": os.environ["POSTGRES_USER"],
-            "PASSWORD": os.environ["POSTGRES_PASS"],
-            "HOST": os.environ["POSTGRES_DB"],
+            "PASSWORD": os.environ["POSTGRES_PASSWORD"],
+            "HOST": os.environ["POSTGRES_HOST"],
         }
     }
 else:
@@ -210,10 +223,17 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "https://whiteflag.fennellabs.com",
+    "https://fennel.network",
+    "https://app.fennel.network",
+    "https://whiteflag.network",
 ]
 
 CSRF_COOKIE_HTTPONLY = True
 SESSION_COOKIE_HTTPONLY = True
+
+# CSRF cookie needs to be secure only in production (HTTPS)
+CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
 
 SESSION_COOKIE_SAMESITE = "None"
 CSRF_COOKIE_SAMESITE = "None"

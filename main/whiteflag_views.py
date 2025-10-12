@@ -106,16 +106,16 @@ def whiteflag_generate_shared_secret_key(request, group_id=None):
 @silk_profile(name="whiteflag_decode")
 @api_view(["POST"])
 def whiteflag_decode(request):
-    form = WhiteflagDecodeForm(request.POST)
+    form = WhiteflagDecodeForm(request.data)
     if not form.is_valid():
         return Response({"error": form.errors.items()})
-    payload = json.dumps(form.cleaned_data["message"])
+    payload = form.cleaned_data["message"]
     sender_group = (
         APIGroup.objects.get(name=form.cleaned_data["sender_group"])
         if form.cleaned_data["sender_group"]
         else None
     )
-    recipient_group = request.user.api_group_users.first()
+    recipient_group = request.user.api_group_users.first() if request.user.is_authenticated else None
     return Response(decode(payload, sender_group, recipient_group))
 
 

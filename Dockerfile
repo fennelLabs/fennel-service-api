@@ -16,6 +16,7 @@ ENV PATH=/opt/venv/bin:$PATH
 COPY requirements.txt /opt/app/requirements.txt
 RUN mkdir /opt/app/static
 RUN mkdir /opt/app/mediafiles
+RUN mkdir /opt/app/profile
 WORKDIR /opt/app
 RUN pip3 install -r requirements.txt
 
