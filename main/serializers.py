@@ -23,7 +23,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("id", "username", "email", "keys")
+        fields = ("id", "username", "email", "keys", "is_staff", "is_superuser")
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -144,12 +144,22 @@ class APIGroupJoinRequestSerializer(serializers.Serializer):
 class EncodeAndSendSignalSerializer(serializers.Serializer):
     signal_body = serializers.JSONField()
     recipient_group = serializers.CharField(required=False)
+    is_test_message = serializers.BooleanField(
+        required=False, 
+        default=False,
+        help_text="If True, converts message to Test (T) type with pseudoMessageCode set to original messageCode. Admin-only feature (requires staff or superuser privileges)."
+    )
 
 
 class AnnotatedWhiteflagSignalSerializer(serializers.Serializer):
     signal_body = serializers.JSONField()
     annotations = serializers.CharField()
     recipient_group = serializers.CharField(required=False)
+    is_test_message = serializers.BooleanField(
+        required=False, 
+        default=False,
+        help_text="If True, converts message to Test (T) type with pseudoMessageCode set to original messageCode. Admin-only feature (requires staff or superuser privileges)."
+    )
 
 
 class SignalTextSerializer(serializers.Serializer):

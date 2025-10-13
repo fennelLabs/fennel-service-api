@@ -9,6 +9,41 @@ import requests
 from main.models import APIGroup
 
 
+def convert_to_test_message(signal_body: dict) -> dict:
+    """
+    Converts a regular WhiteFlag message to a Test (T) message.
+    
+    Test messages allow testing on live blockchains without polluting operational data.
+    They are clearly marked with messageCode "T" and include a pseudoMessageCode field
+    that indicates which message type is being tested.
+    
+    Args:
+        signal_body: The original message body dict
+        
+    Returns:
+        Modified message body dict with messageCode "T" and pseudoMessageCode set
+        
+    Example:
+        Free Text message {"messageCode": "F", "text": "Hello"}
+        becomes Test message {"messageCode": "T", "pseudoMessageCode": "F", "text": "Hello"}
+    """
+    # Store the original message code
+    original_message_code = signal_body.get("messageCode", None)
+    
+    # If already a test message, return as-is
+    if original_message_code == "T":
+        return signal_body
+    
+    # Create a copy to avoid mutating the original
+    test_message = signal_body.copy()
+    
+    # Convert to test message
+    test_message["messageCode"] = "T"
+    test_message["pseudoMessageCode"] = original_message_code
+    
+    return test_message
+
+
 @silk_profile(name="generate_group_keys")
 def generate_group_keys(group: APIGroup) -> bool:
     if (

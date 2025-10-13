@@ -97,8 +97,24 @@ def encode_and_send_signal(request):
                 },
                 status=400,
             )
+    
+    # Handle test message conversion if requested (admin only)
+    signal_body = serializer.validated_data["signal_body"]
+    if serializer.validated_data.get("is_test_message", False):
+        # Only allow admins to create test messages
+        if not (request.user.is_staff or request.user.is_superuser):
+            return Response(
+                {
+                    "error": "Only administrators can create test messages",
+                    "detail": "The is_test_message parameter requires admin privileges"
+                },
+                status=403,
+            )
+        from main.whiteflag_helpers import convert_to_test_message
+        signal_body = convert_to_test_message(signal_body)
+    
     signal_text_encoded, signal_encode_success = whiteflag_encoder_helper(
-        serializer.validated_data["signal_body"], sender_group, recipient_group
+        signal_body, sender_group, recipient_group
     )
     if not signal_encode_success:
         signal_text_encoded["step"] = "signal_encode"
@@ -192,7 +208,22 @@ def get_fee_for_send_signal_with_annotations(request):
     if not serializer.is_valid():
         return Response(serializer.errors, status=400)
     mnemonic = user_key.mnemonic
+    
+    # Handle test message conversion if requested (admin only)
     signal_body = serializer.validated_data["signal_body"]
+    if serializer.validated_data.get("is_test_message", False):
+        # Only allow admins to create test messages
+        if not (request.user.is_staff or request.user.is_superuser):
+            return Response(
+                {
+                    "error": "Only administrators can create test messages",
+                    "detail": "The is_test_message parameter requires admin privileges"
+                },
+                status=403,
+            )
+        from main.whiteflag_helpers import convert_to_test_message
+        signal_body = convert_to_test_message(signal_body)
+    
     signal_text_encoded = whiteflag_encoder_helper(signal_body)
     annotations_signal = {
         "prefix": "WF",
@@ -270,8 +301,24 @@ def send_signal_with_annotations(request):
                 },
                 status=400,
             )
+    
+    # Handle test message conversion if requested (admin only)
+    signal_body = serializer.validated_data["signal_body"]
+    if serializer.validated_data.get("is_test_message", False):
+        # Only allow admins to create test messages
+        if not (request.user.is_staff or request.user.is_superuser):
+            return Response(
+                {
+                    "error": "Only administrators can create test messages",
+                    "detail": "The is_test_message parameter requires admin privileges"
+                },
+                status=403,
+            )
+        from main.whiteflag_helpers import convert_to_test_message
+        signal_body = convert_to_test_message(signal_body)
+    
     signal_text_encoded, signal_encode_success = whiteflag_encoder_helper(
-        serializer.validated_data["signal_body"], sender_group, recipient_group
+        signal_body, sender_group, recipient_group
     )
     if not signal_encode_success:
         signal_text_encoded["step"] = "signal_encode"
