@@ -14,7 +14,7 @@ from silk.profiling.profiler import silk_profile
 
 import requests
 from main.decorators import requires_mnemonic_created
-from main.fennel_views import check_balance, record_signal_fee, signal_send_with_blockchain_data_helper
+from main.fennel_views import check_balance, record_signal_fee, signal_send_helper, signal_send_with_blockchain_data_helper
 from main.serializers import (
     AnnotatedWhiteflagSignalSerializer,
     DecodeListSerializer,

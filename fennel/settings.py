@@ -82,6 +82,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "main",
     "dashboard",
+    "explorer",  # WhiteFlag Explorer - public read-only API
     "django_filters",
     "crispy_forms",
     "rest_framework",

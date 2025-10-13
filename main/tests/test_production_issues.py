@@ -1,6 +1,4 @@
 import json
-import os
-from unittest import skipIf
 
 from django.test import Client, TestCase
 from django.contrib.auth import get_user_model
@@ -13,8 +11,6 @@ from main.signal_processors import process_decoding_signal
 
 
 class TestProductionIssues(TestCase):
-    @skipIf(os.environ.get('TESTING') == 'Github Actions',
-            "Test expects attribute error, but mocks allow signal to succeed")
     def test_no_attribute_recipient_group_in_send_new_signal(self):
         client = Client()
         auth_response = client.post(
@@ -235,10 +231,6 @@ class TestProductionIssues(TestCase):
         assert response.json()[0]["sender"]["keys"]["address"] == "test"
 
     def test_signal_datetime_break(self):
-        """
-        Test signal sending with datetime field.
-        Uses environment-based mocks when TESTING='Github Actions'.
-        """
         client = Client()
         user_model = get_user_model()
         auth_response = client.post(
@@ -257,7 +249,6 @@ class TestProductionIssues(TestCase):
             mnemonic="bottom drive obey lake curtain smoke basket hold race lonely fit walk//Alice",
             address="5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
         )
-        user_keys.balance = "1000000000"  # Set balance for successful signal sending
         user_keys.save()
         payload = {
             "signal_body": json.dumps(

@@ -156,8 +156,11 @@ def whiteflag_encoder_helper(
     encryption_indicator = payload.get("encryptionIndicator", None)
     if sender_group and recipient_group:
         encryption_indicator = "1"
-    if payload.get("text", None):
-        payload["text"] = payload["text"].encode("utf-8").hex()
+    
+    # Note: We do NOT hex-encode text fields here!
+    # The Rust WhiteFlag encoder handles UTF-8 encoding automatically.
+    # Text fields (text, verificationData, resourceData) should be passed as plain UTF-8 strings.
+    
     json_packet = {
         "prefix": "WF",
         "version": "1",
@@ -214,12 +217,11 @@ def send_decode_final_request(signal: str) -> (dict, bool):
     if not response.json()["success"]:
         return ({"error": response.json()["error"]}, False)
     decoded = json.loads(response.json()["decoded"])
-    if decoded.get("text", None):
-        try:
-            decoded["text"] = bytes.fromhex(decoded["text"]).decode("utf-8")
-        except (ValueError, UnicodeDecodeError):
-            # Keep text as-is if it's not valid hex or can't decode to UTF-8
-            pass
+    
+    # Note: We do NOT need to hex-decode text fields here!
+    # The Rust WhiteFlag decoder already returns UTF-8 strings for text fields.
+    # Fields like text, verificationData, and resourceData are already decoded.
+    
     return (
         decoded,
         response.json()["success"],
