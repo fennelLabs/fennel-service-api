@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Deploy Backend with Test F Message Support
-# Version: v1.0.12-escape-json-newlines
+# Version: v1.0.13-replace-newlines
 set -e
 
 echo "🚀 Deploying Backend with Test F Message Support"
@@ -32,7 +32,7 @@ print_error() {
 # Configuration
 ACR_NAME="fennelacr531"
 IMAGE_NAME="fennel-service-api"
-NEW_VERSION="v1.0.12-escape-json-newlines"
+NEW_VERSION="v1.0.13-replace-newlines"
 NAMESPACE="fennel-api"
 DEPLOYMENT="fennel-api"
 

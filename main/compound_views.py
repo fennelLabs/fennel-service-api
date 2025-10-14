@@ -239,27 +239,32 @@ def get_fee_for_send_signal_with_annotations(request):
     annotations_text = serializer.validated_data["annotations"]
     is_test = serializer.validated_data.get("is_test_message", False)
     
-    try:
-        import json
-        annotations_data = json.loads(annotations_text)
-        if isinstance(annotations_data, dict):
-            if is_test:
-                # For test messages, append " TEST" to both name and text
-                if "name" in annotations_data:
-                    annotations_data["name"] = annotations_data["name"] + " TEST"
-                if "text" in annotations_data:
-                    # Replace newlines with spaces to avoid JSON encoding issues
-                    text_value = annotations_data["text"].replace('\n', ' ').replace('\r', ' ')
-                    annotations_data["text"] = text_value + " TEST"
-                # Re-serialize with the modified values
-                # Use ensure_ascii=True and no extra whitespace for compact JSON
-                annotations_text = json.dumps(annotations_data, ensure_ascii=True, separators=(',', ':'))
-            # For both test and non-test, keep the full JSON structure
-            # (non-test messages will use the original JSON as-is)
-    except (json.JSONDecodeError, TypeError):
-        # If it's not valid JSON, use the raw text
-        # For test messages with plain text, append " TEST"
-        if is_test:
+    if is_test:
+        try:
+            import json
+            annotations_data = json.loads(annotations_text)
+            if isinstance(annotations_data, dict):
+                # Append " TEST" to both name and text fields
+                name_value = annotations_data.get("name", "") + " TEST"
+                text_value = annotations_data.get("text", "") + " TEST"
+                
+                # Manually escape special characters for JSON
+                def escape_json_string(s):
+                    return (s.replace('\\', '\\\\')
+                             .replace('"', '\\"')
+                             .replace('\n', '\\n')
+                             .replace('\r', '\\r')
+                             .replace('\t', '\\t')
+                             .replace('\b', '\\b')
+                             .replace('\f', '\\f'))
+                
+                # Manually construct JSON to avoid double-escaping
+                annotations_text = '{{"name":"{}","text":"{}"}}'.format(
+                    escape_json_string(name_value),
+                    escape_json_string(text_value)
+                )
+        except (json.JSONDecodeError, TypeError):
+            # If it's not valid JSON, use the raw text with " TEST" appended
             annotations_text = annotations_text + " TEST"
     
     annotations_signal = {
@@ -396,27 +401,32 @@ def send_signal_with_annotations(request):
     annotations_text = serializer.validated_data["annotations"]
     is_test = serializer.validated_data.get("is_test_message", False)
     
-    try:
-        import json
-        annotations_data = json.loads(annotations_text)
-        if isinstance(annotations_data, dict):
-            if is_test:
-                # For test messages, append " TEST" to both name and text
-                if "name" in annotations_data:
-                    annotations_data["name"] = annotations_data["name"] + " TEST"
-                if "text" in annotations_data:
-                    # Replace newlines with spaces to avoid JSON encoding issues
-                    text_value = annotations_data["text"].replace('\n', ' ').replace('\r', ' ')
-                    annotations_data["text"] = text_value + " TEST"
-                # Re-serialize with the modified values
-                # Use ensure_ascii=True and no extra whitespace for compact JSON
-                annotations_text = json.dumps(annotations_data, ensure_ascii=True, separators=(',', ':'))
-            # For both test and non-test, keep the full JSON structure
-            # (non-test messages will use the original JSON as-is)
-    except (json.JSONDecodeError, TypeError):
-        # If it's not valid JSON, use the raw text
-        # For test messages with plain text, append " TEST"
-        if is_test:
+    if is_test:
+        try:
+            import json
+            annotations_data = json.loads(annotations_text)
+            if isinstance(annotations_data, dict):
+                # Append " TEST" to both name and text fields
+                name_value = annotations_data.get("name", "") + " TEST"
+                text_value = annotations_data.get("text", "") + " TEST"
+                
+                # Manually escape special characters for JSON
+                def escape_json_string(s):
+                    return (s.replace('\\', '\\\\')
+                             .replace('"', '\\"')
+                             .replace('\n', '\\n')
+                             .replace('\r', '\\r')
+                             .replace('\t', '\\t')
+                             .replace('\b', '\\b')
+                             .replace('\f', '\\f'))
+                
+                # Manually construct JSON to avoid double-escaping
+                annotations_text = '{{"name":"{}","text":"{}"}}'.format(
+                    escape_json_string(name_value),
+                    escape_json_string(text_value)
+                )
+        except (json.JSONDecodeError, TypeError):
+            # If it's not valid JSON, use the raw text with " TEST" appended
             annotations_text = annotations_text + " TEST"
     
     annotations_signal = {
