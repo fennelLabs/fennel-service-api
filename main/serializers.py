@@ -111,6 +111,11 @@ class SignalSerializer(serializers.ModelSerializer):
             "synced",
             "references",
             "confirmations",
+            # Message fields
+            "message_code",
+            "pseudo_message_code",
+            "subject_code",
+            "signal_body",
             # Blockchain indexing fields
             "block_number",
             "block_hash",

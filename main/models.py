@@ -49,6 +49,7 @@ class Signal(models.Model):
     tx_hash = models.CharField(max_length=1024, unique=True, null=True, blank=True)
     signal_text = models.CharField(max_length=1024)
     message_code = models.CharField(max_length=2, null=True, blank=True)
+    pseudo_message_code = models.CharField(max_length=2, null=True, blank=True, help_text="For test messages (T), stores the original message code being tested")
     subject_code = models.CharField(max_length=2, null=True, blank=True)
     signal_body = models.CharField(max_length=4096, null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
