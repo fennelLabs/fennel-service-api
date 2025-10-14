@@ -234,13 +234,25 @@ def get_fee_for_send_signal_with_annotations(request):
             status=400,
         )
     
+    # Parse annotations - if it's JSON, extract the text field; otherwise use as-is
+    annotations_text = serializer.validated_data["annotations"]
+    try:
+        import json
+        annotations_data = json.loads(annotations_text)
+        if isinstance(annotations_data, dict) and "text" in annotations_data:
+            # Extract just the text field from the JSON object
+            annotations_text = annotations_data["text"]
+    except (json.JSONDecodeError, TypeError):
+        # If it's not valid JSON or not a dict, use the raw text
+        pass
+    
     annotations_signal = {
         "prefix": "WF",
         "version": "1",
         "encryptionIndicator": "0",
         "duressIndicator": "0",
         "messageCode": "F",
-        "text": serializer.validated_data["annotations"],
+        "text": annotations_text,
         "referenceIndicator": "3",
         "referencedMessage": "0000000000000000000000000000000000000000000000000000000000000000",
     }
@@ -362,13 +374,26 @@ def send_signal_with_annotations(request):
         UserKeys.objects.get(user=request.user), signal
     )
     signal = Signal.objects.get(pk=signal.id)
+    
+    # Parse annotations - if it's JSON, extract the text field; otherwise use as-is
+    annotations_text = serializer.validated_data["annotations"]
+    try:
+        import json
+        annotations_data = json.loads(annotations_text)
+        if isinstance(annotations_data, dict) and "text" in annotations_data:
+            # Extract just the text field from the JSON object
+            annotations_text = annotations_data["text"]
+    except (json.JSONDecodeError, TypeError):
+        # If it's not valid JSON or not a dict, use the raw text
+        pass
+    
     annotations_signal = {
         "prefix": "WF",
         "version": "1",
         "encryptionIndicator": "0",
         "duressIndicator": "0",
         "messageCode": "F",
-        "text": serializer.validated_data["annotations"],
+        "text": annotations_text,
         "referenceIndicator": "3",
         "referencedMessage": signal.tx_hash,
     }
