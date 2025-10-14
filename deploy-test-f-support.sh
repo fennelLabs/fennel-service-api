@@ -53,7 +53,6 @@ print_warning "This may take several minutes..."
 
 docker buildx build \
     --platform linux/arm64 \
-    --no-cache \
     -t ${ACR_NAME}.azurecr.io/${IMAGE_NAME}:${NEW_VERSION} \
     -f Dockerfile \
     --push \
