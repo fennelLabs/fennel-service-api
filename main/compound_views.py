@@ -238,6 +238,7 @@ def get_fee_for_send_signal_with_annotations(request):
     
     # Apply test message conversion to annotation if the main signal was a test
     if serializer.validated_data.get("is_test_message", False):
+        from main.whiteflag_helpers import convert_to_test_message
         annotations_signal = convert_to_test_message(annotations_signal)
     
     annotation_text_encoded = whiteflag_encoder_helper(annotations_signal)
