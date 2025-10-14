@@ -250,7 +250,8 @@ def get_fee_for_send_signal_with_annotations(request):
                 if "text" in annotations_data:
                     annotations_data["text"] = annotations_data["text"] + " TEST"
                 # Re-serialize with the modified values
-                annotations_text = json.dumps(annotations_data)
+                # Use ensure_ascii=True and no extra whitespace for compact JSON
+                annotations_text = json.dumps(annotations_data, ensure_ascii=True, separators=(',', ':'))
             # For both test and non-test, keep the full JSON structure
             # (non-test messages will use the original JSON as-is)
     except (json.JSONDecodeError, TypeError):
@@ -404,7 +405,8 @@ def send_signal_with_annotations(request):
                 if "text" in annotations_data:
                     annotations_data["text"] = annotations_data["text"] + " TEST"
                 # Re-serialize with the modified values
-                annotations_text = json.dumps(annotations_data)
+                # Use ensure_ascii=True and no extra whitespace for compact JSON
+                annotations_text = json.dumps(annotations_data, ensure_ascii=True, separators=(',', ':'))
             # For both test and non-test, keep the full JSON structure
             # (non-test messages will use the original JSON as-is)
     except (json.JSONDecodeError, TypeError):
