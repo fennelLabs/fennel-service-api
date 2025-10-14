@@ -228,6 +228,13 @@ def whiteflag_encoder_helper(
             "0000000000000000000000000000000000000000000000000000000000000000"
         )
     processed_payload = json.dumps({k: v for k, v in json_packet.items() if v})
+    
+    # Debug: Log the exact payload being sent to the encoder
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.error(f"DEBUG ENCODER PAYLOAD (len={len(processed_payload)}): {processed_payload}")
+    logger.error(f"DEBUG ENCODER PAYLOAD BYTES: {processed_payload.encode('utf-8')}")
+    
     response = requests.post(
         f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_encode",
         data=processed_payload,
