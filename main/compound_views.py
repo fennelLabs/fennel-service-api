@@ -224,7 +224,16 @@ def get_fee_for_send_signal_with_annotations(request):
         from main.whiteflag_helpers import convert_to_test_message
         signal_body = convert_to_test_message(signal_body)
     
-    signal_text_encoded = whiteflag_encoder_helper(signal_body)
+    signal_text_encoded, signal_encode_success = whiteflag_encoder_helper(signal_body)
+    if not signal_encode_success:
+        return Response(
+            {
+                "error": "Failed to encode main signal",
+                "details": signal_text_encoded
+            },
+            status=400,
+        )
+    
     annotations_signal = {
         "prefix": "WF",
         "version": "1",
@@ -241,7 +250,16 @@ def get_fee_for_send_signal_with_annotations(request):
         from main.whiteflag_helpers import convert_to_test_message
         annotations_signal = convert_to_test_message(annotations_signal)
     
-    annotation_text_encoded = whiteflag_encoder_helper(annotations_signal)
+    annotation_text_encoded, annotation_encode_success = whiteflag_encoder_helper(annotations_signal)
+    if not annotation_encode_success:
+        return Response(
+            {
+                "error": "Failed to encode annotation signal",
+                "details": annotation_text_encoded
+            },
+            status=400,
+        )
+    
     payload = {
         "mnemonic": mnemonic,
         "content": signal_text_encoded,
