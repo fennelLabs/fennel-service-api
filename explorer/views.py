@@ -152,6 +152,7 @@ def messages_list(request):
         'id': signal.id,
         'tx_hash': signal.tx_hash,
         'message_code': signal.message_code,
+        'pseudo_message_code': signal.pseudo_message_code,  # For test messages (T)
         'message_type': decode_message_code(signal.message_code),
         'subject_code': signal.subject_code,
         'subject_type': decode_subject_code(signal.subject_code),
@@ -197,6 +198,7 @@ def message_detail(request, message_id):
         'id': signal.id,
         'tx_hash': signal.tx_hash,
         'message_code': signal.message_code,
+        'pseudo_message_code': signal.pseudo_message_code,  # For test messages (T)
         'message_type': decode_message_code(signal.message_code),
         'subject_code': signal.subject_code,
         'subject_type': decode_subject_code(signal.subject_code),
