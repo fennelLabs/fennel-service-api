@@ -234,17 +234,30 @@ def get_fee_for_send_signal_with_annotations(request):
             status=400,
         )
     
-    # Parse annotations - if it's JSON, extract the text field; otherwise use as-is
+    # Parse and prepare annotations
+    # For test messages, append " TEST" to name and text fields within the JSON
     annotations_text = serializer.validated_data["annotations"]
+    is_test = serializer.validated_data.get("is_test_message", False)
+    
     try:
         import json
         annotations_data = json.loads(annotations_text)
-        if isinstance(annotations_data, dict) and "text" in annotations_data:
-            # Extract just the text field from the JSON object
-            annotations_text = annotations_data["text"]
+        if isinstance(annotations_data, dict):
+            if is_test:
+                # For test messages, append " TEST" to both name and text
+                if "name" in annotations_data:
+                    annotations_data["name"] = annotations_data["name"] + " TEST"
+                if "text" in annotations_data:
+                    annotations_data["text"] = annotations_data["text"] + " TEST"
+                # Re-serialize with the modified values
+                annotations_text = json.dumps(annotations_data)
+            # For both test and non-test, keep the full JSON structure
+            # (non-test messages will use the original JSON as-is)
     except (json.JSONDecodeError, TypeError):
-        # If it's not valid JSON or not a dict, use the raw text
-        pass
+        # If it's not valid JSON, use the raw text
+        # For test messages with plain text, append " TEST"
+        if is_test:
+            annotations_text = annotations_text + " TEST"
     
     annotations_signal = {
         "prefix": "WF",
@@ -375,17 +388,30 @@ def send_signal_with_annotations(request):
     )
     signal = Signal.objects.get(pk=signal.id)
     
-    # Parse annotations - if it's JSON, extract the text field; otherwise use as-is
+    # Parse and prepare annotations
+    # For test messages, append " TEST" to name and text fields within the JSON
     annotations_text = serializer.validated_data["annotations"]
+    is_test = serializer.validated_data.get("is_test_message", False)
+    
     try:
         import json
         annotations_data = json.loads(annotations_text)
-        if isinstance(annotations_data, dict) and "text" in annotations_data:
-            # Extract just the text field from the JSON object
-            annotations_text = annotations_data["text"]
+        if isinstance(annotations_data, dict):
+            if is_test:
+                # For test messages, append " TEST" to both name and text
+                if "name" in annotations_data:
+                    annotations_data["name"] = annotations_data["name"] + " TEST"
+                if "text" in annotations_data:
+                    annotations_data["text"] = annotations_data["text"] + " TEST"
+                # Re-serialize with the modified values
+                annotations_text = json.dumps(annotations_data)
+            # For both test and non-test, keep the full JSON structure
+            # (non-test messages will use the original JSON as-is)
     except (json.JSONDecodeError, TypeError):
-        # If it's not valid JSON or not a dict, use the raw text
-        pass
+        # If it's not valid JSON, use the raw text
+        # For test messages with plain text, append " TEST"
+        if is_test:
+            annotations_text = annotations_text + " TEST"
     
     annotations_signal = {
         "prefix": "WF",
