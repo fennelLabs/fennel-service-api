@@ -378,9 +378,18 @@ def send_signal_with_annotations(request):
         from main.whiteflag_helpers import convert_to_test_message
         annotations_signal = convert_to_test_message(annotations_signal)
     
+    # DEBUG: Log the annotation signal before encoding
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.error(f"DEBUG: About to encode annotation signal: {annotations_signal}")
+    
     annotation_text_encoded, annotation_encode_success = whiteflag_encoder_helper(
         annotations_signal, sender_group, recipient_group
     )
+    
+    # DEBUG: Log encoding result
+    logger.error(f"DEBUG: Annotation encoding success: {annotation_encode_success}, result: {annotation_text_encoded if not annotation_encode_success else 'SUCCESS'}")
+    
     if not annotation_encode_success:
         return Response(
             {
