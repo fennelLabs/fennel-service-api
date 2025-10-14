@@ -32,7 +32,7 @@ print_error() {
 # Configuration
 ACR_NAME="fennelacr531"
 IMAGE_NAME="fennel-service-api"
-NEW_VERSION="v1.0.15-debug-encoder"
+NEW_VERSION="v1.0.16-fix-double-escape"
 NAMESPACE="fennel-api"
 DEPLOYMENT="fennel-api"
 
@@ -53,6 +53,7 @@ print_warning "This may take several minutes..."
 
 docker buildx build \
     --platform linux/arm64 \
+    --no-cache \
     -t ${ACR_NAME}.azurecr.io/${IMAGE_NAME}:${NEW_VERSION} \
     -f Dockerfile \
     --push \
