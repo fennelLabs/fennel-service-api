@@ -235,6 +235,11 @@ def get_fee_for_send_signal_with_annotations(request):
         "referenceIndicator": "3",
         "referencedMessage": "0000000000000000000000000000000000000000000000000000000000000000",
     }
+    
+    # Apply test message conversion to annotation if the main signal was a test
+    if serializer.validated_data.get("is_test_message", False):
+        annotations_signal = convert_to_test_message(annotations_signal)
+    
     annotation_text_encoded = whiteflag_encoder_helper(annotations_signal)
     payload = {
         "mnemonic": mnemonic,
@@ -348,6 +353,12 @@ def send_signal_with_annotations(request):
         "referenceIndicator": "3",
         "referencedMessage": signal.tx_hash,
     }
+    
+    # Apply test message conversion to annotation if the main signal was a test
+    if serializer.validated_data.get("is_test_message", False):
+        from main.whiteflag_helpers import convert_to_test_message
+        annotations_signal = convert_to_test_message(annotations_signal)
+    
     annotation_text_encoded, annotation_encode_success = whiteflag_encoder_helper(
         annotations_signal, sender_group, recipient_group
     )
