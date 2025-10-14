@@ -245,24 +245,13 @@ def get_fee_for_send_signal_with_annotations(request):
             annotations_data = json.loads(annotations_text)
             if isinstance(annotations_data, dict):
                 # Append " TEST" to both name and text fields
-                name_value = annotations_data.get("name", "") + " TEST"
-                text_value = annotations_data.get("text", "") + " TEST"
+                annotations_data["name"] = annotations_data.get("name", "") + " TEST"
+                annotations_data["text"] = annotations_data.get("text", "") + " TEST"
                 
-                # Manually escape special characters for JSON
-                def escape_json_string(s):
-                    return (s.replace('\\', '\\\\')
-                             .replace('"', '\\"')
-                             .replace('\n', '\\n')
-                             .replace('\r', '\\r')
-                             .replace('\t', '\\t')
-                             .replace('\b', '\\b')
-                             .replace('\f', '\\f'))
-                
-                # Manually construct JSON to avoid double-escaping
-                annotations_text = '{{"name":"{}","text":"{}"}}'.format(
-                    escape_json_string(name_value),
-                    escape_json_string(text_value)
-                )
+                # Use json.dumps to properly serialize the dict
+                # This will be passed as a STRING to whiteflag_encoder_helper
+                # which will then call json.dumps() on the entire payload
+                annotations_text = json.dumps(annotations_data)
         except (json.JSONDecodeError, TypeError):
             # If it's not valid JSON, use the raw text with " TEST" appended
             annotations_text = annotations_text + " TEST"

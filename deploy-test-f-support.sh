@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Deploy Backend with Test F Message Support
-# Version: v1.0.14-manual-json
+# Version: v1.0.15-debug-encoder
 set -e
 
 echo "🚀 Deploying Backend with Test F Message Support"
@@ -32,7 +32,7 @@ print_error() {
 # Configuration
 ACR_NAME="fennelacr531"
 IMAGE_NAME="fennel-service-api"
-NEW_VERSION="v1.0.14-manual-json"
+NEW_VERSION="v1.0.15-debug-encoder"
 NAMESPACE="fennel-api"
 DEPLOYMENT="fennel-api"
 
