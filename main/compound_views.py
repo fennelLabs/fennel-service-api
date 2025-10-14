@@ -234,13 +234,17 @@ def get_fee_for_send_signal_with_annotations(request):
             status=400,
         )
     
+    # For test messages, pass annotations through unchanged
+    # Users should manually add visual indicators to their annotation text if desired
+    annotations_text = serializer.validated_data["annotations"]
+    
     annotations_signal = {
         "prefix": "WF",
         "version": "1",
         "encryptionIndicator": "0",
         "duressIndicator": "0",
         "messageCode": "F",
-        "text": serializer.validated_data["annotations"],
+        "text": annotations_text,
         "referenceIndicator": "3",
         "referencedMessage": "0000000000000000000000000000000000000000000000000000000000000000",
     }
