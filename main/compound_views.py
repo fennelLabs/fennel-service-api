@@ -248,7 +248,9 @@ def get_fee_for_send_signal_with_annotations(request):
                 if "name" in annotations_data:
                     annotations_data["name"] = annotations_data["name"] + " TEST"
                 if "text" in annotations_data:
-                    annotations_data["text"] = annotations_data["text"] + " TEST"
+                    # Replace newlines with spaces to avoid JSON encoding issues
+                    text_value = annotations_data["text"].replace('\n', ' ').replace('\r', ' ')
+                    annotations_data["text"] = text_value + " TEST"
                 # Re-serialize with the modified values
                 # Use ensure_ascii=True and no extra whitespace for compact JSON
                 annotations_text = json.dumps(annotations_data, ensure_ascii=True, separators=(',', ':'))
@@ -403,7 +405,9 @@ def send_signal_with_annotations(request):
                 if "name" in annotations_data:
                     annotations_data["name"] = annotations_data["name"] + " TEST"
                 if "text" in annotations_data:
-                    annotations_data["text"] = annotations_data["text"] + " TEST"
+                    # Replace newlines with spaces to avoid JSON encoding issues
+                    text_value = annotations_data["text"].replace('\n', ' ').replace('\r', ' ')
+                    annotations_data["text"] = text_value + " TEST"
                 # Re-serialize with the modified values
                 # Use ensure_ascii=True and no extra whitespace for compact JSON
                 annotations_text = json.dumps(annotations_data, ensure_ascii=True, separators=(',', ':'))
