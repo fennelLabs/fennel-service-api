@@ -154,7 +154,7 @@ class EncodeAndSendSignalSerializer(serializers.Serializer):
 class AnnotatedWhiteflagSignalSerializer(serializers.Serializer):
     signal_body = serializers.JSONField()
     annotations = serializers.CharField()
-    recipient_group = serializers.CharField(required=False)
+    recipient_group = serializers.CharField(required=False, allow_blank=True)
     is_test_message = serializers.BooleanField(
         required=False, 
         default=False,
