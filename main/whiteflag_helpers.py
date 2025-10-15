@@ -64,11 +64,16 @@ def convert_to_test_message(signal_body: dict) -> dict:
     
     # Add all remaining body fields (text, subjectCode, dateTime, etc.)
     # These come after pseudoMessageCode in the protocol
+    # Note: Normalize 'datetime' to 'dateTime' for WhiteFlag protocol compliance
     body_fields = [k for k in signal_body.keys() 
                    if k not in ["prefix", "version", "encryptionIndicator", "duressIndicator", 
                                 "messageCode", "referenceIndicator", "referencedMessage"]]
     for field in body_fields:
-        test_message[field] = signal_body[field]
+        # Normalize datetime to dateTime (WhiteFlag protocol uses camelCase)
+        if field == "datetime":
+            test_message["dateTime"] = signal_body[field]
+        else:
+            test_message[field] = signal_body[field]
     
     return test_message
 
