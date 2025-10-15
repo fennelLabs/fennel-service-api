@@ -233,20 +233,26 @@ def whiteflag_encoder_helper(
     # For messages with pseudoMessageCode (Test messages), preserve the exact field order
     # from the input payload, as it's already correctly ordered by convert_to_test_message()
     if payload.get("pseudoMessageCode"):
-        # Clone the payload and set defaults
-        json_packet = {}
-        for key in payload.keys():
-            json_packet[key] = payload[key]
+        # Start with required header fields in correct order
+        json_packet = {
+            "prefix": payload.get("prefix", "WF"),
+            "version": payload.get("version", "1"),
+        }
         
-        # Set defaults for header fields if not present
-        if "prefix" not in json_packet:
-            json_packet["prefix"] = "WF"
-        if "version" not in json_packet:
-            json_packet["version"] = "1"
-        if "encryptionIndicator" in json_packet:
+        # Add all other fields in the order they appear in the payload
+        for key in payload.keys():
+            if key not in ["prefix", "version"]:
+                json_packet[key] = payload[key]
+        
+        # Override encryption indicator if needed for encrypted channels
+        if encryption_indicator:
             json_packet["encryptionIndicator"] = encryption_indicator
-        if "referencedMessage" not in json_packet or json_packet["referencedMessage"] is None:
+        
+        # Ensure referencedMessage has a default if None
+        if json_packet.get("referencedMessage") is None:
             json_packet["referencedMessage"] = "0000000000000000000000000000000000000000000000000000000000000000"
+        
+        # Use dateTime if available (already normalized by convert_to_test_message)
         if datetime_field and "dateTime" in json_packet:
             json_packet["dateTime"] = datetime_field
     else:
