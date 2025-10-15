@@ -19,8 +19,8 @@ def convert_to_test_message(signal_body: dict) -> dict:
     
     IMPORTANT: Field order matters! WhiteFlag protocol specifies:
     - Header fields (prefix, version, encryptionIndicator, duressIndicator, messageCode)
-    - Test-specific field (pseudoMessageCode) at byte 71
-    - Reference fields (referenceIndicator, referencedMessage) if applicable  
+    - Reference fields (referenceIndicator, referencedMessage) if applicable
+    - pseudoMessageCode field (indicates which message type is being tested)
     - Message body fields (depends on pseudoMessageCode type)
     
     Args:
@@ -41,7 +41,7 @@ def convert_to_test_message(signal_body: dict) -> dict:
         return signal_body
     
     # Create new dict with correct WhiteFlag field order for Test messages
-    # Order: header fields → pseudoMessageCode → reference fields → body fields
+    # Order: header fields → reference fields → pseudoMessageCode → body fields
     test_message = {}
     
     # Add prefix and version only if they exist (encoder will add defaults if needed)
