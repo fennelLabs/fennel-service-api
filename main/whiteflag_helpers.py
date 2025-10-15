@@ -225,38 +225,65 @@ def whiteflag_encoder_helper(
     # The Rust WhiteFlag encoder handles UTF-8 encoding automatically.
     # Text fields (text, verificationData, resourceData) should be passed as plain UTF-8 strings.
     
-    json_packet = {
-        "prefix": "WF",
-        "version": "1",
-        "encryptionIndicator": encryption_indicator,
-        "duressIndicator": payload.get("duressIndicator", None),
-        "messageCode": payload.get("messageCode", None),
-        "pseudoMessageCode": payload.get("pseudoMessageCode", None),  # Must come before reference fields per WhiteFlag spec
-        "referenceIndicator": payload.get("referenceIndicator", None),
-        "referencedMessage": payload.get("referencedMessage", None),
-        "verificationMethod": payload.get("verificationMethod", None),
-        "verificationData": payload.get("verificationData", None),
-        "cryptoDataType": payload.get("cryptoDataType", None),
-        "cryptoData": payload.get("cryptoData", None),
-        "text": payload.get("text", None),
-        "resourceMethod": payload.get("resourceMethod", None),
-        "resourceData": payload.get("resourceData", None),
-        "subjectCode": payload.get("subjectCode", None),
-        "dateTime": datetime_field,
-        "duration": payload.get("duration", None),
-        "objectType": payload.get("objectType", None),
-        "objectLatitude": payload.get("objectLatitude", None),
-        "objectLongitude": payload.get("objectLongitude", None),
-        "objectSizeDim1": payload.get("objectSizeDim1", None),
-        "objectSizeDim2": payload.get("objectSizeDim2", None),
-        "objectOrientation": payload.get("objectOrientation", None),
-        "objectTypeQuant": payload.get("objectTypeQuant", None),
-    }
-    if payload.get("referencedMessage", None) is None:
-        json_packet["referencedMessage"] = (
-            "0000000000000000000000000000000000000000000000000000000000000000"
-        )
+    # For messages with pseudoMessageCode (Test messages), preserve the exact field order
+    # from the input payload, as it's already correctly ordered by convert_to_test_message()
+    if payload.get("pseudoMessageCode"):
+        # Clone the payload and set defaults
+        json_packet = {}
+        for key in payload.keys():
+            json_packet[key] = payload[key]
+        
+        # Set defaults for header fields if not present
+        if "prefix" not in json_packet:
+            json_packet["prefix"] = "WF"
+        if "version" not in json_packet:
+            json_packet["version"] = "1"
+        if "encryptionIndicator" in json_packet:
+            json_packet["encryptionIndicator"] = encryption_indicator
+        if "referencedMessage" not in json_packet or json_packet["referencedMessage"] is None:
+            json_packet["referencedMessage"] = "0000000000000000000000000000000000000000000000000000000000000000"
+        if datetime_field and "dateTime" in json_packet:
+            json_packet["dateTime"] = datetime_field
+    else:
+        # For non-test messages, use the traditional field order
+        json_packet = {
+            "prefix": "WF",
+            "version": "1",
+            "encryptionIndicator": encryption_indicator,
+            "duressIndicator": payload.get("duressIndicator", None),
+            "messageCode": payload.get("messageCode", None),
+            "referenceIndicator": payload.get("referenceIndicator", None),
+            "referencedMessage": payload.get("referencedMessage", None),
+            "verificationMethod": payload.get("verificationMethod", None),
+            "verificationData": payload.get("verificationData", None),
+            "cryptoDataType": payload.get("cryptoDataType", None),
+            "cryptoData": payload.get("cryptoData", None),
+            "text": payload.get("text", None),
+            "resourceMethod": payload.get("resourceMethod", None),
+            "resourceData": payload.get("resourceData", None),
+            "subjectCode": payload.get("subjectCode", None),
+            "dateTime": datetime_field,
+            "duration": payload.get("duration", None),
+            "objectType": payload.get("objectType", None),
+            "objectLatitude": payload.get("objectLatitude", None),
+            "objectLongitude": payload.get("objectLongitude", None),
+            "objectSizeDim1": payload.get("objectSizeDim1", None),
+            "objectSizeDim2": payload.get("objectSizeDim2", None),
+            "objectOrientation": payload.get("objectOrientation", None),
+            "objectTypeQuant": payload.get("objectTypeQuant", None),
+        }
+        if payload.get("referencedMessage", None) is None:
+            json_packet["referencedMessage"] = (
+                "0000000000000000000000000000000000000000000000000000000000000000"
+            )
+    
     processed_payload = json.dumps({k: v for k, v in json_packet.items() if v})
+    
+    # Debug logging for test messages
+    if payload.get("pseudoMessageCode"):
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"DEBUG encoder_helper: Sending to Rust encoder: {processed_payload}")
     
     response = requests.post(
         f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_encode",
