@@ -54,13 +54,16 @@ def convert_to_test_message(signal_body: dict) -> dict:
     test_message["encryptionIndicator"] = signal_body.get("encryptionIndicator")
     test_message["duressIndicator"] = signal_body.get("duressIndicator")
     test_message["messageCode"] = "T"  # Convert to test message
-    test_message["pseudoMessageCode"] = original_message_code  # Store original type
     
-    # Add reference fields if present (for signals referencing other messages)
+    # Add reference fields if present (MUST come before pseudoMessageCode!)
+    # Per WhiteFlag spec and whiteflag-rust implementation
     if "referenceIndicator" in signal_body:
         test_message["referenceIndicator"] = signal_body["referenceIndicator"]
     if "referencedMessage" in signal_body:
         test_message["referencedMessage"] = signal_body["referencedMessage"]
+    
+    # Add pseudoMessageCode AFTER reference fields
+    test_message["pseudoMessageCode"] = original_message_code  # Store original type
     
     # Add all remaining body fields (text, subjectCode, dateTime, etc.)
     # These come after pseudoMessageCode in the protocol
