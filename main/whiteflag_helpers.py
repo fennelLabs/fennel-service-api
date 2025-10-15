@@ -17,11 +17,17 @@ def convert_to_test_message(signal_body: dict) -> dict:
     They are clearly marked with messageCode "T" and include a pseudoMessageCode field
     that indicates which message type is being tested.
     
+    IMPORTANT: Field order matters! WhiteFlag protocol specifies:
+    - Header fields (prefix, version, encryptionIndicator, duressIndicator, messageCode)
+    - Test-specific field (pseudoMessageCode) at byte 71
+    - Reference fields (referenceIndicator, referencedMessage) if applicable  
+    - Message body fields (depends on pseudoMessageCode type)
+    
     Args:
         signal_body: The original message body dict
         
     Returns:
-        Modified message body dict with messageCode "T" and pseudoMessageCode set
+        Modified message body dict with messageCode "T" and pseudoMessageCode set in correct order
         
     Example:
         Free Text message {"messageCode": "F", "text": "Hello"}
@@ -34,12 +40,30 @@ def convert_to_test_message(signal_body: dict) -> dict:
     if original_message_code == "T":
         return signal_body
     
-    # Create a copy to avoid mutating the original
-    test_message = signal_body.copy()
+    # Create new dict with correct WhiteFlag field order for Test messages
+    # Order: header fields → pseudoMessageCode → reference fields → body fields
+    test_message = {
+        "prefix": signal_body.get("prefix"),
+        "version": signal_body.get("version"),
+        "encryptionIndicator": signal_body.get("encryptionIndicator"),
+        "duressIndicator": signal_body.get("duressIndicator"),
+        "messageCode": "T",  # Convert to test message
+        "pseudoMessageCode": original_message_code,  # Store original type
+    }
     
-    # Convert to test message
-    test_message["messageCode"] = "T"
-    test_message["pseudoMessageCode"] = original_message_code
+    # Add reference fields if present (for signals referencing other messages)
+    if "referenceIndicator" in signal_body:
+        test_message["referenceIndicator"] = signal_body["referenceIndicator"]
+    if "referencedMessage" in signal_body:
+        test_message["referencedMessage"] = signal_body["referencedMessage"]
+    
+    # Add all remaining body fields (text, subjectCode, dateTime, etc.)
+    # These come after pseudoMessageCode in the protocol
+    body_fields = [k for k in signal_body.keys() 
+                   if k not in ["prefix", "version", "encryptionIndicator", "duressIndicator", 
+                                "messageCode", "referenceIndicator", "referencedMessage"]]
+    for field in body_fields:
+        test_message[field] = signal_body[field]
     
     return test_message
 
@@ -228,12 +252,6 @@ def whiteflag_encoder_helper(
             "0000000000000000000000000000000000000000000000000000000000000000"
         )
     processed_payload = json.dumps({k: v for k, v in json_packet.items() if v})
-    
-    # Debug: Log the exact payload being sent to the encoder
-    import logging
-    logger = logging.getLogger(__name__)
-    logger.error(f"DEBUG ENCODER PAYLOAD (len={len(processed_payload)}): {processed_payload}")
-    logger.error(f"DEBUG ENCODER PAYLOAD BYTES: {processed_payload.encode('utf-8')}")
     
     response = requests.post(
         f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_encode",
