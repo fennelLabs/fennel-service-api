@@ -233,31 +233,75 @@ def whiteflag_encoder_helper(
     # The Rust WhiteFlag encoder handles UTF-8 encoding automatically.
     # Text fields (text, verificationData, resourceData) should be passed as plain UTF-8 strings.
     
-    # For messages with pseudoMessageCode (Test messages), preserve the exact field order
-    # from the input payload, as it's already correctly ordered by convert_to_test_message()
+    # For messages with pseudoMessageCode (Test messages), use explicit WhiteFlag field order
+    # Cannot rely on dict iteration order - must explicitly order fields per WhiteFlag spec
     if payload.get("pseudoMessageCode"):
-        # Start with required header fields in correct order
+        # Build json_packet with explicit WhiteFlag field order:
+        # 1. Header fields
+        # 2. Reference fields (if present)
+        # 3. pseudoMessageCode
+        # 4. Body fields (depends on pseudoMessageCode type)
+        
         json_packet = {
             "prefix": payload.get("prefix", "WF"),
             "version": payload.get("version", "1"),
+            "encryptionIndicator": encryption_indicator or payload.get("encryptionIndicator"),
+            "duressIndicator": payload.get("duressIndicator"),
+            "messageCode": payload.get("messageCode"),
         }
         
-        # Add all other fields in the order they appear in the payload
-        for key in payload.keys():
-            if key not in ["prefix", "version"]:
-                json_packet[key] = payload[key]
-        
-        # Override encryption indicator if needed for encrypted channels
-        if encryption_indicator:
-            json_packet["encryptionIndicator"] = encryption_indicator
-        
-        # Ensure referencedMessage has a default if None
-        if json_packet.get("referencedMessage") is None:
+        # Add reference fields if present (MUST come before pseudoMessageCode!)
+        if "referenceIndicator" in payload:
+            json_packet["referenceIndicator"] = payload["referenceIndicator"]
+        if "referencedMessage" in payload:
+            json_packet["referencedMessage"] = payload["referencedMessage"]
+        elif payload.get("referenceIndicator") == "0":
+            # If referenceIndicator is 0, ensure referencedMessage has default value
             json_packet["referencedMessage"] = "0000000000000000000000000000000000000000000000000000000000000000"
         
-        # Use dateTime if available (already normalized by convert_to_test_message)
-        if datetime_field and "dateTime" in json_packet:
+        # Add pseudoMessageCode AFTER reference fields
+        json_packet["pseudoMessageCode"] = payload["pseudoMessageCode"]
+        
+        # Add body fields based on pseudoMessageCode type
+        # Order varies by message type, but we add them in a logical order
+        
+        # Common fields (if present)
+        if "text" in payload:
+            json_packet["text"] = payload["text"]
+        if "verificationMethod" in payload:
+            json_packet["verificationMethod"] = payload["verificationMethod"]
+        if "verificationData" in payload:
+            json_packet["verificationData"] = payload["verificationData"]
+        if "cryptoDataType" in payload:
+            json_packet["cryptoDataType"] = payload["cryptoDataType"]
+        if "cryptoData" in payload:
+            json_packet["cryptoData"] = payload["cryptoData"]
+        if "resourceMethod" in payload:
+            json_packet["resourceMethod"] = payload["resourceMethod"]
+        if "resourceData" in payload:
+            json_packet["resourceData"] = payload["resourceData"]
+        
+        # Infrastructure/Sign fields
+        if "subjectCode" in payload:
+            json_packet["subjectCode"] = payload["subjectCode"]
+        if datetime_field:
             json_packet["dateTime"] = datetime_field
+        if "duration" in payload:
+            json_packet["duration"] = payload["duration"]
+        if "objectType" in payload:
+            json_packet["objectType"] = payload["objectType"]
+        if "objectLatitude" in payload:
+            json_packet["objectLatitude"] = payload["objectLatitude"]
+        if "objectLongitude" in payload:
+            json_packet["objectLongitude"] = payload["objectLongitude"]
+        if "objectSizeDim1" in payload:
+            json_packet["objectSizeDim1"] = payload["objectSizeDim1"]
+        if "objectSizeDim2" in payload:
+            json_packet["objectSizeDim2"] = payload["objectSizeDim2"]
+        if "objectOrientation" in payload:
+            json_packet["objectOrientation"] = payload["objectOrientation"]
+        if "objectTypeQuant" in payload:
+            json_packet["objectTypeQuant"] = payload["objectTypeQuant"]
     else:
         # For non-test messages, use the traditional field order
         json_packet = {

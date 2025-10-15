@@ -22,6 +22,7 @@ from main.forms import WhiteflagDecodeForm
 from main.models import APIGroup
 
 from main.whiteflag_helpers import (
+    convert_to_test_message,
     generate_shared_secret,
     whiteflag_encoder_helper,
     decode,
@@ -81,11 +82,31 @@ def whiteflag_discontinue_authentication(request):
 
 
 @api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def whiteflag_encode(request):
-    result, success = whiteflag_encoder_helper(request.data)
+    # Check if this should be a test message
+    is_test_message = request.data.get("is_test_message", False)
+    
+    # Verify admin permissions for test messages
+    if is_test_message and not (request.user.is_staff or request.user.is_superuser):
+        return Response(
+            {"error": "Only admin users can create test messages"},
+            status=403
+        )
+    
+    # Get the signal body
+    signal_body = request.data.get("signal_body", request.data)
+    
+    # Convert to test message if requested
+    if is_test_message:
+        signal_body = convert_to_test_message(signal_body)
+    
+    result, success = whiteflag_encoder_helper(signal_body)
     if success:
         return Response(result, 200)
     return Response(result, 400)
+
 
 
 @silk_profile(name="whiteflag_generate_shared_secret_key")
