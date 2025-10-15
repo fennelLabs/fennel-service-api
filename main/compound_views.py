@@ -387,9 +387,6 @@ def send_signal_with_annotations(request):
         annotations_signal, sender_group, recipient_group
     )
     
-    # DEBUG: Log encoding result
-    logger.error(f"DEBUG: Annotation encoding success: {annotation_encode_success}, result: {annotation_text_encoded if not annotation_encode_success else 'SUCCESS'}")
-    
     if not annotation_encode_success:
         return Response(
             {
