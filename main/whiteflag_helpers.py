@@ -231,6 +231,7 @@ def whiteflag_encoder_helper(
         "encryptionIndicator": encryption_indicator,
         "duressIndicator": payload.get("duressIndicator", None),
         "messageCode": payload.get("messageCode", None),
+        "pseudoMessageCode": payload.get("pseudoMessageCode", None),  # Must come before reference fields per WhiteFlag spec
         "referenceIndicator": payload.get("referenceIndicator", None),
         "referencedMessage": payload.get("referencedMessage", None),
         "verificationMethod": payload.get("verificationMethod", None),
@@ -240,7 +241,6 @@ def whiteflag_encoder_helper(
         "text": payload.get("text", None),
         "resourceMethod": payload.get("resourceMethod", None),
         "resourceData": payload.get("resourceData", None),
-        "pseudoMessageCode": payload.get("pseudoMessageCode", None),
         "subjectCode": payload.get("subjectCode", None),
         "dateTime": datetime_field,
         "duration": payload.get("duration", None),
