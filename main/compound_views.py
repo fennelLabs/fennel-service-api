@@ -253,9 +253,15 @@ def get_fee_for_send_signal_with_annotations(request):
     if serializer.validated_data.get("is_test_message", False):
         from main.whiteflag_helpers import convert_to_test_message
         annotations_signal = convert_to_test_message(annotations_signal)
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"DEBUG: Annotation signal after conversion: {annotations_signal}")
     
     annotation_text_encoded, annotation_encode_success = whiteflag_encoder_helper(annotations_signal)
     if not annotation_encode_success:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"DEBUG: Annotation encoding failed: {annotation_text_encoded}")
         return Response(
             {
                 "error": "Failed to encode annotation signal",
@@ -343,12 +349,19 @@ def send_signal_with_annotations(request):
                 status=403,
             )
         from main.whiteflag_helpers import convert_to_test_message
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"DEBUG send_signal: Original signal_body: {signal_body}")
         signal_body = convert_to_test_message(signal_body)
+        logger.error(f"DEBUG send_signal: Converted signal_body: {signal_body}")
     
     signal_text_encoded, signal_encode_success = whiteflag_encoder_helper(
         signal_body, sender_group, recipient_group
     )
     if not signal_encode_success:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"DEBUG send_signal: Main signal encoding failed: {signal_text_encoded}")
         signal_text_encoded["step"] = "signal_encode"
         return Response(
             {
@@ -382,12 +395,18 @@ def send_signal_with_annotations(request):
     if serializer.validated_data.get("is_test_message", False):
         from main.whiteflag_helpers import convert_to_test_message
         annotations_signal = convert_to_test_message(annotations_signal)
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"DEBUG send_signal: Annotation signal after conversion: {annotations_signal}")
     
     annotation_text_encoded, annotation_encode_success = whiteflag_encoder_helper(
         annotations_signal, sender_group, recipient_group
     )
     
     if not annotation_encode_success:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"DEBUG send_signal: Annotation encoding failed: {annotation_text_encoded}")
         return Response(
             {
                 "signal_response": signal_sent_response,

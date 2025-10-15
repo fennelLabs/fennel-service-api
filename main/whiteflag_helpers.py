@@ -42,14 +42,19 @@ def convert_to_test_message(signal_body: dict) -> dict:
     
     # Create new dict with correct WhiteFlag field order for Test messages
     # Order: header fields → pseudoMessageCode → reference fields → body fields
-    test_message = {
-        "prefix": signal_body.get("prefix"),
-        "version": signal_body.get("version"),
-        "encryptionIndicator": signal_body.get("encryptionIndicator"),
-        "duressIndicator": signal_body.get("duressIndicator"),
-        "messageCode": "T",  # Convert to test message
-        "pseudoMessageCode": original_message_code,  # Store original type
-    }
+    test_message = {}
+    
+    # Add prefix and version only if they exist (encoder will add defaults if needed)
+    if "prefix" in signal_body:
+        test_message["prefix"] = signal_body["prefix"]
+    if "version" in signal_body:
+        test_message["version"] = signal_body["version"]
+    
+    # Add required header fields
+    test_message["encryptionIndicator"] = signal_body.get("encryptionIndicator")
+    test_message["duressIndicator"] = signal_body.get("duressIndicator")
+    test_message["messageCode"] = "T"  # Convert to test message
+    test_message["pseudoMessageCode"] = original_message_code  # Store original type
     
     # Add reference fields if present (for signals referencing other messages)
     if "referenceIndicator" in signal_body:
