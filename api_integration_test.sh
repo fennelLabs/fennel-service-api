@@ -117,7 +117,7 @@ echo -e "${YELLOW}TEST 2: Decode Infrastructure Test Message${NC}"
 echo -e "${YELLOW}=================================================================================${NC}"
 echo ""
 
-DECODE_PAYLOAD="{\"signal_text\": \"$ENCODED_INFRA\"}"
+DECODE_PAYLOAD="{\"message\": \"$ENCODED_INFRA\"}"
 
 echo "Calling: POST /api/v1/whiteflag/decode/"
 DECODED_INFRA=$(api_call "POST" "/api/v1/whiteflag/decode/" "$DECODE_PAYLOAD")
@@ -127,9 +127,12 @@ echo "Decoded message:"
 echo "$DECODED_INFRA" | jq '.' 2>/dev/null || echo "$DECODED_INFRA"
 echo ""
 
+# Extract the decoded message from the array response [decoded_message, success]
+DECODED_INFRA_MSG=$(echo "$DECODED_INFRA" | jq -r '.[0] // .' 2>/dev/null)
+
 # Verify decoded message
-MESSAGE_CODE=$(echo "$DECODED_INFRA" | jq -r '.messageCode // .signal_body.messageCode // empty' 2>/dev/null)
-PSEUDO_CODE=$(echo "$DECODED_INFRA" | jq -r '.pseudoMessageCode // .signal_body.pseudoMessageCode // empty' 2>/dev/null)
+MESSAGE_CODE=$(echo "$DECODED_INFRA_MSG" | jq -r '.messageCode // .signal_body.messageCode // empty' 2>/dev/null)
+PSEUDO_CODE=$(echo "$DECODED_INFRA_MSG" | jq -r '.pseudoMessageCode // .signal_body.pseudoMessageCode // empty' 2>/dev/null)
 
 if [ "$MESSAGE_CODE" != "T" ]; then
     echo -e "${RED}❌ TEST 2 FAILED: messageCode should be 'T', got '$MESSAGE_CODE'${NC}"
@@ -207,7 +210,7 @@ echo -e "${YELLOW}TEST 4: Decode Free Text Test Message with Reference${NC}"
 echo -e "${YELLOW}=================================================================================${NC}"
 echo ""
 
-DECODE_FREETEXT_PAYLOAD="{\"signal_text\": \"$ENCODED_FREETEXT\"}"
+DECODE_FREETEXT_PAYLOAD="{\"message\": \"$ENCODED_FREETEXT\"}"
 
 echo "Calling: POST /api/v1/whiteflag/decode/"
 DECODED_FREETEXT=$(api_call "POST" "/api/v1/whiteflag/decode/" "$DECODE_FREETEXT_PAYLOAD")
@@ -217,12 +220,15 @@ echo "Decoded message:"
 echo "$DECODED_FREETEXT" | jq '.' 2>/dev/null || echo "$DECODED_FREETEXT"
 echo ""
 
+# Extract the decoded message from the array response [decoded_message, success]
+DECODED_FREETEXT_MSG=$(echo "$DECODED_FREETEXT" | jq -r '.[0] // .' 2>/dev/null)
+
 # Verify decoded message
-FT_MESSAGE_CODE=$(echo "$DECODED_FREETEXT" | jq -r '.messageCode // .signal_body.messageCode // empty' 2>/dev/null)
-FT_PSEUDO_CODE=$(echo "$DECODED_FREETEXT" | jq -r '.pseudoMessageCode // .signal_body.pseudoMessageCode // empty' 2>/dev/null)
-FT_REF_IND=$(echo "$DECODED_FREETEXT" | jq -r '.referenceIndicator // .signal_body.referenceIndicator // empty' 2>/dev/null)
-FT_REF_MSG=$(echo "$DECODED_FREETEXT" | jq -r '.referencedMessage // .signal_body.referencedMessage // empty' 2>/dev/null)
-FT_TEXT=$(echo "$DECODED_FREETEXT" | jq -r '.text // .signal_body.text // empty' 2>/dev/null)
+FT_MESSAGE_CODE=$(echo "$DECODED_FREETEXT_MSG" | jq -r '.messageCode // .signal_body.messageCode // empty' 2>/dev/null)
+FT_PSEUDO_CODE=$(echo "$DECODED_FREETEXT_MSG" | jq -r '.pseudoMessageCode // .signal_body.pseudoMessageCode // empty' 2>/dev/null)
+FT_REF_IND=$(echo "$DECODED_FREETEXT_MSG" | jq -r '.referenceIndicator // .signal_body.referenceIndicator // empty' 2>/dev/null)
+FT_REF_MSG=$(echo "$DECODED_FREETEXT_MSG" | jq -r '.referencedMessage // .signal_body.referencedMessage // empty' 2>/dev/null)
+FT_TEXT=$(echo "$DECODED_FREETEXT_MSG" | jq -r '.text // .signal_body.text // empty' 2>/dev/null)
 
 if [ "$FT_MESSAGE_CODE" != "T" ]; then
     echo -e "${RED}❌ TEST 4 FAILED: messageCode should be 'T', got '$FT_MESSAGE_CODE'${NC}"

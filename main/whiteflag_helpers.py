@@ -335,17 +335,23 @@ def whiteflag_encoder_helper(
                 "0000000000000000000000000000000000000000000000000000000000000000"
             )
     
-    processed_payload = json.dumps({k: v for k, v in json_packet.items() if v})
+    # Remove None values while preserving order
+    # Use list comprehension to maintain exact insertion order
+    cleaned_packet = {}
+    for k, v in json_packet.items():
+        if v is not None:
+            cleaned_packet[k] = v
     
     # Debug logging for test messages
     if payload.get("pseudoMessageCode"):
         import logging
         logger = logging.getLogger(__name__)
-        logger.error(f"DEBUG encoder_helper: Sending to Rust encoder: {processed_payload}")
+        logger.error(f"DEBUG encoder_helper: json_packet keys order: {list(cleaned_packet.keys())}")
+        logger.error(f"DEBUG encoder_helper: Sending to Rust encoder: {json.dumps(cleaned_packet)}")
     
     response = requests.post(
         f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_encode",
-        data=processed_payload,
+        json=cleaned_packet,  # Use json= instead of data= to ensure proper Content-Type header
         timeout=5,
     )
     return create_whiteflag_encoder_response(
