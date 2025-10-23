@@ -1,87 +1,177 @@
 import json
 import os
-from typing import Optional
+from typing import Optional, Tuple
 
-from silk.profiling.profiler import silk_profile
+# from silk.profiling.profiler import silk_profile  # DISABLED: Silk removed
 
 import requests
 
-from main.models import APIGroup
+from main.models import APIGroup, WhiteflagAuthentication
 
 
-def convert_to_test_message(signal_body: dict) -> dict:
+# @silk_profile(name="submit_initial_authentication")  # DISABLED: Silk removed
+def submit_initial_authentication(
+    user,
+    verification_method: str,
+    verification_data: str
+) -> Tuple[dict, bool]:
     """
-    Converts a regular WhiteFlag message to a Test (T) message.
+    Submits A(0) initial authentication message for a user.
     
-    Test messages allow testing on live blockchains without polluting operational data.
-    They are clearly marked with messageCode "T" and include a pseudoMessageCode field
-    that indicates which message type is being tested.
+    Per Whiteflag spec 5.1.1: "Each account should be identified by sending 
+    an A(0) initial authentication message, before sending any other message."
     
-    IMPORTANT: Field order matters! WhiteFlag protocol specifies:
-    - Header fields (prefix, version, encryptionIndicator, duressIndicator, messageCode)
-    - Reference fields (referenceIndicator, referencedMessage) if applicable
-    - pseudoMessageCode field (indicates which message type is being tested)
-    - Message body fields (depends on pseudoMessageCode type)
+    For Method 2 (Pre-shared Token): The verification_data is a private secret
+    that will be HKDF-derived using the blockchain address as context to create
+    a public verification token for the blockchain.
     
     Args:
-        signal_body: The original message body dict
-        
+        user: Django User object
+        verification_method: "1" for URL validation, "2" for shared token
+        verification_data: URL (Method 1) or HEX pre-shared secret (Method 2)
+    
     Returns:
-        Modified message body dict with messageCode "T" and pseudoMessageCode set in correct order
-        
-    Example:
-        Free Text message {"messageCode": "F", "text": "Hello"}
-        becomes Test message {"messageCode": "T", "pseudoMessageCode": "F", "text": "Hello"}
+        (response_dict, success_bool)
     """
-    # Store the original message code
-    original_message_code = signal_body.get("messageCode", None)
+    # Check if user already has authentication
+    if WhiteflagAuthentication.objects.filter(user=user, is_active=True).exists():
+        return (
+            {
+                "error": "User already has active authentication",
+                "fix": "Use A(4) discontinuation before re-authenticating"
+            },
+            False
+        )
     
-    # If already a test message, return as-is
-    if original_message_code == "T":
-        return signal_body
+    # For Method 2, derive the public token using HKDF
+    derived_token = None
+    if verification_method == "2":
+        try:
+            # Get blockchain address for the user (context for HKDF)
+            from main.models import UserKeys
+            user_keys = UserKeys.objects.get(user=user)
+            blockchain_address = user_keys.address
+            
+            if not blockchain_address:
+                return (
+                    {
+                        "error": "User has no blockchain address",
+                        "fix": "Create blockchain account first"
+                    },
+                    False
+                )
+            
+            # Convert blockchain address to binary context for HKDF
+            # Per Whiteflag spec 5.2.3: "the binary representation of the blockchain address"
+            blockchain_context = blockchain_address.encode('utf-8').hex()
+            
+        except UserKeys.DoesNotExist:
+            return (
+                {
+                    "error": "User has no blockchain keys",
+                    "fix": "Create blockchain account first"
+                },
+                False
+            )
+        
+        try:
+            response = requests.post(
+                f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/derive_auth_token",
+                json={
+                    "secret": verification_data,
+                    "context": blockchain_context,
+                },
+                timeout=5,
+            )
+            
+            if response.status_code != 200:
+                return (
+                    {"error": "Failed to derive authentication token", "details": response.text},
+                    False
+                )
+            
+            result = response.json()
+            if not result.get("success"):
+                return (
+                    {"error": "Token derivation failed", "details": result.get("error")},
+                    False
+                )
+            
+            derived_token = result.get("derived_token")
+            
+        except requests.exceptions.RequestException as e:
+            return (
+                {"error": "Failed to connect to crypto service", "details": str(e)},
+                False
+            )
     
-    # Create new dict with correct WhiteFlag field order for Test messages
-    # Order: header fields → reference fields → pseudoMessageCode → body fields
-    test_message = {}
+    # Create A(0) message payload
+    payload = {
+        "prefix": "WF",
+        "version": "1",
+        "encryptionIndicator": "0",
+        "duressIndicator": "0",
+        "messageCode": "A",
+        "referenceIndicator": "0",  # Initial authentication
+        "referencedMessage": "0" * 64,  # No reference for A(0)
+        "verificationMethod": verification_method,
+        # For Method 2, use the derived token; for Method 1, use the URL directly
+        "verificationData": derived_token if verification_method == "2" else verification_data,
+    }
     
-    # Add prefix and version only if they exist (encoder will add defaults if needed)
-    if "prefix" in signal_body:
-        test_message["prefix"] = signal_body["prefix"]
-    if "version" in signal_body:
-        test_message["version"] = signal_body["version"]
+    # Submit via whiteflag encoder
+    result, success = whiteflag_encoder_helper(payload)
     
-    # Add required header fields
-    test_message["encryptionIndicator"] = signal_body.get("encryptionIndicator")
-    test_message["duressIndicator"] = signal_body.get("duressIndicator")
-    test_message["messageCode"] = "T"  # Convert to test message
+    if success:
+        # result is the encoded message string when successful
+        # Store authentication record
+        # Store the ORIGINAL secret for Method 2 (not the derived token)
+        auth_record = WhiteflagAuthentication.objects.create(
+            user=user,
+            verification_method=verification_method,
+            verification_data=verification_data,  # Store original secret
+            transaction_hash=None,  # Will be updated after blockchain submission
+            is_active=True
+        )
+        
+        return (
+            {
+                "status": "authenticated",
+                "verification_method": verification_method,
+                "encoded_message": result,
+                "message": "A(0) initial authentication submitted successfully",
+                "authentication_id": auth_record.id,
+                # Include derived token info for Method 2
+                "derived_token": derived_token if verification_method == "2" else None,
+            },
+            True
+        )
     
-    # Add reference fields if present (MUST come before pseudoMessageCode!)
-    # Per WhiteFlag spec and whiteflag-rust implementation
-    if "referenceIndicator" in signal_body:
-        test_message["referenceIndicator"] = signal_body["referenceIndicator"]
-    if "referencedMessage" in signal_body:
-        test_message["referencedMessage"] = signal_body["referencedMessage"]
-    
-    # Add pseudoMessageCode AFTER reference fields
-    test_message["pseudoMessageCode"] = original_message_code  # Store original type
-    
-    # Add all remaining body fields (text, subjectCode, dateTime, etc.)
-    # These come after pseudoMessageCode in the protocol
-    # Note: Normalize 'datetime' to 'dateTime' for WhiteFlag protocol compliance
-    body_fields = [k for k in signal_body.keys() 
-                   if k not in ["prefix", "version", "encryptionIndicator", "duressIndicator", 
-                                "messageCode", "referenceIndicator", "referencedMessage"]]
-    for field in body_fields:
-        # Normalize datetime to dateTime (WhiteFlag protocol uses camelCase)
-        if field == "datetime":
-            test_message["dateTime"] = signal_body[field]
-        else:
-            test_message[field] = signal_body[field]
-    
-    return test_message
+    # When not successful, result is an error dict
+    return (result, False)
 
 
-@silk_profile(name="generate_group_keys")
+# @silk_profile(name="check_authentication_status")  # DISABLED: Silk removed
+def check_authentication_status(user) -> bool:
+    """
+    Check if user has submitted A(0) initial authentication.
+    
+    Per Whiteflag spec 5.1.1: Messages sent before A(0) may be 
+    considered unauthenticated by recipients.
+    
+    Args:
+        user: Django User object
+    
+    Returns:
+        True if user has active authentication, False otherwise
+    """
+    return WhiteflagAuthentication.objects.filter(
+        user=user,
+        is_active=True
+    ).exists()
+
+
+# @silk_profile(name="generate_group_keys")  # DISABLED: Silk removed
 def generate_group_keys(group: APIGroup) -> bool:
     if (
         group.public_diffie_hellman_key is not None
@@ -101,7 +191,7 @@ def generate_group_keys(group: APIGroup) -> bool:
     return True
 
 
-@silk_profile(name="generate_diffie_hellman_keys")
+# @silk_profile(name="generate_diffie_hellman_keys")  # DISABLED: Silk removed
 def generate_diffie_hellman_keys() -> dict:
     try:
         response = requests.post(
@@ -122,7 +212,7 @@ def generate_diffie_hellman_keys() -> dict:
         }
 
 
-@silk_profile(name="generate_shared_secret")
+# @silk_profile(name="generate_shared_secret")  # DISABLED: Silk removed
 def generate_shared_secret(our_group: APIGroup, their_group: APIGroup) -> (str, bool):
     if (
         our_group.private_diffie_hellman_key is None
@@ -145,16 +235,14 @@ def generate_shared_secret(our_group: APIGroup, their_group: APIGroup) -> (str, 
             },
             timeout=5,
         )
-        response.raise_for_status()
-        response_data = response.json()
-        if "shared_secret" not in response_data:
-            return ({"error": "shared secret not generated: missing shared_secret in response"}), False
-        return response_data["shared_secret"], True
-    except (requests.RequestException, requests.JSONDecodeError, KeyError) as e:
-        return ({"error": f"shared secret not generated: {str(e)}"}), False
+        if response.status_code != 200:
+            return ({"error": "shared secret not generated"}), False
+        return response.json()["shared_secret"], True
+    except requests.HTTPError:
+        return ({"error": "shared secret not generated"}), False
 
 
-@silk_profile(name="whiteflag_encrypt_helper")
+# @silk_profile(name="whiteflag_encrypt_helper")  # DISABLED: Silk removed
 def whiteflag_encrypt_helper(message: str, shared_secret: str) -> (str, bool):
     try:
         response = requests.post(
@@ -170,7 +258,7 @@ def whiteflag_encrypt_helper(message: str, shared_secret: str) -> (str, bool):
         return "message not encrypted", False
 
 
-@silk_profile(name="whiteflag_decrypt_helper")
+# @silk_profile(name="whiteflag_decrypt_helper")  # DISABLED: Silk removed
 def whiteflag_decrypt_helper(message: str, shared_secret: str) -> (str, bool):
     try:
         response = requests.post(
@@ -216,142 +304,55 @@ def create_whiteflag_encoder_response(
     return (return_value["encoded"], True)
 
 
-@silk_profile(name="whiteflag_encoder_helper")
+# @silk_profile(name="whiteflag_encoder_helper")  # DISABLED: Silk removed
 def whiteflag_encoder_helper(
     payload: dict,
     sender_group: Optional[APIGroup] = None,
     recipient_group: Optional[APIGroup] = None,
-) -> (str, bool):
+) -> (dict, bool):
     datetime_field = payload.get("datetime", None)
     if datetime_field is None:
         datetime_field = payload.get("dateTime", None)
     encryption_indicator = payload.get("encryptionIndicator", None)
     if sender_group and recipient_group:
         encryption_indicator = "1"
-    
-    # Note: We do NOT hex-encode text fields here!
-    # The Rust WhiteFlag encoder handles UTF-8 encoding automatically.
-    # Text fields (text, verificationData, resourceData) should be passed as plain UTF-8 strings.
-    
-    # For messages with pseudoMessageCode (Test messages), use explicit WhiteFlag field order
-    # Cannot rely on dict iteration order - must explicitly order fields per WhiteFlag spec
-    if payload.get("pseudoMessageCode"):
-        # Build json_packet with explicit WhiteFlag field order:
-        # 1. Header fields
-        # 2. Reference fields (if present)
-        # 3. pseudoMessageCode
-        # 4. Body fields (depends on pseudoMessageCode type)
-        
-        json_packet = {
-            "prefix": payload.get("prefix", "WF"),
-            "version": payload.get("version", "1"),
-            "encryptionIndicator": encryption_indicator or payload.get("encryptionIndicator"),
-            "duressIndicator": payload.get("duressIndicator"),
-            "messageCode": payload.get("messageCode"),
-        }
-        
-        # Add reference fields if present (MUST come before pseudoMessageCode!)
-        if "referenceIndicator" in payload:
-            json_packet["referenceIndicator"] = payload["referenceIndicator"]
-        if "referencedMessage" in payload:
-            json_packet["referencedMessage"] = payload["referencedMessage"]
-        elif payload.get("referenceIndicator") == "0":
-            # If referenceIndicator is 0, ensure referencedMessage has default value
-            json_packet["referencedMessage"] = "0000000000000000000000000000000000000000000000000000000000000000"
-        
-        # Add pseudoMessageCode AFTER reference fields
-        json_packet["pseudoMessageCode"] = payload["pseudoMessageCode"]
-        
-        # Add body fields based on pseudoMessageCode type
-        # Order varies by message type, but we add them in a logical order
-        
-        # Common fields (if present)
-        if "text" in payload:
-            json_packet["text"] = payload["text"]
-        if "verificationMethod" in payload:
-            json_packet["verificationMethod"] = payload["verificationMethod"]
-        if "verificationData" in payload:
-            json_packet["verificationData"] = payload["verificationData"]
-        if "cryptoDataType" in payload:
-            json_packet["cryptoDataType"] = payload["cryptoDataType"]
-        if "cryptoData" in payload:
-            json_packet["cryptoData"] = payload["cryptoData"]
-        if "resourceMethod" in payload:
-            json_packet["resourceMethod"] = payload["resourceMethod"]
-        if "resourceData" in payload:
-            json_packet["resourceData"] = payload["resourceData"]
-        
-        # Infrastructure/Sign fields
-        if "subjectCode" in payload:
-            json_packet["subjectCode"] = payload["subjectCode"]
-        if datetime_field:
-            json_packet["dateTime"] = datetime_field
-        if "duration" in payload:
-            json_packet["duration"] = payload["duration"]
-        if "objectType" in payload:
-            json_packet["objectType"] = payload["objectType"]
-        if "objectLatitude" in payload:
-            json_packet["objectLatitude"] = payload["objectLatitude"]
-        if "objectLongitude" in payload:
-            json_packet["objectLongitude"] = payload["objectLongitude"]
-        if "objectSizeDim1" in payload:
-            json_packet["objectSizeDim1"] = payload["objectSizeDim1"]
-        if "objectSizeDim2" in payload:
-            json_packet["objectSizeDim2"] = payload["objectSizeDim2"]
-        if "objectOrientation" in payload:
-            json_packet["objectOrientation"] = payload["objectOrientation"]
-        if "objectTypeQuant" in payload:
-            json_packet["objectTypeQuant"] = payload["objectTypeQuant"]
-    else:
-        # For non-test messages, use the traditional field order
-        json_packet = {
-            "prefix": "WF",
-            "version": "1",
-            "encryptionIndicator": encryption_indicator,
-            "duressIndicator": payload.get("duressIndicator", None),
-            "messageCode": payload.get("messageCode", None),
-            "referenceIndicator": payload.get("referenceIndicator", None),
-            "referencedMessage": payload.get("referencedMessage", None),
-            "verificationMethod": payload.get("verificationMethod", None),
-            "verificationData": payload.get("verificationData", None),
-            "cryptoDataType": payload.get("cryptoDataType", None),
-            "cryptoData": payload.get("cryptoData", None),
-            "text": payload.get("text", None),
-            "resourceMethod": payload.get("resourceMethod", None),
-            "resourceData": payload.get("resourceData", None),
-            "subjectCode": payload.get("subjectCode", None),
-            "dateTime": datetime_field,
-            "duration": payload.get("duration", None),
-            "objectType": payload.get("objectType", None),
-            "objectLatitude": payload.get("objectLatitude", None),
-            "objectLongitude": payload.get("objectLongitude", None),
-            "objectSizeDim1": payload.get("objectSizeDim1", None),
-            "objectSizeDim2": payload.get("objectSizeDim2", None),
-            "objectOrientation": payload.get("objectOrientation", None),
-            "objectTypeQuant": payload.get("objectTypeQuant", None),
-        }
-        if payload.get("referencedMessage", None) is None:
-            json_packet["referencedMessage"] = (
-                "0000000000000000000000000000000000000000000000000000000000000000"
-            )
-    
-    # Remove None values while preserving order
-    # Use list comprehension to maintain exact insertion order
-    cleaned_packet = {}
-    for k, v in json_packet.items():
-        if v is not None:
-            cleaned_packet[k] = v
-    
-    # Debug logging for test messages
-    if payload.get("pseudoMessageCode"):
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.error(f"DEBUG encoder_helper: json_packet keys order: {list(cleaned_packet.keys())}")
-        logger.error(f"DEBUG encoder_helper: Sending to Rust encoder: {json.dumps(cleaned_packet)}")
-    
+    if payload.get("text", None):
+        payload["text"] = payload["text"].encode("utf-8").hex()
+    json_packet = {
+        "prefix": "WF",
+        "version": "1",
+        "encryptionIndicator": encryption_indicator,
+        "duressIndicator": payload.get("duressIndicator", None),
+        "messageCode": payload.get("messageCode", None),
+        "referenceIndicator": payload.get("referenceIndicator", None),
+        "referencedMessage": payload.get("referencedMessage", None),
+        "verificationMethod": payload.get("verificationMethod", None),
+        "verificationData": payload.get("verificationData", None),
+        "cryptoDataType": payload.get("cryptoDataType", None),
+        "cryptoData": payload.get("cryptoData", None),
+        "text": payload.get("text", None),
+        "resourceMethod": payload.get("resourceMethod", None),
+        "resourceData": payload.get("resourceData", None),
+        "pseudoMessageCode": payload.get("pseudoMessageCode", None),
+        "subjectCode": payload.get("subjectCode", None),
+        "dateTime": datetime_field,
+        "duration": payload.get("duration", None),
+        "objectType": payload.get("objectType", None),
+        "objectLatitude": payload.get("objectLatitude", None),
+        "objectLongitude": payload.get("objectLongitude", None),
+        "objectSizeDim1": payload.get("objectSizeDim1", None),
+        "objectSizeDim2": payload.get("objectSizeDim2", None),
+        "objectOrientation": payload.get("objectOrientation", None),
+        "objectTypeQuant": payload.get("objectTypeQuant", None),
+    }
+    if payload.get("referencedMessage", None) is None:
+        json_packet["referencedMessage"] = (
+            "0000000000000000000000000000000000000000000000000000000000000000"
+        )
+    processed_payload = json.dumps({k: v for k, v in json_packet.items() if v})
     response = requests.post(
         f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_encode",
-        json=cleaned_packet,  # Use json= instead of data= to ensure proper Content-Type header
+        data=processed_payload,
         timeout=5,
     )
     return create_whiteflag_encoder_response(
@@ -373,26 +374,20 @@ def send_decode_final_request(signal: str) -> (dict, bool):
     if not response.json()["success"]:
         return ({"error": response.json()["error"]}, False)
     decoded = json.loads(response.json()["decoded"])
-    
-    # Note: We do NOT need to hex-decode text fields here!
-    # The Rust WhiteFlag decoder already returns UTF-8 strings for text fields.
-    # Fields like text, verificationData, and resourceData are already decoded.
-    
+    if decoded.get("text", None):
+        decoded["text"] = bytes.fromhex(decoded["text"]).decode("utf-8")
     return (
         decoded,
         response.json()["success"],
     )
 
 
-@silk_profile(name="whiteflag_decoder_helper")
+# @silk_profile(name="whiteflag_decoder_helper")  # DISABLED: Silk removed
 def decode(
     signal: str,
     sender_group: Optional[APIGroup] = None,
     recipient_group: Optional[APIGroup] = None,
 ) -> (dict, bool):
-    # Ensure signal is a string
-    if not isinstance(signal, str):
-        return ({"error": "signal must be a string"}, False)
     if signal[0:2] != "57":
         return ({"error": "not a whiteflag signal"}, False)
     if signal[7] == "1":

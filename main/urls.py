@@ -58,10 +58,35 @@ urlpatterns = [
     path("whiteflag/healthcheck/", whiteflag_views.fennel_cli_healthcheck),
     path("fennel/healthcheck/", views.subservice_healthcheck),
     path("whiteflag/authenticate/", whiteflag_views.whiteflag_authenticate),
+    path("whiteflag/authentication-status/", whiteflag_views.whiteflag_authentication_status),
     path(
         "whiteflag/discontinue_authentication/",
         whiteflag_views.whiteflag_discontinue_authentication,
     ),
+    # Enhanced authentication endpoints
+    path("user/auth_status/", whiteflag_views.user_auth_status),
+    path("whiteflag/publish_ecdh_key/", whiteflag_views.publish_ecdh_key),
+    # ECDH authentication endpoints
+    path("ecdh/generate_keypair/", whiteflag_views.generate_ecdh_keypair),
+    path("ecdh/get_my_public_key/", whiteflag_views.get_my_ecdh_public_key),
+    path("ecdh/derive_auth_token/", whiteflag_views.derive_auth_from_ecdh),
+    # Self-ECDH universal authentication (RECOMMENDED)
+    path("whiteflag/self_authenticate/", whiteflag_views.self_authenticate),
+    path("whiteflag/verify_user_universal/", whiteflag_views.verify_user_universal),
+    path("whiteflag/establish_private_channel/", whiteflag_views.establish_private_channel),
+    # Peer-to-peer ECDH authentication (LEGACY - for specific use cases)
+    path("whiteflag/discover_users/", whiteflag_views.discover_users_with_ecdh),
+    path("whiteflag/user_ecdh_info/<str:username>/", whiteflag_views.get_user_ecdh_info),
+    path("whiteflag/authenticate_with_user/", whiteflag_views.authenticate_with_user),
+    path("whiteflag/verify_user/", whiteflag_views.verify_user_authentication),
+    path("whiteflag/verify_any_user/", whiteflag_views.verify_any_user),
+    path("whiteflag/verifiable_users/", whiteflag_views.get_verifiable_users),
+    path("whiteflag/send_confirmation/", whiteflag_views.send_confirmation),
+    path("whiteflag/confirmations_received/", whiteflag_views.get_confirmations_received),
+    # Token request system
+    path("user/request_tokens/", whiteflag_views.request_tokens),
+    path("admin/token_requests/", whiteflag_views.list_token_requests_admin),
+    path("admin/fulfill_token_request/", whiteflag_views.fulfill_token_request),
     path("whiteflag/encode/", whiteflag_views.whiteflag_encode),
     path("whiteflag/decode/", whiteflag_views.whiteflag_decode),
     path(
