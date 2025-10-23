@@ -355,14 +355,66 @@ def publish_ecdh_key(request):
         "cryptoData": public_key,
     }
     
-    # Submit to blockchain
+    # Encode the K(0)0A message
     encoded_message, success = whiteflag_encoder_helper(payload)
     
     if not success:
         return Response({
-            "error": "Failed to publish ECDH key",
+            "error": "Failed to encode ECDH key message",
             "details": encoded_message
         }, status=400)
+    
+    # Submit to blockchain via subservice (following the flow: API → Subservice → Node)
+    from main.models import UserKeys
+    import os
+    import requests
+    
+    try:
+        user_keys = UserKeys.objects.get(user=request.user)
+        
+        subservice_payload = {
+            "mnemonic": user_keys.mnemonic,
+            "content": encoded_message,
+        }
+        
+        blockchain_response = requests.post(
+            f"{os.environ.get('FENNEL_SUBSERVICE_IP')}/send_new_signal_with_blockchain_data",
+            data=subservice_payload,
+            timeout=30,
+        )
+        
+        if blockchain_response.status_code != 200:
+            return Response({
+                "error": "Failed to submit K(0)0A message to blockchain",
+                "details": blockchain_response.text,
+                "encoded_message": encoded_message,
+                "note": "Message encoded but not submitted. Store this for manual submission."
+            }, status=500)
+        
+        response_data = blockchain_response.json()
+        tx_hash = response_data.get("txHash", "")
+        if tx_hash and tx_hash.startswith("0x"):
+            tx_hash = tx_hash[2:]
+        
+        block_number = response_data.get("blockNumber")
+        block_hash = response_data.get("blockHash")
+        
+    except UserKeys.DoesNotExist:
+        return Response({
+            "error": "No keys found for user"
+        }, status=404)
+    except requests.exceptions.Timeout:
+        return Response({
+            "error": "Blockchain submission timed out",
+            "encoded_message": encoded_message,
+            "note": "Message encoded but submission timed out. Try again or submit manually."
+        }, status=500)
+    except Exception as e:
+        return Response({
+            "error": "Exception during blockchain submission",
+            "details": str(e),
+            "encoded_message": encoded_message
+        }, status=500)
     
     # Store public key with most recent authentication record
     # or create a note that this key was published
@@ -378,11 +430,14 @@ def publish_ecdh_key(request):
     return Response({
         "success": True,
         "encoded_message": encoded_message,
+        "transaction_hash": tx_hash,
+        "block_number": block_number,
+        "block_hash": block_hash,
         "message_code": "K",
         "reference_code": "0",
         "crypto_data_type": "0A",
         "public_key": public_key,
-        "message": "ECDH public key published successfully"
+        "message": "✅ K(0)0A message published successfully to blockchain"
     }, status=200)
 
 
