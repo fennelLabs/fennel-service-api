@@ -955,7 +955,7 @@ def self_authenticate(request):
             }
             
             blockchain_response = requests.post(
-                f"{os.environ.get('FENNEL_SUBSERVICE_IP')}/send_new_signal_with_blockchain_data/",
+                f"{os.environ.get('FENNEL_SUBSERVICE_IP')}/send_new_signal_with_blockchain_data",
                 data=subservice_payload,
                 timeout=30,
             )
