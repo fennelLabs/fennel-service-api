@@ -886,7 +886,13 @@ def self_authenticate(request):
         
         # Derive self-ECDH token
         # Using own public key as counterpart creates universal verifiability
-        context = user_keys.address or format(request.user.id, '064x')
+        # Context must be hex-encoded string (matching old derive_auth_token pattern)
+        if user_keys.address:
+            # Convert address string to hex (same as old Method 2 auth)
+            context = user_keys.address.encode('utf-8').hex()
+        else:
+            # Fallback to user ID as 32-byte hex
+            context = format(request.user.id, '064x')
         
         payload = {
             "my_private_key": user_keys.private_diffie_hellman_key,
