@@ -938,16 +938,55 @@ def self_authenticate(request):
             "verificationData": auth_token,
         }
         
-        # Encode and submit to blockchain
-        result_data, success = whiteflag_encoder_helper(payload)
+        # Encode the A(0) authentication message
+        encoded_message, success = whiteflag_encoder_helper(payload)
         
         if not success:
             return Response({
-                "error": "Failed to submit authentication",
-                "details": result_data
+                "error": "Failed to encode authentication message",
+                "details": encoded_message
             }, status=500)
         
-        # Store authentication record
+        # Submit to blockchain via subservice (following the flow: API → Subservice → Node)
+        try:
+            subservice_payload = {
+                "mnemonic": user_keys.mnemonic,
+                "content": encoded_message,
+            }
+            
+            blockchain_response = requests.post(
+                f"{os.environ.get('FENNEL_SUBSERVICE_IP')}/send_new_signal_with_blockchain_data/",
+                data=subservice_payload,
+                timeout=30,
+            )
+            
+            if blockchain_response.status_code != 200:
+                return Response({
+                    "error": "Failed to submit authentication to blockchain",
+                    "details": blockchain_response.text,
+                    "encoded_message": encoded_message,
+                    "note": "Message encoded but not submitted. Store this for manual submission."
+                }, status=500)
+            
+            response_data = blockchain_response.json()
+            tx_hash = response_data.get("txHash", "")
+            if tx_hash.startswith("0x"):
+                tx_hash = tx_hash[2:]
+            
+        except requests.exceptions.Timeout:
+            return Response({
+                "error": "Blockchain submission timed out",
+                "encoded_message": encoded_message,
+                "note": "Message encoded but submission timed out. Try again or submit manually."
+            }, status=500)
+        except Exception as e:
+            return Response({
+                "error": "Exception during blockchain submission",
+                "details": str(e),
+                "encoded_message": encoded_message
+            }, status=500)
+        
+        # Store authentication record with blockchain data
         auth_record = WhiteflagAuthentication.objects.create(
             user=request.user,
             verification_method="2",
@@ -955,7 +994,7 @@ def self_authenticate(request):
             ecdh_public_key=user_keys.public_diffie_hellman_key,
             ecdh_counterpart="self",  # Special marker for self-authentication
             ecdh_counterpart_key=user_keys.public_diffie_hellman_key,
-            transaction_hash=result_data.get("transaction_hash"),
+            transaction_hash=tx_hash,
             is_active=True
         )
         
@@ -963,11 +1002,13 @@ def self_authenticate(request):
             "success": True,
             "authentication_id": auth_record.id,
             "authentication_type": "self_ecdh_universal",
-            "transaction_hash": result_data.get("transaction_hash"),
-            "encoded_message": result_data.get("encoded_message"),
+            "transaction_hash": tx_hash,
+            "encoded_message": encoded_message,
+            "block_number": response_data.get("blockNumber"),
+            "block_hash": response_data.get("blockHash"),
             "verifiable_by": "anyone_with_ecdh_keys",
-            "message": "✅ Self-authenticated! Anyone with ECDH keys can verify your identity.",
-            "note": "Use establish_private_channel for on-demand encrypted communication"
+            "message": "✅ Self-authenticated! A(0) message submitted to blockchain.",
+            "note": "Your authentication is now verifiable by anyone with ECDH keys."
         }, status=200)
         
     except UserKeys.DoesNotExist:
