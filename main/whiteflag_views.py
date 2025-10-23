@@ -356,12 +356,12 @@ def publish_ecdh_key(request):
     }
     
     # Submit to blockchain
-    result, success = whiteflag_encoder_helper(payload)
+    encoded_message, success = whiteflag_encoder_helper(payload)
     
     if not success:
         return Response({
             "error": "Failed to publish ECDH key",
-            "details": result
+            "details": encoded_message
         }, status=400)
     
     # Store public key with most recent authentication record
@@ -377,11 +377,12 @@ def publish_ecdh_key(request):
     
     return Response({
         "success": True,
-        "transaction_hash": result.get("tx_hash"),
+        "encoded_message": encoded_message,
         "message_code": "K",
         "reference_code": "0",
         "crypto_data_type": "0A",
-        "public_key": public_key
+        "public_key": public_key,
+        "message": "ECDH public key published successfully"
     }, status=200)
 
 
