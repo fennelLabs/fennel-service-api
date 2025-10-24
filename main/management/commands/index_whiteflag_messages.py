@@ -27,7 +27,8 @@ Usage:
     python manage.py index_whiteflag_messages --start-block 341335 --end-block 341336 --dry-run
 
 Environment Variables:
-    PROTOCOL_HOST_WS: WebSocket RPC URL (default: ws://localhost:9944)
+    FENNEL_RPC: WebSocket RPC URL (default: ws://localhost:9944)
+    PROTOCOL_HOST_WS: Alternative WebSocket RPC URL
     
 Database:
     Stores indexed blocks in Signal table
@@ -98,7 +99,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        rpc_url = options['rpc_url'] or os.environ.get('PROTOCOL_HOST_WS', 'ws://localhost:9944')
+        rpc_url = options['rpc_url'] or os.environ.get('FENNEL_RPC') or os.environ.get('PROTOCOL_HOST_WS', 'ws://localhost:9944')
         batch_size = options['batch_size']
         dry_run = options['dry_run']
         verbose = options['verbose']
@@ -113,7 +114,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS('✓ Connected to blockchain'))
             
             # Get current chain state
-            finalized_hash = substrate.get_finalized_head()
+            finalized_hash = substrate.get_chain_finalised_head()
             finalized_header = substrate.get_block_header(finalized_hash)
             finalized_block = finalized_header['header']['number']
             
@@ -194,34 +195,36 @@ class Command(BaseCommand):
                         if verbose:
                             self.stdout.write(f'  Block {block_num:,}: {block_hash}')
                         
-                        # Get events for this block
-                        events = substrate.get_events(block_hash)
-                        
                         # Process each extrinsic in the block
                         for extrinsic_idx, extrinsic in enumerate(block['extrinsics']):
-                            # Check if this is a signal.sendSignal extrinsic
-                            if (extrinsic.value['call']['call_module'] == 'Signal' and
-                                extrinsic.value['call']['call_function'] == 'sendSignal'):
+                            # Check if this is a signal.send_signal extrinsic
+                            call_module = extrinsic.value.get('call', {}).get('call_module')
+                            call_function = extrinsic.value.get('call', {}).get('call_function')
+                            
+                            if call_module == 'Signal' and call_function == 'send_signal':
                                 
-                                # Extract signal data
-                                signal_data_hex = extrinsic.value['call']['call_args'][0]['value']
+                                # Extract signal data (hex string)
+                                call_args = extrinsic.value.get('call', {}).get('call_args', [])
+                                if not call_args:
+                                    continue
+                                    
+                                signal_data = call_args[0].get('value', '')
                                 
-                                # Convert hex to string (remove 0x prefix if present)
-                                if signal_data_hex.startswith('0x'):
-                                    signal_data_hex = signal_data_hex[2:]
+                                # Remove 0x prefix if present
+                                if signal_data.startswith('0x'):
+                                    signal_data = signal_data[2:]
                                 
-                                signal_text = signal_data_hex
+                                signal_text = signal_data
                                 
                                 # Get sender address from extrinsic
-                                sender_address = extrinsic.value['address']
+                                sender_address = extrinsic.value.get('address')
                                 
-                                # Extract message code from signal text (first character after prefix)
+                                # Extract message code from signal text
+                                # Whiteflag: First byte is message code (2 hex chars = 1 byte)
                                 message_code = None
-                                if len(signal_text) > 0:
-                                    # Whiteflag messages: First byte is message code
-                                    # Convert first 2 hex chars to ASCII
+                                if len(signal_text) >= 2:
                                     try:
-                                        first_byte = bytes.fromhex(signal_text[:2]).decode('ascii')
+                                        first_byte = bytes.fromhex(signal_text[:2]).decode('ascii', errors='ignore')
                                         if first_byte.isalpha():
                                             message_code = first_byte
                                     except:
