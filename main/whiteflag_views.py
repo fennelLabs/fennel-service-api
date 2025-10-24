@@ -427,8 +427,23 @@ def publish_ecdh_key(request):
         recent_auth.ecdh_public_key = public_key
         recent_auth.save()
     
+    # FIX: Store K(0)0A message in Signal database for indexing/querying
+    # Previously this message was only submitted to blockchain but not stored locally
+    from main.models import Signal
+    signal = Signal.objects.create(
+        signal_text=encoded_message,
+        sender=request.user,
+        tx_hash=tx_hash,
+        block_number=block_number,
+        block_hash=block_hash,
+        message_code="K",
+        synced=True,
+        finalized=True,  # Assuming message was successfully included in block
+    )
+    
     return Response({
         "success": True,
+        "signal_id": signal.id,
         "encoded_message": encoded_message,
         "transaction_hash": tx_hash,
         "block_number": block_number,
@@ -1053,9 +1068,24 @@ def self_authenticate(request):
             is_active=True
         )
         
+        # FIX: Store A(0) message in Signal database for indexing/querying
+        # Previously this message was only submitted to blockchain but not stored locally
+        from main.models import Signal
+        signal = Signal.objects.create(
+            signal_text=encoded_message,
+            sender=request.user,
+            tx_hash=tx_hash,
+            block_number=response_data.get("blockNumber"),
+            block_hash=response_data.get("blockHash"),
+            message_code="A",
+            synced=True,
+            finalized=True,  # Assuming message was successfully included in block
+        )
+        
         return Response({
             "success": True,
             "authentication_id": auth_record.id,
+            "signal_id": signal.id,
             "authentication_type": "self_ecdh_universal",
             "transaction_hash": tx_hash,
             "encoded_message": encoded_message,
