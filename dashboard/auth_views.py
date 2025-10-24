@@ -5,7 +5,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from silk.profiling.profiler import silk_profile
+# from silk.profiling.profiler import silk_profile  # DISABLED: Silk removed
 
 from dashboard.decorators import require_authentication
 from dashboard.forms import LoginForm, RegistrationForm
@@ -20,7 +20,7 @@ def redirect_authenticated_user(view_func):
     return wrapper
 
 
-@silk_profile(name="registration_view")
+# @silk_profile(name="registration_view")  # DISABLED: Silk removed
 @redirect_authenticated_user
 def registration_view(request):
     if request.method == "POST":
@@ -33,7 +33,7 @@ def registration_view(request):
     return render(request, "auth/register.html", {"form": form})
 
 
-@silk_profile(name="login_view")
+# @silk_profile(name="login_view")  # DISABLED: Silk removed
 @redirect_authenticated_user
 def login_view(request):
     if request.method == "POST":
@@ -51,14 +51,14 @@ def login_view(request):
     return render(request, "auth/login.html", {"form": form})
 
 
-@silk_profile(name="logout_view")
+# @silk_profile(name="logout_view")  # DISABLED: Silk removed
 def logout_view(request):
     messages.get_messages(request).used = True
     logout(request)
     return redirect(reverse("dashboard:login"))
 
 
-@silk_profile(name="change_password_view")
+# @silk_profile(name="change_password_view")  # DISABLED: Silk removed
 @require_authentication
 def change_password_view(request):
     messages.get_messages(request).used = True

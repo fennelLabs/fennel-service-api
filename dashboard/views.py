@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 from django.contrib.messages.storage import default_storage
 
-from silk.profiling.profiler import silk_profile
+# from silk.profiling.profiler import silk_profile  # DISABLED: Silk removed
 
 from dashboard.decorators import require_admin, require_authentication
 from dashboard.forms import (
@@ -20,7 +20,7 @@ from dashboard.blockchain_helpers import (
 )
 
 
-@silk_profile(name="index")
+# @silk_profile(name="index")  # DISABLED: Silk removed
 @require_authentication
 def index(request):
     request._messages = default_storage(request)
@@ -36,7 +36,7 @@ def index(request):
     )
 
 
-@silk_profile(name="send_group_join_request")
+# @silk_profile(name="send_group_join_request")  # DISABLED: Silk removed
 @require_authentication
 def send_group_join_request(request):
     if request.method == "POST":
@@ -71,7 +71,7 @@ def send_group_join_request(request):
     )
 
 
-@silk_profile(name="create_api_group")
+# @silk_profile(name="create_api_group")  # DISABLED: Silk removed
 @require_authentication
 def create_api_group(request):
     if request.method == "POST":
@@ -95,7 +95,7 @@ def create_api_group(request):
     )
 
 
-@silk_profile(name="import_wallet")
+# @silk_profile(name="import_wallet")  # DISABLED: Silk removed
 @require_authentication
 def import_wallet(request, group_id=None):
     if request.method == "POST":
@@ -114,7 +114,7 @@ def import_wallet(request, group_id=None):
     )
 
 
-@silk_profile(name="transfer_tokens_to_address_post")
+# @silk_profile(name="transfer_tokens_to_address_post")  # DISABLED: Silk removed
 def __tranfer_tokens_to_address_post(request, user_key, group_id, address, amount):
     print(f"Transferring {amount} tokens to {address}.")
     balance = check_balance(user_key)
@@ -149,7 +149,7 @@ def __tranfer_tokens_to_address_post(request, user_key, group_id, address, amoun
     )
 
 
-@silk_profile(name="transfer_tokens_to_address")
+# @silk_profile(name="transfer_tokens_to_address")  # DISABLED: Silk removed
 @require_authentication
 @require_admin
 def transfer_tokens_to_address(request, group_id=None):
@@ -178,7 +178,7 @@ def transfer_tokens_to_address(request, group_id=None):
     )
 
 
-@silk_profile(name="confirm_transfer_tokens_to_address")
+# @silk_profile(name="confirm_transfer_tokens_to_address")  # DISABLED: Silk removed
 @require_authentication
 @require_admin
 def confirm_transfer_tokens_to_address(request, group_id=None):
@@ -199,7 +199,7 @@ def confirm_transfer_tokens_to_address(request, group_id=None):
     return redirect("dashboard:api_group_members", group_id=group_id)
 
 
-@silk_profile(name="get_balance")
+# @silk_profile(name="get_balance")  # DISABLED: Silk removed
 @require_authentication
 def get_balance(request):
     if not UserKeys.objects.filter(user=request.user).exists():
@@ -216,7 +216,7 @@ def get_balance(request):
     return redirect("dashboard:index")
 
 
-@silk_profile(name="get_balance_for_member")
+# @silk_profile(name="get_balance_for_member")  # DISABLED: Silk removed
 @require_authentication
 def get_balance_for_member(request, group_id, member_id):
     if not UserKeys.objects.filter(user__pk=member_id).exists():

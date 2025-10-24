@@ -2,7 +2,7 @@ import os
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 
-from silk.profiling.profiler import silk_profile
+# from silk.profiling.profiler import silk_profile  # DISABLED: Silk removed
 
 import requests
 
@@ -20,7 +20,7 @@ from dashboard.forms import TransferTokenForm
 from dashboard.models import APIGroup, APIGroupJoinRequest, User, UserKeys
 
 
-@silk_profile(name="api_group_join_requests")
+# @silk_profile(name="api_group_join_requests")  # DISABLED: Silk removed
 @require_admin
 @require_authentication
 def api_group_join_requests(request, group_id=None):
@@ -35,7 +35,7 @@ def api_group_join_requests(request, group_id=None):
     )
 
 
-@silk_profile(name="accept_join_request")
+# @silk_profile(name="accept_join_request")  # DISABLED: Silk removed
 @require_admin
 @require_authentication
 def accept_join_request(request, group_id=None, request_id=None):
@@ -46,7 +46,7 @@ def accept_join_request(request, group_id=None, request_id=None):
     return redirect("dashboard:api_group_join_requests", group_id=group_id)
 
 
-@silk_profile(name="reject_join_request")
+# @silk_profile(name="reject_join_request")  # DISABLED: Silk removed
 @require_admin
 @require_authentication
 def reject_join_request(request, group_id=None, request_id=None):
@@ -56,7 +56,7 @@ def reject_join_request(request, group_id=None, request_id=None):
     return redirect("dashboard:api_group_join_requests", group_id=group_id)
 
 
-@silk_profile(name="api_group_members")
+# @silk_profile(name="api_group_members")  # DISABLED: Silk removed
 @require_admin
 @require_authentication
 def api_group_members(request, group_id=None):
@@ -87,7 +87,7 @@ def api_group_members(request, group_id=None):
     )
 
 
-@silk_profile(name="create_wallet")
+# @silk_profile(name="create_wallet")  # DISABLED: Silk removed
 @require_admin
 @require_authentication
 def create_wallet(request, group_id=None):
@@ -99,7 +99,7 @@ def create_wallet(request, group_id=None):
     return redirect("dashboard:api_group_members", group_id=group_id)
 
 
-@silk_profile(name="create_wallet_for_member")
+# @silk_profile(name="create_wallet_for_member")  # DISABLED: Silk removed
 @require_admin
 @require_authentication
 def create_wallet_for_member(request, group_id=None, member_id=None):
@@ -112,7 +112,7 @@ def create_wallet_for_member(request, group_id=None, member_id=None):
     return redirect("dashboard:api_group_members", group_id=group_id)
 
 
-@silk_profile(name="transfer_tokens_to_member_post")
+# @silk_profile(name="transfer_tokens_to_member_post")  # DISABLED: Silk removed
 def __tranfer_tokens_to_member_post(request, form, user_key, member, group_id):
     amount = form.cleaned_data.get("amount")
     username = member.user.username
@@ -149,7 +149,7 @@ def __tranfer_tokens_to_member_post(request, form, user_key, member, group_id):
     )
 
 
-@silk_profile(name="transfer_tokens_to_member")
+# @silk_profile(name="transfer_tokens_to_member")  # DISABLED: Silk removed
 @require_admin
 @require_authentication
 def transfer_tokens_to_member(request, group_id=None, member_id=None):
@@ -207,7 +207,7 @@ def transfer_tokens_to_member(request, group_id=None, member_id=None):
     )
 
 
-@silk_profile(name="confirm_transfer_tokens_to_member")
+# @silk_profile(name="confirm_transfer_tokens_to_member")  # DISABLED: Silk removed
 @require_admin
 @require_authentication
 def confirm_transfer_tokens_to_member(request, group_id=None, member_id=None):
@@ -228,7 +228,7 @@ def confirm_transfer_tokens_to_member(request, group_id=None, member_id=None):
     return redirect("dashboard:api_group_members", group_id=group_id)
 
 
-@silk_profile(name="remove_group_member")
+# @silk_profile(name="remove_group_member")  # DISABLED: Silk removed
 @require_admin
 @require_authentication
 def remove_group_member(request, group_id=None, member_id=None):
@@ -257,7 +257,7 @@ def remove_group_member(request, group_id=None, member_id=None):
     return redirect("dashboard:api_group_members", group_id=group_id)
 
 
-@silk_profile(name="generate_group_encryption_keys")
+# @silk_profile(name="generate_group_encryption_keys")  # DISABLED: Silk removed
 @require_admin
 @require_authentication
 def generate_group_encryption_keys(request, group_id=None):

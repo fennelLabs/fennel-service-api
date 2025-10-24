@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from knox.auth import TokenAuthentication
 
-from silk.profiling.profiler import silk_profile
+# from silk.profiling.profiler import silk_profile  # DISABLED: Silk removed
 
 import requests
 from main.decorators import requires_mnemonic_created
@@ -494,7 +494,7 @@ def get_fee_for_send_signal_list(request):
     )
 
 
-@silk_profile(name="send_signal_list")
+# @silk_profile(name="send_signal_list")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -549,7 +549,7 @@ def send_signal_list(request):
     )
 
 
-@silk_profile(name="get_fee_for_discontinue_signal")
+# @silk_profile(name="get_fee_for_discontinue_signal")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -607,7 +607,7 @@ def get_fee_for_discontinue_signal(request, signal_id=None):
         )
 
 
-@silk_profile(name="discontinue_signal")
+# @silk_profile(name="discontinue_signal")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])

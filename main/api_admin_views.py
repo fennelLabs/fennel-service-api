@@ -10,7 +10,7 @@ from rest_framework.decorators import (
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
-from silk.profiling.profiler import silk_profile
+# from silk.profiling.profiler import silk_profile  # DISABLED: Silk removed
 
 from knox.auth import TokenAuthentication
 
@@ -24,7 +24,7 @@ from main.decorators import fennel_admin_only
 from main.serializers import APIGroupJoinRequestSerializer
 
 
-@silk_profile(name="get_api_group_list")
+# @silk_profile(name="get_api_group_list")  # DISABLED: Silk removed
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -58,7 +58,7 @@ def get_api_group_list(request):
     )
 
 
-@silk_profile(name="create_new_api_group")
+# @silk_profile(name="create_new_api_group")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -97,7 +97,7 @@ def create_new_api_group(request):
     )
 
 
-@silk_profile(name="get_api_group_keys")
+# @silk_profile(name="get_api_group_keys")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -114,7 +114,7 @@ def add_user_to_api_group(request):
     return Response(status=status.HTTP_200_OK)
 
 
-@silk_profile(name="add_user_to_api_group")
+# @silk_profile(name="add_user_to_api_group")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -131,7 +131,7 @@ def remove_user_from_api_group(request):
     return Response(status=status.HTTP_200_OK)
 
 
-@silk_profile(name="remove_user_from_api_group")
+# @silk_profile(name="remove_user_from_api_group")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -142,7 +142,7 @@ def get_accounts_billable_count(request):
     return Response({"count": api_group.user_list.count()})
 
 
-@silk_profile(name="get_accounts_billable_count")
+# @silk_profile(name="get_accounts_billable_count")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -153,7 +153,7 @@ def get_api_group_requests_count(request):
     return Response({"count": api_group.request_counter})
 
 
-@silk_profile(name="get_api_group_requests_count")
+# @silk_profile(name="get_api_group_requests_count")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -172,7 +172,7 @@ def add_admin_to_api_group(request):
     return Response(status=status.HTTP_200_OK)
 
 
-@silk_profile(name="add_admin_to_api_group")
+# @silk_profile(name="add_admin_to_api_group")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -191,7 +191,7 @@ def remove_admin_from_api_group(request):
     return Response(status=status.HTTP_200_OK)
 
 
-@silk_profile(name="remove_admin_from_api_group")
+# @silk_profile(name="remove_admin_from_api_group")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -212,7 +212,7 @@ def get_api_group_users(request):
     )
 
 
-@silk_profile(name="get_api_group_join_requests")
+# @silk_profile(name="get_api_group_join_requests")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -229,7 +229,7 @@ def get_join_requests(request):
     )
 
 
-@silk_profile(name="send_join_request")
+# @silk_profile(name="send_join_request")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -245,7 +245,7 @@ def send_join_request(request):
     return Response(status=status.HTTP_200_OK)
 
 
-@silk_profile(name="accept_join_request")
+# @silk_profile(name="accept_join_request")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])

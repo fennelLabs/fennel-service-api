@@ -109,6 +109,7 @@ class SignalSerializer(serializers.ModelSerializer):
             "mempool_timestamp",
             "sender",
             "synced",
+            "active",
             "references",
             "confirmations",
             # Message fields

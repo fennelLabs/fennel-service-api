@@ -13,7 +13,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from knox.auth import TokenAuthentication
 
-from silk.profiling.profiler import silk_profile
+# from silk.profiling.profiler import silk_profile  # DISABLED: Silk removed
 
 import requests
 
@@ -22,7 +22,7 @@ from main.secret_key_utils import split_mnemonic, reconstruct_mnemonic
 from main.decorators import subject_to_api_limit
 
 
-@silk_profile(name="create_self_custodial_account")
+# @silk_profile(name="create_self_custodial_account")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -60,7 +60,7 @@ def create_self_custodial_account(request):
     )
 
 
-@silk_profile(name="reconstruct_self_custodial_account")
+# @silk_profile(name="reconstruct_self_custodial_account")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -79,7 +79,7 @@ def reconstruct_self_custodial_account(request):
     )
 
 
-@silk_profile(name="download_self_custodial_account_as_json")
+# @silk_profile(name="download_self_custodial_account_as_json")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -103,7 +103,7 @@ def download_self_custodial_account_as_json(request):
         return Response({"error": "could not get account json"})
 
 
-@silk_profile(name="get_self_custodial_account_address")
+# @silk_profile(name="get_self_custodial_account_address")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])

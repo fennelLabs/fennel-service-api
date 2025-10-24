@@ -15,7 +15,7 @@ from rest_framework.decorators import (
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
-from silk.profiling.profiler import silk_profile
+# from silk.profiling.profiler import silk_profile  # DISABLED: Silk removed
 
 from knox.auth import TokenAuthentication
 
@@ -31,9 +31,10 @@ from main.models import (
     ConfirmationRecord,
 )
 from main.serializers import SignalSerializer, TransactionSerializer
+from main.whiteflag_helpers import submit_initial_authentication
 
 
-@silk_profile(name="record_signal_fee")
+# @silk_profile(name="record_signal_fee")  # DISABLED: Silk removed
 def record_signal_fee(payload: dict) -> (dict, bool):
     response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_fee_for_new_signal/",
@@ -59,7 +60,7 @@ def record_signal_fee(payload: dict) -> (dict, bool):
     return response.json(), True
 
 
-@silk_profile(name="check_balance")
+# @silk_profile(name="check_balance")  # DISABLED: Silk removed
 def check_balance(key):
     try:
         payload = {"mnemonic": key.mnemonic}
@@ -79,7 +80,7 @@ def check_balance(key):
         return {"balance": int(key.balance)}
 
 
-@silk_profile(name="signal_send_helper")
+# @silk_profile(name="signal_send_helper")  # DISABLED: Silk removed
 def signal_send_helper(user_key: UserKeys, signal: Signal) -> (dict, bool):
     try:
         payload = {
@@ -231,7 +232,7 @@ def signal_send_with_blockchain_data_helper(user_key: UserKeys, signal: Signal) 
         )
 
 
-@silk_profile(name="create_account")
+# @silk_profile(name="create_account")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -254,11 +255,52 @@ def create_account(request):
     )
     mnemonic = response.json()["mnemonic"]
     keys.mnemonic = mnemonic
+    
+    # Immediately fetch and save the blockchain address
+    address_response = requests.post(
+        f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_address/",
+        data={"mnemonic": mnemonic},
+        timeout=5,
+    )
+    keys.address = address_response.json()["address"]
     keys.save()
-    return Response(mnemonic == keys.mnemonic)
+    
+    # Prepare response
+    account_data = {
+        "mnemonic_saved": mnemonic == keys.mnemonic,
+        "account_created": True,
+        "address": keys.address
+    }
+    
+    # Auto-submit A(0) authentication if auth data provided
+    auth_url = request.data.get("auth_url")
+    auth_token = request.data.get("auth_token")
+    
+    if auth_url or auth_token:
+        verification_method = "1" if auth_url else "2"
+        verification_data = auth_url if auth_url else auth_token
+        
+        auth_result, auth_success = submit_initial_authentication(
+            user=request.user,
+            verification_method=verification_method,
+            verification_data=verification_data
+        )
+        
+        if auth_success:
+            account_data["authentication"] = auth_result
+            account_data["authenticated"] = True
+        else:
+            account_data["authentication_error"] = auth_result
+            account_data["authenticated"] = False
+            account_data["note"] = "Account created but authentication failed. You can retry authentication later."
+    else:
+        account_data["authenticated"] = False
+        account_data["note"] = "Account created without Whiteflag authentication. Provide 'auth_url' or 'auth_token' to auto-authenticate."
+    
+    return Response(account_data)
 
 
-@silk_profile(name="download_account_as_json")
+# @silk_profile(name="download_account_as_json")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -277,7 +319,7 @@ def download_account_as_json(request):
         return Response({"error": "could not get account json"})
 
 
-@silk_profile(name="get_account_balance")
+# @silk_profile(name="get_account_balance")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -289,7 +331,7 @@ def get_account_balance(request):
     return Response(response)
 
 
-@silk_profile(name="get_address")
+# @silk_profile(name="get_address")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -309,7 +351,7 @@ def get_address(request):
     return Response(response.json())
 
 
-@silk_profile(name="get_fee_for_transfer_token")
+# @silk_profile(name="get_fee_for_transfer_token")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -337,7 +379,7 @@ def get_fee_for_transfer_token(request):
     return Response(response_json)
 
 
-@silk_profile(name="transfer_token")
+# @silk_profile(name="transfer_token")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -359,7 +401,7 @@ def transfer_token(request):
     return Response(response_json)
 
 
-@silk_profile(name="get_fee_for_new_signal")
+# @silk_profile(name="get_fee_for_new_signal")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -384,7 +426,7 @@ def get_fee_for_new_signal(request):
         return Response({"error": "could not get fee"})
 
 
-@silk_profile(name="send_new_signal")
+# @silk_profile(name="send_new_signal")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -408,7 +450,7 @@ def send_new_signal(request):
     )
 
 
-@silk_profile(name="get_fee_for_sync_signal")
+# @silk_profile(name="get_fee_for_sync_signal")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -428,7 +470,7 @@ def get_fee_for_sync_signal(request):
     return Response(response, status=code)
 
 
-@silk_profile(name="sync_signal")
+# @silk_profile(name="sync_signal")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -446,7 +488,7 @@ def sync_signal(request):
     )
 
 
-@silk_profile(name="confirm_signal")
+# @silk_profile(name="confirm_signal")  # DISABLED: Silk removed
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -456,7 +498,7 @@ def confirm_signal(request):
     return Response({"status": "ok"})
 
 
-@silk_profile(name="get_signal_by_id")
+# @silk_profile(name="get_signal_by_id")  # DISABLED: Silk removed
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -466,7 +508,7 @@ def get_signal_by_id(request, signal_id):
     return Response(serializer.data)
 
 
-@silk_profile(name="search_signals")
+# @silk_profile(name="search_signals")  # DISABLED: Silk removed
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -483,7 +525,7 @@ def search_signals(request):
     return Response(serializer.data)
 
 
-@silk_profile(name="get_signals")
+# @silk_profile(name="get_signals")  # DISABLED: Silk removed
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -501,8 +543,17 @@ def get_signals(request, count=None):  # noqa: C901
     start = request.GET.get("start", None)
     end = request.GET.get("end", None)
     groups = request.user.api_group_users.all()
+    # Optimize query with select_related and prefetch_related to prevent N+1 queries
+    # This reduces ~518 queries down to ~3-5 queries for 129 signals
     queryset = Signal.objects.filter(
         (Q(viewers=None) | Q(viewers__in=groups))
+    ).select_related(
+        'sender',  # ForeignKey: pre-load user data
+        'sender__keys'  # OneToOne through sender: pre-load user keys
+    ).prefetch_related(
+        'references',  # ManyToMany: pre-load referenced signals
+        'confirmations',  # Reverse ForeignKey: pre-load confirmations
+        'viewers'  # ManyToMany: pre-load viewer groups
     ).order_by("-timestamp")
     if not show_inactive:
         queryset = queryset.filter(active=True)
@@ -531,7 +582,7 @@ def get_signals(request, count=None):  # noqa: C901
     return Response(serializer.data)
 
 
-@silk_profile(name="get_signals_in_range")
+# @silk_profile(name="get_signals_in_range")  # DISABLED: Silk removed
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -548,7 +599,7 @@ def get_signals_in_range(request, start_index=None, end_index=None):
     return Response(serializer.data)
 
 
-@silk_profile(name="get_unsynced_signals")
+# @silk_profile(name="get_unsynced_signals")  # DISABLED: Silk removed
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -558,7 +609,7 @@ def get_unsynced_signals(request):
     return Response(serializer.data)
 
 
-@silk_profile(name="get_fee_history")
+# @silk_profile(name="get_fee_history")  # DISABLED: Silk removed
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])

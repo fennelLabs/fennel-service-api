@@ -2,14 +2,14 @@ import os
 
 from django.contrib import messages
 
-from silk.profiling.profiler import silk_profile
+# from silk.profiling.profiler import silk_profile  # DISABLED: Silk removed
 
 from dashboard.models import Transaction, UserKeys
 
 import requests
 
 
-@silk_profile(name="create_wallet_with_userkeys")
+# @silk_profile(name="create_wallet_with_userkeys")  # DISABLED: Silk removed
 def create_wallet_with_userkeys(request, keys: UserKeys) -> None:
     if keys.mnemonic is not None and keys.mnemonic != "":
         messages.error(
@@ -67,7 +67,7 @@ def create_wallet_with_userkeys(request, keys: UserKeys) -> None:
         return
 
 
-@silk_profile(name="import_account_with_mnemonic")
+# @silk_profile(name="import_account_with_mnemonic")  # DISABLED: Silk removed
 def import_account_with_mnemonic(request, mnemonic: str) -> None:
     response = requests.post(
         f"{os.environ.get('FENNEL_SUBSERVICE_IP', None)}/get_address",
@@ -97,7 +97,7 @@ def import_account_with_mnemonic(request, mnemonic: str) -> None:
     )
 
 
-@silk_profile(name="check_balance")
+# @silk_profile(name="check_balance")  # DISABLED: Silk removed
 def check_balance(key: UserKeys) -> int:
     payload = {"mnemonic": key.mnemonic}
     try:
@@ -115,7 +115,7 @@ def check_balance(key: UserKeys) -> int:
     return int(response.json()["balance"]) / 1000000000000
 
 
-@silk_profile(name="get_fee_for_transfer_token")
+# @silk_profile(name="get_fee_for_transfer_token")  # DISABLED: Silk removed
 def get_fee_for_transfer_token(recipient: str, amount: int, user_key: UserKeys) -> int:
     payload = {
         "mnemonic": user_key.mnemonic,
@@ -140,7 +140,7 @@ def get_fee_for_transfer_token(recipient: str, amount: int, user_key: UserKeys) 
     return round(int(response.json()["fee"]) / 1000000000000, 4)
 
 
-@silk_profile(name="transfer_token")
+# @silk_profile(name="transfer_token")  # DISABLED: Silk removed
 def transfer_token(recipient: str, amount: int, user_key: UserKeys) -> {int, str}:
     math_response = requests.post(
         f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/big_multiply",

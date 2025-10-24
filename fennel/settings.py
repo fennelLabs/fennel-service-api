@@ -88,8 +88,8 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_rest_passwordreset",
     "knox",
-    "django_nose",
-    "silk",
+    # "django_nose",  # TEMPORARILY DISABLED: incompatible with Python 3.12 (imp module removed)
+    # "silk",  # DISABLED: Profiling middleware causes DB connection exhaustion in production
     "bootstrap5",
     "crispy_bootstrap5",
     "anymail",
@@ -105,7 +105,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "silk.middleware.SilkyMiddleware",
+    # "silk.middleware.SilkyMiddleware",  # DISABLED: Creates zombie DB connections in production
     "dashboard.user_balance_middleware.user_balance_middleware",
     "dashboard.api_group_middleware.get_api_group_public_key",
 ]
@@ -143,6 +143,12 @@ if "RDS_HOSTNAME" in os.environ:
             "PASSWORD": os.environ["RDS_PASSWORD"],
             "HOST": os.environ["RDS_HOSTNAME"],
             "PORT": os.environ["RDS_PORT"],
+            # Close connections immediately after each request to prevent connection exhaustion
+            # CONN_MAX_AGE=0 closes connections, preventing idle connection buildup
+            "CONN_MAX_AGE": int(os.environ.get("CONN_MAX_AGE", "0")),
+            "OPTIONS": {
+                "connect_timeout": 10,
+            },
         }
     }
 elif "POSTGRES_USER" in os.environ:
@@ -153,6 +159,12 @@ elif "POSTGRES_USER" in os.environ:
             "USER": os.environ["POSTGRES_USER"],
             "PASSWORD": os.environ["POSTGRES_PASSWORD"],
             "HOST": os.environ["POSTGRES_HOST"],
+            # Close connections immediately after each request to prevent connection exhaustion
+            # CONN_MAX_AGE=0 closes connections, preventing idle connection buildup
+            "CONN_MAX_AGE": int(os.environ.get("CONN_MAX_AGE", "0")),
+            "OPTIONS": {
+                "connect_timeout": 10,
+            },
         }
     }
 else:

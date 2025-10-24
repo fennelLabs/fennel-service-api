@@ -1,7 +1,7 @@
 import ast
 import json
 
-from silk.profiling.profiler import silk_profile
+# from silk.profiling.profiler import silk_profile  # DISABLED: Silk removed
 
 from main.serializers import (
     ConfirmationRecordSerializer,
@@ -12,7 +12,7 @@ from main.models import ConfirmationRecord, Signal
 from main.whiteflag_helpers import decode
 
 
-@silk_profile(name="process_decoding_signal")
+# @silk_profile(name="process_decoding_signal")  # DISABLED: Silk removed
 def process_decoding_signal(user, signal, depth=0):
     if not signal.signal_body:
         signal_body, success = decode(
