@@ -246,6 +246,250 @@ def whiteflag_generate_shared_token(request):
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
+def authenticate_oneclick(request):
+    """
+    ONE-CLICK AUTHENTICATION - Whiteflag Method 2A (Pre-Shared Token)
+    
+    Complete authentication flow in a single button press:
+    1. Generate pre-shared secret (UUID)
+    2. Derive 32-byte token with HKDF-SHA256 (secret + address + salt)
+    3. Post A2(0) authentication message with derived token
+    4. Generate ECDH keypair (if not exists)
+    5. Post K(0)0A message with ECDH public key
+    
+    Per Whiteflag spec section 5.2.3:
+    - Token length: 32 bytes (256 bits)
+    - Salt: 0x420abc48f5d69328c457d61725d3fd7af2883cad8460976167e375b9f2c14081
+    - Info: Binary blockchain address
+    
+    Returns:
+        - shared_secret: UUID token (SAVE THIS SECURELY!)
+        - ecdh_public_key: Your ECDH public key (64 hex chars)
+        - a_transaction_hash: A2(0) message transaction hash
+        - k_transaction_hash: K(0)0A message transaction hash
+        - authentication_id: Database record ID
+    """
+    from main.models import UserKeys, WhiteflagAuthentication, Signal
+    
+    try:
+        # Step 1: Generate pre-shared secret (UUID)
+        shared_secret = str(uuid.uuid4())
+        
+        # Get user's keys and address
+        user_keys = UserKeys.objects.get(user=request.user)
+        
+        if not user_keys.address:
+            return Response({
+                "error": "No blockchain address found",
+                "message": "Create blockchain account first",
+                "fix": "Call POST /api/v1/fennel/create_account/"
+            }, status=404)
+        
+        blockchain_address = user_keys.address
+        
+        # Step 2: Derive 32-byte token with HKDF-SHA256
+        from substrateinterface import Keypair
+        binary_address = Keypair(ss58_address=blockchain_address).public_key
+        context_hex = binary_address.hex()
+        
+        payload = {
+            "secret": shared_secret,
+            "context": context_hex
+        }
+        
+        derive_response = requests.post(
+            f"{os.environ.get('FENNEL_CLI_IP')}/v1/derive_auth_token",
+            json=payload,
+            timeout=10
+        )
+        
+        if derive_response.status_code != 200:
+            return Response({
+                "error": "Failed to derive authentication token",
+                "details": derive_response.text
+            }, status=500)
+        
+        derive_result = derive_response.json()
+        
+        if not derive_result.get("success"):
+            return Response({
+                "error": "Token derivation failed",
+                "details": derive_result.get("error")
+            }, status=500)
+        
+        auth_token = derive_result["derived_token"]
+        
+        # Step 3: Post A2(0) authentication message
+        a_message_payload = {
+            "prefix": "WF",
+            "version": "1",
+            "encryptionIndicator": "0",
+            "duressIndicator": "0",
+            "messageCode": "A",
+            "referenceIndicator": "0",
+            "referencedMessage": "0" * 64,
+            "verificationMethod": "2",
+            "verificationData": auth_token  # Full 32-byte token (64 hex chars)
+        }
+        
+        encoded_a_message, encode_success = whiteflag_encoder_helper(a_message_payload)
+        
+        if not encode_success:
+            return Response({
+                "error": "Failed to encode A2(0) message",
+                "details": encoded_a_message
+            }, status=400)
+        
+        subservice_payload = {
+            "mnemonic": user_keys.mnemonic,
+            "content": encoded_a_message,
+        }
+        
+        blockchain_response = requests.post(
+            f"{os.environ.get('FENNEL_SUBSERVICE_IP')}/send_new_signal_with_blockchain_data",
+            data=subservice_payload,
+            timeout=30,
+        )
+        
+        if blockchain_response.status_code != 200:
+            return Response({
+                "error": "Failed to submit A2(0) to blockchain",
+                "details": blockchain_response.text,
+                "shared_secret": shared_secret,
+                "note": "Token derived successfully but blockchain submission failed"
+            }, status=500)
+        
+        a_response_data = blockchain_response.json()
+        a_tx_hash = a_response_data.get("txHash", "")
+        if a_tx_hash.startswith("0x"):
+            a_tx_hash = a_tx_hash[2:]
+        a_block_number = a_response_data.get("blockNumber")
+        
+        # Step 4: Generate ECDH keypair (if not exists)
+        ecdh_public_key = user_keys.public_diffie_hellman_key
+        ecdh_generated = False
+        
+        if not ecdh_public_key:
+            ecdh_response = requests.post(
+                f"{os.environ.get('FENNEL_CLI_IP')}/v1/generate_ecdh_keypair",
+                timeout=10
+            )
+            
+            if ecdh_response.status_code == 200:
+                ecdh_result = ecdh_response.json()
+                if ecdh_result.get("success"):
+                    user_keys.private_diffie_hellman_key = ecdh_result["private_key"]
+                    user_keys.public_diffie_hellman_key = ecdh_result["public_key"]
+                    user_keys.save()
+                    ecdh_public_key = ecdh_result["public_key"]
+                    ecdh_generated = True
+        
+        # Step 5: Post K(0)0A message with ECDH public key
+        k_tx_hash = None
+        k_block_number = None
+        k_warning = None
+        
+        if ecdh_public_key:
+            k_message_payload = {
+                "prefix": "WF",
+                "version": "1",
+                "encryptionIndicator": "0",
+                "duressIndicator": "0",
+                "messageCode": "K",
+                "referenceIndicator": "0",
+                "referencedMessage": "0" * 64,
+                "cryptoDataType": "0A",
+                "cryptoData": ecdh_public_key,
+            }
+            
+            encoded_k_message, k_encode_success = whiteflag_encoder_helper(k_message_payload)
+            
+            if k_encode_success:
+                k_blockchain_response = requests.post(
+                    f"{os.environ.get('FENNEL_SUBSERVICE_IP')}/send_new_signal_with_blockchain_data",
+                    data={"mnemonic": user_keys.mnemonic, "content": encoded_k_message},
+                    timeout=30,
+                )
+                
+                if k_blockchain_response.status_code == 200:
+                    k_response_data = k_blockchain_response.json()
+                    k_tx_hash = k_response_data.get("txHash", "")
+                    if k_tx_hash.startswith("0x"):
+                        k_tx_hash = k_tx_hash[2:]
+                    k_block_number = k_response_data.get("blockNumber")
+                else:
+                    k_warning = "A2(0) sent successfully but K(0)0A submission failed"
+            else:
+                k_warning = f"A2(0) sent but K(0)0A encoding failed: {encoded_k_message}"
+        else:
+            k_warning = "ECDH keypair generation failed"
+        
+        # Store authentication record
+        auth_record = WhiteflagAuthentication.objects.create(
+            user=request.user,
+            verification_method="2",
+            verification_data=auth_token,
+            ecdh_public_key=ecdh_public_key,
+            transaction_hash=a_tx_hash,
+            is_active=True
+        )
+        
+        # Store Signal records
+        Signal.objects.create(
+            signal_text=encoded_a_message,
+            sender=request.user,
+            tx_hash=a_tx_hash,
+            block_number=a_block_number,
+            message_code="A",
+            synced=True,
+            finalized=True
+        )
+        
+        if k_tx_hash:
+            Signal.objects.create(
+                signal_text=encoded_k_message,
+                sender=request.user,
+                tx_hash=k_tx_hash,
+                block_number=k_block_number,
+                message_code="K",
+                synced=True,
+                finalized=True
+            )
+        
+        response_data = {
+            "success": True,
+            "authentication_id": auth_record.id,
+            "shared_secret": shared_secret,
+            "ecdh_public_key": ecdh_public_key,
+            "ecdh_generated": ecdh_generated,
+            "a_transaction_hash": a_tx_hash,
+            "k_transaction_hash": k_tx_hash,
+            "blockchain_address": blockchain_address,
+            "message": "✅ Authentication complete! A2(0) and K(0)0A messages posted to blockchain.",
+            "warning": "⚠️ SAVE YOUR SHARED SECRET SECURELY! You'll need it to verify messages."
+        }
+        
+        if k_warning:
+            response_data["k_warning"] = k_warning
+        
+        return Response(response_data, status=200)
+        
+    except UserKeys.DoesNotExist:
+        return Response({
+            "error": "No keys found for user",
+            "message": "Create blockchain account first",
+            "fix": "Call POST /api/v1/fennel/create_account/"
+        }, status=404)
+    except Exception as e:
+        return Response({
+            "error": "Exception during one-click authentication",
+            "details": str(e)
+        }, status=500)
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def authenticate_with_shared_token(request):
     """
     Authenticate using Method 2A: Pre-Shared Token.

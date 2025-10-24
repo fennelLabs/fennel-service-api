@@ -97,9 +97,14 @@ urlpatterns = [
         "whiteflag/generate_shared_token/",
         whiteflag_views.whiteflag_generate_shared_token,
     ),
+    # ONE-CLICK AUTHENTICATION (Simplified Method 2A)
     path(
-        "whiteflag/generate_public_token/",
-        whiteflag_views.whiteflag_generate_public_token,
+        "whiteflag/authenticate_oneclick/",
+        whiteflag_views.authenticate_oneclick,
+    ),
+    path(
+        "whiteflag/authenticate_with_shared_token/",
+        whiteflag_views.authenticate_with_shared_token,
     ),
     path(
         "whiteflag/decode_list/",
