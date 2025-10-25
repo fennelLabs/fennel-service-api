@@ -182,7 +182,9 @@ class Command(BaseCommand):
             
             try:
                 block_number = obj['header']['number']
-                block_hash = obj['header']['hash']
+                
+                # Get block hash from block number
+                block_hash = substrate.get_block_hash(block_number)
                 
                 if verbose:
                     self.stdout.write(f'[{update_nr}] Block #{block_number}: {block_hash}')
