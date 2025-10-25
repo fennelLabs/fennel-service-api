@@ -44,6 +44,9 @@ node_modules/
 # Static files
 static/
 
+# Test scripts
+test-whiteflag-compliance.py
+
 # Certificates and keys
 *.key
 *.pem
