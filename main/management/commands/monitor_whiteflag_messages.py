@@ -328,5 +328,6 @@ class Command(BaseCommand):
         """Build mapping of blockchain addresses to User objects"""
         address_to_user = {}
         for user_key in UserKeys.objects.select_related('user').all():
-            address_to_user[user_key.blockchain_address] = user_key.user
+            if user_key.address:  # address field in UserKeys model
+                address_to_user[user_key.address] = user_key.user
         return address_to_user
