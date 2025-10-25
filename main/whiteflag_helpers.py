@@ -375,7 +375,11 @@ def send_decode_final_request(signal: str) -> (dict, bool):
         return ({"error": response.json()["error"]}, False)
     decoded = json.loads(response.json()["decoded"])
     if decoded.get("text", None):
-        decoded["text"] = bytes.fromhex(decoded["text"]).decode("utf-8")
+        try:
+            decoded["text"] = bytes.fromhex(decoded["text"]).decode("utf-8")
+        except (ValueError, AttributeError):
+            # Text field is not valid hex or cannot be decoded - leave as-is
+            pass
     return (
         decoded,
         response.json()["success"],

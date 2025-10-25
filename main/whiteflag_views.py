@@ -260,7 +260,11 @@ def authenticate_oneclick(request):
     Per Whiteflag spec section 5.2.3:
     - Token length: 32 bytes (256 bits)
     - Salt: 0x420abc48f5d69328c457d61725d3fd7af2883cad8460976167e375b9f2c14081
-    - Info: Binary blockchain address
+    - Info: Full base58-decoded address (version + pubkey + checksum = 35 bytes)
+    
+    IMPORTANT: The address must be the FULL base58-decoded bytes including
+    SS58 format version byte and checksum, not just the 32-byte public key.
+    This matches the Whiteflag Foundation reference implementation.
     
     Returns:
         - shared_secret: UUID token (SAVE THIS SECURELY!)
@@ -272,8 +276,8 @@ def authenticate_oneclick(request):
     from main.models import UserKeys, WhiteflagAuthentication, Signal
     
     try:
-        # Step 1: Generate pre-shared secret (UUID)
-        shared_secret = str(uuid.uuid4())
+        # Step 1: Generate pre-shared secret (UUID without dashes for hex compatibility)
+        shared_secret = uuid.uuid4().hex
         
         # Get user's keys and address
         user_keys = UserKeys.objects.get(user=request.user)
@@ -288,9 +292,11 @@ def authenticate_oneclick(request):
         blockchain_address = user_keys.address
         
         # Step 2: Derive 32-byte token with HKDF-SHA256
-        from substrateinterface import Keypair
-        binary_address = Keypair(ss58_address=blockchain_address).public_key
-        context_hex = binary_address.hex()
+        # IMPORTANT: Whiteflag spec requires the FULL base58-decoded address
+        # (including version byte and checksum), not just the public key
+        import base58
+        full_address_bytes = base58.b58decode(blockchain_address)
+        context_hex = full_address_bytes.hex()
         
         payload = {
             "secret": shared_secret,
