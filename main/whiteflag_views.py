@@ -542,9 +542,11 @@ def authenticate_with_shared_token(request):
         blockchain_address = address_override or user_keys.address
         
         # Step 1: Derive authentication token using HKDF via fennel-cli
-        from substrateinterface import Keypair
-        binary_address = Keypair(ss58_address=blockchain_address).public_key
-        context_hex = binary_address.hex()
+        # IMPORTANT: Whiteflag spec requires the FULL base58-decoded address
+        # (version byte + 32-byte pubkey + 2-byte checksum = 35 bytes total)
+        import base58
+        full_address_bytes = base58.b58decode(blockchain_address)
+        context_hex = full_address_bytes.hex()
         
         payload = {
             "secret": shared_token,
