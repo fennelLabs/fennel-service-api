@@ -26,6 +26,7 @@ from main.whiteflag_helpers import (
     whiteflag_encoder_helper,
     decode,
     check_authentication_status,
+    send_decode_final_request,
 )
 
 @api_view(["GET"])
@@ -440,11 +441,22 @@ def authenticate_oneclick(request):
             is_active=True
         )
 
+        # Decode messages for explorer display
+        a_decoded, a_decode_success = send_decode_final_request(encoded_a_message)
+        a_signal_body = json.dumps(a_decoded) if a_decode_success else None
+        
+        k_decoded = None
+        k_signal_body = None
+        if encoded_k_message:
+            k_decoded, k_decode_success = send_decode_final_request(encoded_k_message)
+            k_signal_body = json.dumps(k_decoded) if k_decode_success else None
+
         # Store Signal records - use update_or_create to avoid duplicates and fix indexer data
         Signal.objects.update_or_create(
             tx_hash=a_tx_hash,
             defaults={
                 "signal_text": encoded_a_message,
+                "signal_body": a_signal_body,
                 "sender": request.user,
                 "block_number": a_block_number,
                 "message_code": "A",
@@ -458,6 +470,7 @@ def authenticate_oneclick(request):
                 tx_hash=k_tx_hash,
                 defaults={
                     "signal_text": encoded_k_message,
+                    "signal_body": k_signal_body,
                     "sender": request.user,
                     "block_number": k_block_number,
                     "message_code": "K",
@@ -681,11 +694,22 @@ def authenticate_with_shared_token(request):
             is_active=True
         )
 
+        # Decode messages for explorer display
+        a_decoded, a_decode_success = send_decode_final_request(encoded_a_message)
+        a_signal_body = json.dumps(a_decoded) if a_decode_success else None
+        
+        k_decoded = None
+        k_signal_body = None
+        if encoded_k_message:
+            k_decoded, k_decode_success = send_decode_final_request(encoded_k_message)
+            k_signal_body = json.dumps(k_decoded) if k_decode_success else None
+
         # Step 5: Store messages in Signal database - use get_or_create to avoid duplicates from indexer
         Signal.objects.update_or_create(
             tx_hash=a_tx_hash,
             defaults={
                 "signal_text": encoded_a_message,
+                "signal_body": a_signal_body,
                 "sender": request.user,
                 "block_number": a_block_number,
                 "message_code": "A",
@@ -699,6 +723,7 @@ def authenticate_with_shared_token(request):
                 tx_hash=k_tx_hash,
                 defaults={
                     "signal_text": encoded_k_message,
+                    "signal_body": k_signal_body,
                     "sender": request.user,
                     "block_number": k_block_number,
                     "message_code": "K",
