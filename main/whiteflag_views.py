@@ -371,21 +371,21 @@ def authenticate_oneclick(request):
         a_tx_hash = a_tx_hash[2:].lower() if a_tx_hash.startswith("0x") else a_tx_hash.lower()
         a_block_number = a_response_data.get("blockNumber")
 
-        # Step 4: Generate ECDH keypair (if not exists)
-        ecdh_public_key = user_keys.public_diffie_hellman_key
+        # Step 4: Generate brainpoolP256r1 keypair (if not exists)
+        ecdh_public_key = user_keys.public_brainpool_key
         ecdh_generated = False
 
         if not ecdh_public_key:
             ecdh_response = requests.post(
-                f"{os.environ.get('FENNEL_CLI_IP')}/v1/generate_ecdh_keypair",
+                f"{os.environ.get('FENNEL_CLI_IP')}/v1/generate_brainpool_keypair",
                 timeout=10
             )
 
             if ecdh_response.status_code == 200:
                 ecdh_result = ecdh_response.json()
                 if ecdh_result.get("success"):
-                    user_keys.private_diffie_hellman_key = ecdh_result["private_key"]
-                    user_keys.public_diffie_hellman_key = ecdh_result["public_key"]
+                    user_keys.private_brainpool_key = ecdh_result["private_key"]
+                    user_keys.public_brainpool_key = ecdh_result["public_key"]
                     user_keys.save()
                     ecdh_public_key = ecdh_result["public_key"]
                     ecdh_generated = True
@@ -636,7 +636,7 @@ def authenticate_with_shared_token(request):
         k_block_number = None
         k_warning = None
 
-        if user_keys.public_diffie_hellman_key:
+        if user_keys.public_brainpool_key:
             k_message_payload = {
                 "prefix": "WF",
                 "version": "1",
@@ -646,7 +646,7 @@ def authenticate_with_shared_token(request):
                 "referenceIndicator": "0",
                 "referencedMessage": "0" * 64,
                 "cryptoDataType": "0A",  # ECDHPubKey
-                "cryptoData": user_keys.public_diffie_hellman_key,
+                "cryptoData": user_keys.public_brainpool_key,
             }
 
             encoded_k_message, k_encode_success = whiteflag_encoder_helper(k_message_payload)
@@ -676,7 +676,7 @@ def authenticate_with_shared_token(request):
             user=request.user,
             verification_method="2",
             verification_data=auth_token,
-            ecdh_public_key=user_keys.public_diffie_hellman_key,
+            ecdh_public_key=user_keys.public_brainpool_key,
             transaction_hash=a_tx_hash,
             is_active=True
         )
