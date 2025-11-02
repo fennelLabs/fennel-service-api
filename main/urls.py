@@ -194,6 +194,27 @@ urlpatterns = [
         "crypto/dh/get_public_key_by_address/",
         crypto_views.get_dh_public_key_by_address,
     ),
+    # Brainpool P256r1 endpoints for Whiteflag RFC 5639 compliance
+    path(
+        "crypto/brainpool/generate_keypair/",
+        crypto_views.generate_brainpool_keypair,
+    ),
+    path(
+        "crypto/brainpool/get_my_keypair/",
+        crypto_views.get_my_brainpool_keypair,
+    ),
+    path(
+        "crypto/brainpool/compute_shared_secret/",
+        crypto_views.compute_brainpool_shared_secret_view,
+    ),
+    path(
+        "crypto/brainpool/get_public_key_by_username/",
+        crypto_views.get_brainpool_public_key_by_username,
+    ),
+    path(
+        "crypto/brainpool/get_public_key_by_address/",
+        crypto_views.get_brainpool_public_key_by_address,
+    ),
     path("fennel/create_account/", fennel_views.create_account, name="create_account"),
     path(
         "onetrust/create_self_custodial_account/",

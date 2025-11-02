@@ -16,6 +16,8 @@ from main.forms import DhDecryptWhiteflagMessageForm, DhEncryptWhiteflagMessageF
 from main.models import UserKeys
 from main.whiteflag_helpers import (
     generate_diffie_hellman_keys,
+    generate_brainpool_keys,
+    compute_brainpool_shared_secret,
     whiteflag_decrypt_helper,
     whiteflag_encrypt_helper,
 )
@@ -179,3 +181,209 @@ def get_dh_public_key_by_address(request):
         ).public_diffie_hellman_key
         return Response({"public_key": public_key})
     return Response({"error": "no key exists for address"})
+
+
+# ============================================================================
+# Brainpool P256r1 Endpoints (Whiteflag RFC 5639 Compliance)
+# ============================================================================
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def generate_brainpool_keypair(request):
+    """
+    Generates a brainpoolP256r1 keypair for Whiteflag authentication (RFC 5639).
+    Stores both private and public keys in the user's UserKeys record.
+    
+    Returns:
+        {
+            "success": bool,
+            "private_key": str (32 bytes hex),
+            "public_key": str (33 bytes SEC1 compressed hex),
+            "error": str (optional)
+        }
+    """
+    keys_dict = generate_brainpool_keys()
+    if keys_dict["success"]:
+        UserKeys.objects.update_or_create(
+            user=request.user,
+            defaults={
+                "private_brainpool_key": keys_dict["private_key"],
+                "public_brainpool_key": keys_dict["public_key"],
+            }
+        )
+    return Response(keys_dict)
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_my_brainpool_keypair(request):
+    """
+    Retrieves the current user's brainpoolP256r1 keypair.
+    
+    Returns:
+        {
+            "success": str,
+            "private_key": str (32 bytes hex),
+            "public_key": str (33 bytes SEC1 compressed hex)
+        }
+        OR
+        {
+            "error": str
+        }
+    """
+    if UserKeys.objects.filter(user=request.user).exists():
+        user_keys = UserKeys.objects.get(user=request.user)
+        private_key = user_keys.private_brainpool_key
+        public_key = user_keys.public_brainpool_key
+        
+        if private_key and public_key:
+            return Response(
+                {
+                    "success": "brainpool keypair retrieved",
+                    "private_key": private_key,
+                    "public_key": public_key,
+                }
+            )
+        else:
+            return Response(
+                {"error": "no brainpool keypair exists for user"},
+                status=404
+            )
+    return Response({"error": "user keys not found"}, status=404)
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def compute_brainpool_shared_secret_view(request):
+    """
+    Computes ECDH shared secret using brainpoolP256r1.
+    Requires my_private_key and their_public_key in request body.
+    
+    Request body:
+        {
+            "my_private_key": str (32 bytes hex),
+            "their_public_key": str (33 bytes SEC1 compressed hex)
+        }
+    
+    Returns:
+        {
+            "success": str,
+            "shared_secret": str (32 bytes hex)
+        }
+        OR
+        {
+            "error": str
+        }
+    """
+    my_private_key = request.data.get("my_private_key")
+    their_public_key = request.data.get("their_public_key")
+    
+    if not my_private_key or not their_public_key:
+        return Response(
+            {"error": "Both my_private_key and their_public_key are required"},
+            status=400
+        )
+    
+    result = compute_brainpool_shared_secret(my_private_key, their_public_key)
+    
+    if result["success"]:
+        return Response(
+            {
+                "success": "brainpool shared secret computed",
+                "shared_secret": result["shared_secret"],
+            }
+        )
+    else:
+        return Response(
+            {"error": result.get("error", "Failed to compute shared secret")},
+            status=500
+        )
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_brainpool_public_key_by_username(request):
+    """
+    Retrieves another user's brainpool public key by username.
+    Used for initiating Whiteflag authentication handshakes.
+    
+    Request body:
+        {
+            "username": str
+        }
+    
+    Returns:
+        {
+            "public_key": str (33 bytes SEC1 compressed hex)
+        }
+        OR
+        {
+            "error": str
+        }
+    """
+    username = request.data.get("username")
+    if not username:
+        return Response({"error": "username is required"}, status=400)
+    
+    from django.contrib.auth.models import User
+    try:
+        user = User.objects.get(username=username)
+        if UserKeys.objects.filter(user=user).exists():
+            user_keys = UserKeys.objects.get(user=user)
+            public_key = user_keys.public_brainpool_key
+            if public_key:
+                return Response({"public_key": public_key})
+            else:
+                return Response(
+                    {"error": "no brainpool key exists for username"},
+                    status=404
+                )
+        else:
+            return Response({"error": "user keys not found"}, status=404)
+    except User.DoesNotExist:
+        return Response({"error": "user not found"}, status=404)
+
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_brainpool_public_key_by_address(request):
+    """
+    Retrieves a user's brainpool public key by blockchain address.
+    Used for Whiteflag authentication with known blockchain participants.
+    
+    Request body:
+        {
+            "address": str
+        }
+    
+    Returns:
+        {
+            "public_key": str (33 bytes SEC1 compressed hex)
+        }
+        OR
+        {
+            "error": str
+        }
+    """
+    address = request.data.get("address")
+    if not address:
+        return Response({"error": "address is required"}, status=400)
+    
+    if UserKeys.objects.filter(address=address).exists():
+        user_keys = UserKeys.objects.get(address=address)
+        public_key = user_keys.public_brainpool_key
+        if public_key:
+            return Response({"public_key": public_key})
+        else:
+            return Response(
+                {"error": "no brainpool key exists for address"},
+                status=404
+            )
+    return Response({"error": "address not found"}, status=404)
+

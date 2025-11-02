@@ -257,6 +257,9 @@ class UserKeys(models.Model):
     private_diffie_hellman_key = models.CharField(
         max_length=1024, null=True, blank=True
     )
+    # Whiteflag RFC 5639 brainpoolP256r1 ECDH keys for authentication
+    public_brainpool_key = models.CharField(max_length=1024, null=True, blank=True)
+    private_brainpool_key = models.CharField(max_length=1024, null=True, blank=True)
 
     def __str__(self):
         return self.user.username

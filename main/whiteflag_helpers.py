@@ -212,6 +212,85 @@ def generate_diffie_hellman_keys() -> dict:
         }
 
 
+def generate_brainpool_keys() -> dict:
+    """
+    Generates a brainpoolP256r1 keypair for Whiteflag RFC 5639 compliance.
+    Calls fennel-cli's /v1/generate_brainpool_keypair endpoint.
+    
+    Returns:
+        dict with success, private_key (32 bytes hex), public_key (33 bytes SEC1 compressed hex)
+    """
+    try:
+        response = requests.post(
+            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/generate_brainpool_keypair",
+            timeout=5,
+        )
+        response_data = response.json()
+        
+        if response_data.get("success"):
+            return {
+                "success": True,
+                "private_key": response_data["private_key"],
+                "public_key": response_data["public_key"],
+            }
+        else:
+            return {
+                "success": False,
+                "error": response_data.get("error", "Unknown error"),
+                "private_key": None,
+                "public_key": None,
+            }
+    except (requests.HTTPError, requests.RequestException) as e:
+        return {
+            "success": False,
+            "error": f"Failed to generate brainpool keypair: {str(e)}",
+            "private_key": None,
+            "public_key": None,
+        }
+
+
+def compute_brainpool_shared_secret(my_private_key: str, their_public_key: str) -> dict:
+    """
+    Computes ECDH shared secret using brainpoolP256r1.
+    Calls fennel-cli's /v1/compute_brainpool_shared_secret endpoint.
+    
+    Args:
+        my_private_key: 32-byte private key (hex string)
+        their_public_key: 33-byte SEC1 compressed public key (hex string)
+    
+    Returns:
+        dict with success, shared_secret (32 bytes hex)
+    """
+    try:
+        response = requests.post(
+            f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/compute_brainpool_shared_secret",
+            json={
+                "my_private_key": my_private_key,
+                "their_public_key": their_public_key,
+            },
+            timeout=5,
+        )
+        response_data = response.json()
+        
+        if response_data.get("success"):
+            return {
+                "success": True,
+                "shared_secret": response_data["shared_secret"],
+            }
+        else:
+            return {
+                "success": False,
+                "error": response_data.get("error", "Unknown error"),
+                "shared_secret": None,
+            }
+    except (requests.HTTPError, requests.RequestException) as e:
+        return {
+            "success": False,
+            "error": f"Failed to compute brainpool shared secret: {str(e)}",
+            "shared_secret": None,
+        }
+
+
 # @silk_profile(name="generate_shared_secret")  # DISABLED: Silk removed
 def generate_shared_secret(our_group: APIGroup, their_group: APIGroup) -> (str, bool):
     if (
