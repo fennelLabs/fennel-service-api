@@ -1,9 +1,12 @@
-name: Create and publish a Docker image
+name: Build and publish multi-platform Docker image to GHCR
 
-# Configures this workflow to run every time a change is pushed to the branch called `release`.
+# Configures this workflow to run every time a change is pushed to the fennel-service-api-2.0 branch.
+# Also triggers on semantic version tags (v1.0.4, v2.0.0, etc.)
 on:
   push:
-    branches: ['master']
+    branches: ['fennel-service-api-2.0']
+    tags:
+      - 'v*.*.*'  # Trigger on semantic version tags like v1.0.4
 
 # Defines two custom environment variables for the workflow. These are used for the Container registry domain, and a name for the Docker image that this workflow builds.
 env:
@@ -18,31 +21,46 @@ jobs:
     permissions:
       contents: read
       packages: write
-      # 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      # Uses the `docker/login-action` action to log in to the Container registry registry using the account and password that will publish the packages. Once published, the packages are scoped to the account defined here.
-      - name: Log in to the Container registry
-        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+      
+      # Set up Docker Buildx for multi-platform builds (AMD64 and ARM64)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      # Log in to GitHub Container Registry
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      # This step uses [docker/metadata-action](https://github.com/docker/metadata-action#about) to extract tags and labels that will be applied to the specified image. The `id` "meta" allows the output of this step to be referenced in a subsequent step. The `images` value provides the base name for the tags and labels.
+      
+      # Extract metadata for Docker tags and labels
+      # Uses semantic versioning: v1.0.4 for tags, branch-name for feature branches
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-      # This step uses the `docker/build-push-action` action to build the image, based on your repository's `Dockerfile`. If the build succeeds, it pushes the image to GitHub Packages.
-      # It uses the `context` parameter to define the build's context as the set of files located in the specified path. For more information, see "[Usage](https://github.com/docker/build-push-action#usage)" in the README of the `docker/build-push-action` repository.
-      # It uses the `tags` and `labels` parameters to tag and label the image with the output from the "meta" step.
-      - name: Build and push Docker image
-        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+      
+      # Build and push multi-platform Docker image (AMD64 and ARM64)
+      # Creates a manifest that works on both architectures
+      # Docker will automatically select the correct image based on the platform
+      - name: Build and push Docker image (AMD64 + ARM64)
+        uses: docker/build-push-action@v5
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
