@@ -17,19 +17,19 @@ def submit_initial_authentication(
 ) -> Tuple[dict, bool]:
     """
     Submits A(0) initial authentication message for a user.
-    
-    Per Whiteflag spec 5.1.1: "Each account should be identified by sending 
+
+    Per Whiteflag spec 5.1.1: "Each account should be identified by sending
     an A(0) initial authentication message, before sending any other message."
-    
+
     For Method 2 (Pre-shared Token): The verification_data is a private secret
     that will be HKDF-derived using the blockchain address as context to create
     a public verification token for the blockchain.
-    
+
     Args:
         user: Django User object
         verification_method: "1" for URL validation, "2" for shared token
         verification_data: URL (Method 1) or HEX pre-shared secret (Method 2)
-    
+
     Returns:
         (response_dict, success_bool)
     """
@@ -42,7 +42,7 @@ def submit_initial_authentication(
             },
             False
         )
-    
+
     # For Method 2, derive the public token using HKDF
     derived_token = None
     if verification_method == "2":
@@ -51,7 +51,7 @@ def submit_initial_authentication(
             from main.models import UserKeys
             user_keys = UserKeys.objects.get(user=user)
             blockchain_address = user_keys.address
-            
+
             if not blockchain_address:
                 return (
                     {
@@ -60,11 +60,11 @@ def submit_initial_authentication(
                     },
                     False
                 )
-            
+
             # Convert blockchain address to binary context for HKDF
             # Per Whiteflag spec 5.2.3: "the binary representation of the blockchain address"
             blockchain_context = blockchain_address.encode('utf-8').hex()
-            
+
         except UserKeys.DoesNotExist:
             return (
                 {
@@ -73,7 +73,7 @@ def submit_initial_authentication(
                 },
                 False
             )
-        
+
         try:
             response = requests.post(
                 f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/derive_auth_token",
@@ -83,28 +83,28 @@ def submit_initial_authentication(
                 },
                 timeout=5,
             )
-            
+
             if response.status_code != 200:
                 return (
                     {"error": "Failed to derive authentication token", "details": response.text},
                     False
                 )
-            
+
             result = response.json()
             if not result.get("success"):
                 return (
                     {"error": "Token derivation failed", "details": result.get("error")},
                     False
                 )
-            
+
             derived_token = result.get("derived_token")
-            
+
         except requests.exceptions.RequestException as e:
             return (
                 {"error": "Failed to connect to crypto service", "details": str(e)},
                 False
             )
-    
+
     # Create A(0) message payload
     payload = {
         "prefix": "WF",
@@ -118,10 +118,10 @@ def submit_initial_authentication(
         # For Method 2, use the derived token; for Method 1, use the URL directly
         "verificationData": derived_token if verification_method == "2" else verification_data,
     }
-    
+
     # Submit via whiteflag encoder
     result, success = whiteflag_encoder_helper(payload)
-    
+
     if success:
         # result is the encoded message string when successful
         # Store authentication record
@@ -133,7 +133,7 @@ def submit_initial_authentication(
             transaction_hash=None,  # Will be updated after blockchain submission
             is_active=True
         )
-        
+
         return (
             {
                 "status": "authenticated",
@@ -146,7 +146,7 @@ def submit_initial_authentication(
             },
             True
         )
-    
+
     # When not successful, result is an error dict
     return (result, False)
 
@@ -155,13 +155,13 @@ def submit_initial_authentication(
 def check_authentication_status(user) -> bool:
     """
     Check if user has submitted A(0) initial authentication.
-    
-    Per Whiteflag spec 5.1.1: Messages sent before A(0) may be 
+
+    Per Whiteflag spec 5.1.1: Messages sent before A(0) may be
     considered unauthenticated by recipients.
-    
+
     Args:
         user: Django User object
-    
+
     Returns:
         True if user has active authentication, False otherwise
     """
@@ -445,7 +445,7 @@ def send_decode_final_request(signal: str) -> (dict, bool):
     try:
         response = requests.post(
             f"{os.environ.get('FENNEL_CLI_IP', None)}/v1/whiteflag_decode",
-            data=signal,
+            json=signal,
             timeout=5,
         )
     except requests.exceptions.ConnectionError:
