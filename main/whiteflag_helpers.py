@@ -492,4 +492,4 @@ def decode(
         signal, decrypt_success = whiteflag_decrypt_helper(signal, shared_key)
         if not decrypt_success:
             return signal, False
-    return send_decode_final_request(json.dumps(signal))
+    return send_decode_final_request(signal)
