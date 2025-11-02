@@ -216,9 +216,10 @@ def generate_brainpool_keys() -> dict:
     """
     Generates a brainpoolP256r1 keypair for Whiteflag RFC 5639 compliance.
     Calls fennel-cli's /v1/generate_brainpool_keypair endpoint.
-    
+
     Returns:
-        dict with success, private_key (32 bytes hex), public_key (33 bytes SEC1 compressed hex)
+        dict with success, private_key (32 bytes hex),
+        public_key (33 bytes SEC1 compressed hex)
     """
     try:
         response = requests.post(
@@ -226,7 +227,7 @@ def generate_brainpool_keys() -> dict:
             timeout=5,
         )
         response_data = response.json()
-        
+
         if response_data.get("success"):
             return {
                 "success": True,
@@ -249,15 +250,16 @@ def generate_brainpool_keys() -> dict:
         }
 
 
-def compute_brainpool_shared_secret(my_private_key: str, their_public_key: str) -> dict:
+def compute_brainpool_shared_secret(my_private_key: str,
+                                     their_public_key: str) -> dict:
     """
     Computes ECDH shared secret using brainpoolP256r1.
     Calls fennel-cli's /v1/compute_brainpool_shared_secret endpoint.
-    
+
     Args:
         my_private_key: 32-byte private key (hex string)
         their_public_key: 33-byte SEC1 compressed public key (hex string)
-    
+
     Returns:
         dict with success, shared_secret (32 bytes hex)
     """
@@ -271,7 +273,7 @@ def compute_brainpool_shared_secret(my_private_key: str, their_public_key: str) 
             timeout=5,
         )
         response_data = response.json()
-        
+
         if response_data.get("success"):
             return {
                 "success": True,

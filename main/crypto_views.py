@@ -195,7 +195,7 @@ def generate_brainpool_keypair(request):
     """
     Generates a brainpoolP256r1 keypair for Whiteflag authentication (RFC 5639).
     Stores both private and public keys in the user's UserKeys record.
-    
+
     Returns:
         {
             "success": bool,
@@ -222,7 +222,7 @@ def generate_brainpool_keypair(request):
 def get_my_brainpool_keypair(request):
     """
     Retrieves the current user's brainpoolP256r1 keypair.
-    
+
     Returns:
         {
             "success": str,
@@ -238,7 +238,7 @@ def get_my_brainpool_keypair(request):
         user_keys = UserKeys.objects.get(user=request.user)
         private_key = user_keys.private_brainpool_key
         public_key = user_keys.public_brainpool_key
-        
+
         if private_key and public_key:
             return Response(
                 {
@@ -262,13 +262,13 @@ def compute_brainpool_shared_secret_view(request):
     """
     Computes ECDH shared secret using brainpoolP256r1.
     Requires my_private_key and their_public_key in request body.
-    
+
     Request body:
         {
             "my_private_key": str (32 bytes hex),
             "their_public_key": str (33 bytes SEC1 compressed hex)
         }
-    
+
     Returns:
         {
             "success": str,
@@ -281,15 +281,15 @@ def compute_brainpool_shared_secret_view(request):
     """
     my_private_key = request.data.get("my_private_key")
     their_public_key = request.data.get("their_public_key")
-    
+
     if not my_private_key or not their_public_key:
         return Response(
             {"error": "Both my_private_key and their_public_key are required"},
             status=400
         )
-    
+
     result = compute_brainpool_shared_secret(my_private_key, their_public_key)
-    
+
     if result["success"]:
         return Response(
             {
@@ -311,12 +311,12 @@ def get_brainpool_public_key_by_username(request):
     """
     Retrieves another user's brainpool public key by username.
     Used for initiating Whiteflag authentication handshakes.
-    
+
     Request body:
         {
             "username": str
         }
-    
+
     Returns:
         {
             "public_key": str (33 bytes SEC1 compressed hex)
@@ -329,7 +329,7 @@ def get_brainpool_public_key_by_username(request):
     username = request.data.get("username")
     if not username:
         return Response({"error": "username is required"}, status=400)
-    
+
     from django.contrib.auth.models import User
     try:
         user = User.objects.get(username=username)
@@ -356,12 +356,12 @@ def get_brainpool_public_key_by_address(request):
     """
     Retrieves a user's brainpool public key by blockchain address.
     Used for Whiteflag authentication with known blockchain participants.
-    
+
     Request body:
         {
             "address": str
         }
-    
+
     Returns:
         {
             "public_key": str (33 bytes SEC1 compressed hex)
@@ -374,7 +374,7 @@ def get_brainpool_public_key_by_address(request):
     address = request.data.get("address")
     if not address:
         return Response({"error": "address is required"}, status=400)
-    
+
     if UserKeys.objects.filter(address=address).exists():
         user_keys = UserKeys.objects.get(address=address)
         public_key = user_keys.public_brainpool_key
@@ -386,4 +386,3 @@ def get_brainpool_public_key_by_address(request):
                 status=404
             )
     return Response({"error": "address not found"}, status=404)
-
