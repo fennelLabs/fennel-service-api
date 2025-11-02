@@ -251,7 +251,7 @@ def generate_brainpool_keys() -> dict:
 
 
 def compute_brainpool_shared_secret(my_private_key: str,
-                                     their_public_key: str) -> dict:
+                                    their_public_key: str) -> dict:
     """
     Computes ECDH shared secret using brainpoolP256r1.
     Calls fennel-cli's /v1/compute_brainpool_shared_secret endpoint.
