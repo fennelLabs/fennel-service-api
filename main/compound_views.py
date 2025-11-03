@@ -355,6 +355,15 @@ def send_signal_with_annotations(request):
         signal_body = convert_to_test_message(signal_body)
         logger.error(f"DEBUG send_signal: Converted signal_body: {signal_body}")
     
+    # Fix Whiteflag compliance: If referencedMessage is all zeros, referenceIndicator must be "0"
+    # Per Whiteflag Standard 4.2.1.6: ReferenceIndicator "0" = Original (not related to earlier message)
+    # This ensures compliance without requiring frontend changes (from oct282025fix.md)
+    if "referencedMessage" in signal_body and "referenceIndicator" in signal_body:
+        referenced_msg = signal_body.get("referencedMessage", "")
+        # Check if it's all zeros (any length)
+        if referenced_msg and all(c == '0' for c in referenced_msg):
+            signal_body["referenceIndicator"] = "0"
+    
     signal_text_encoded, signal_encode_success = whiteflag_encoder_helper(
         signal_body, sender_group, recipient_group
     )
