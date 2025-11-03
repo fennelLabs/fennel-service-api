@@ -201,7 +201,6 @@ def signal_send_with_blockchain_data_helper(user_key: UserKeys, signal: Signal) 
                 "signal_text": signal.signal_text,
                 "signal_body": signal.signal_body,
                 "sender": signal.sender,
-                "user_keys": signal.user_keys,
                 "message_code": signal.message_code,
                 "synced": True,
                 "mempool_timestamp": datetime.datetime.now(),
