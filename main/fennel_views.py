@@ -4,6 +4,7 @@ import datetime
 
 from django.db import DataError
 from django.db.models import Q
+from django.db.utils import IntegrityError
 
 from django.shortcuts import get_object_or_404
 
@@ -204,7 +205,7 @@ def signal_send_with_blockchain_data_helper(user_key: UserKeys, signal: Signal) 
         # Handle race condition with indexer (from oct282025fix.md)
         try:
             signal.save()
-        except django.db.utils.IntegrityError:
+        except IntegrityError:
             # Race condition: monitor already indexed this message from blockchain
             # This is not an error - the message was successfully sent to blockchain
             # Try to get the signal that was indexed by the monitor
