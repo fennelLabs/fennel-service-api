@@ -192,24 +192,33 @@ def signal_send_with_blockchain_data_helper(user_key: UserKeys, signal: Signal) 
             )
 
         # Update signal with all blockchain data
-        # Use update_or_create to avoid duplicates from indexer or retries
+        signal.synced = True
         tx_hash_value = response_json["txHash"][2:] if response_json["txHash"].startswith("0x") else response_json["txHash"]
+        signal.tx_hash = tx_hash_value
+        signal.mempool_timestamp = datetime.datetime.now()
+        signal.block_number = response_json.get("blockNumber")
+        signal.block_hash = response_json.get("blockHash")
+        signal.extrinsic_index = response_json.get("extrinsicIndex")
+        signal.execution_success = response_json.get("executionSuccess", True)
         
-        signal_obj, created = Signal.objects.update_or_create(
-            tx_hash=tx_hash_value,
-            defaults={
-                "signal_text": signal.signal_text,
-                "signal_body": signal.signal_body,
-                "sender": signal.sender,
-                "message_code": signal.message_code,
-                "synced": True,
-                "mempool_timestamp": datetime.datetime.now(),
-                "block_number": response_json.get("blockNumber"),
-                "block_hash": response_json.get("blockHash"),
-                "extrinsic_index": response_json.get("extrinsicIndex"),
-                "execution_success": response_json.get("executionSuccess", True),
-            }
-        )
+        # Handle race condition with indexer (from oct282025fix.md)
+        try:
+            signal.save()
+        except django.db.utils.IntegrityError:
+            # Race condition: monitor already indexed this message from blockchain
+            # This is not an error - the message was successfully sent to blockchain
+            # Try to get the signal that was indexed by the monitor
+            existing_signal = Signal.objects.filter(tx_hash=tx_hash_value).first()
+            if existing_signal:
+                # Delete our duplicate unsaved version
+                signal.delete()
+                # Use the one from the monitor
+                signal = existing_signal
+            else:
+                # Different integrity error, re-raise
+                raise
+        
+        signal_obj = signal
 
         response_json["balance"] = check_balance(user_key)["balance"]
         response_json["signal_id"] = signal_obj.id

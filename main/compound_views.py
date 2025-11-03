@@ -378,7 +378,20 @@ def send_signal_with_annotations(request):
     signal_sent_response, signal_success = signal_send_with_blockchain_data_helper(
         UserKeys.objects.get(user=request.user), signal
     )
-    signal = Signal.objects.get(pk=signal.id)
+    # After helper, signal might have been replaced due to race condition
+    # Get the actual signal ID from the response (fix from oct282025fix.md)
+    if signal_success and "signal_id" in signal_sent_response:
+        signal = Signal.objects.get(pk=signal_sent_response["signal_id"])
+    else:
+        # If not successful, try to get the original signal (might have been deleted)
+        try:
+            signal = Signal.objects.get(pk=signal.id)
+        except Signal.DoesNotExist:
+            # Signal was deleted in race condition handling, but we don't have the new ID
+            return Response(
+                {"error": "Signal was created but could not be retrieved", "details": signal_sent_response},
+                status=500,
+            )
     
     annotations_signal = {
         "prefix": "WF",
