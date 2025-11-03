@@ -192,17 +192,28 @@ def signal_send_with_blockchain_data_helper(user_key: UserKeys, signal: Signal) 
             )
 
         # Update signal with all blockchain data
-        signal.synced = True
-        signal.tx_hash = response_json["txHash"][2:] if response_json["txHash"].startswith("0x") else response_json["txHash"]
-        signal.mempool_timestamp = datetime.datetime.now()
-        signal.block_number = response_json.get("blockNumber")
-        signal.block_hash = response_json.get("blockHash")
-        signal.extrinsic_index = response_json.get("extrinsicIndex")
-        signal.execution_success = response_json.get("executionSuccess", True)
-        signal.save()
+        # Use update_or_create to avoid duplicates from indexer or retries
+        tx_hash_value = response_json["txHash"][2:] if response_json["txHash"].startswith("0x") else response_json["txHash"]
+        
+        signal_obj, created = Signal.objects.update_or_create(
+            tx_hash=tx_hash_value,
+            defaults={
+                "signal_text": signal.signal_text,
+                "signal_body": signal.signal_body,
+                "sender": signal.sender,
+                "user_keys": signal.user_keys,
+                "message_code": signal.message_code,
+                "synced": True,
+                "mempool_timestamp": datetime.datetime.now(),
+                "block_number": response_json.get("blockNumber"),
+                "block_hash": response_json.get("blockHash"),
+                "extrinsic_index": response_json.get("extrinsicIndex"),
+                "execution_success": response_json.get("executionSuccess", True),
+            }
+        )
 
         response_json["balance"] = check_balance(user_key)["balance"]
-        response_json["signal_id"] = signal.id
+        response_json["signal_id"] = signal_obj.id
         response_json["synced"] = True
         response_json["hash"] = response_json["txHash"]  # For backward compatibility
         return response_json, True
